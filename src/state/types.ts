@@ -1,0 +1,153 @@
+export type Role = 'pa' | 'physician'
+
+export type NoteStatus =
+  | 'not_started'
+  | 'draft'
+  | 'submitted'
+  | 'returned'
+  | 'cosigned'
+
+export type LabStatus =
+  | 'pending'
+  | 'requested'
+  | 'granted_unstarted'
+  | 'active'
+  | 'expired'
+  | 'denied'
+  | 'released'
+
+export type GrantDuration = '10s' | '10m' | '1h' | '4h' | '24h'
+
+export type ScheduleStatus =
+  | 'scheduled'
+  | 'checked_in'
+  | 'in_progress'
+  | 'awaiting_cosign'
+  | 'completed'
+  | 'late'
+
+export type BreadcrumbOrigin = 'schedule' | 'queue' | 'requests' | 'patients'
+
+export type ScheduleView = 'today' | 'fullWeek'
+
+export interface NoteVersion {
+  id: string
+  version: number
+  status: 'submitted' | 'returned' | 'cosigned'
+  actor: Role
+  timestamp: string
+  feedback?: string
+}
+
+export interface LabResult {
+  id: string
+  name: string
+  type: 'lab' | 'imaging'
+  orderDate: string
+  status: LabStatus
+  requestId?: string
+  grantDuration?: GrantDuration
+  grantExpiresAt?: number
+  grantConfirmedAt?: number
+  denialFeedback?: string
+}
+
+export interface AuditEvent {
+  id: string
+  timestamp: string
+  actor: Role
+  action: string
+  detail: string
+}
+
+export interface MedicationEvent {
+  id: string
+  timestamp: string
+  actor: Role
+  action: 'continued' | 'discontinued' | 'added'
+  detail?: string
+}
+
+export interface Medication {
+  id: string
+  name: string
+  dose: string
+  frequency: string
+  status: 'active' | 'discontinued'
+  history: MedicationEvent[]
+}
+
+export interface Appointment {
+  id: string
+  patientId: string
+  patientName: string
+  time: string
+  date: string
+  status: ScheduleStatus
+  isInteractive?: boolean
+}
+
+export interface Patient {
+  id: string
+  name: string
+  mrn: string
+  dob: string
+  isInteractive?: boolean
+}
+
+export interface AppState {
+  role: Role
+  selectedVisitId: 'today' | string | null
+  visitStarted: boolean
+  checkedIn: boolean
+  vitalsSubmitted: boolean
+  noteStatus: NoteStatus
+  hasSubmittedOnce: boolean
+  visitFinished: boolean
+  returnFeedback: string | null
+  noteDraft: string
+  noteHistory: NoteVersion[]
+  confidentialNoteExists: boolean
+  confidentialNoteContent: string
+  labs: LabResult[]
+  auditLog: AuditEvent[]
+  meds: Medication[]
+  cosignUnread: number
+  requestUnread: number
+  viewedRequests: string[]
+  breadcrumbOrigin: BreadcrumbOrigin
+  scheduleView: ScheduleView
+  expiryModalLabId: string | null
+  pendingGrantLabId: string | null
+  pendingGrantDuration: GrantDuration | null
+}
+
+export type AppAction =
+  | { type: 'SET_ROLE'; role: Role }
+  | { type: 'SET_SCHEDULE_VIEW'; view: ScheduleView }
+  | { type: 'SET_BREADCRUMB_ORIGIN'; origin: BreadcrumbOrigin }
+  | { type: 'OPEN_VISIT'; visitId: 'today' | string }
+  | { type: 'CLOSE_VISIT' }
+  | { type: 'START_VISIT' }
+  | { type: 'SUBMIT_VITALS' }
+  | { type: 'UPDATE_NOTE_DRAFT'; content: string }
+  | { type: 'SUBMIT_NOTE' }
+  | { type: 'COSIGN_NOTE' }
+  | { type: 'RETURN_NOTE'; feedback: string }
+  | { type: 'FINISH_VISIT' }
+  | { type: 'SAVE_CONFIDENTIAL_NOTE'; content: string }
+  | { type: 'REQUEST_LAB_ACCESS'; labId: string }
+  | { type: 'GRANT_LAB_ACCESS'; labId: string; duration: GrantDuration }
+  | { type: 'CONFIRM_LAB_GRANT'; labId: string }
+  | { type: 'DENY_LAB_ACCESS'; labId: string; feedback: string }
+  | { type: 'RELEASE_LAB'; labId: string }
+  | { type: 'EXPIRE_LAB'; labId: string }
+  | { type: 'DISMISS_EXPIRY_MODAL' }
+  | { type: 'TICK_LAB_TIMERS' }
+  | { type: 'CONTINUE_MED'; medId: string }
+  | { type: 'DISCONTINUE_MED'; medId: string }
+  | { type: 'ADD_MEDICATION'; name: string; dose: string; frequency: string }
+  | { type: 'MARK_COSIGN_READ' }
+  | { type: 'MARK_REQUEST_READ'; requestId: string }
+  | { type: 'INCREMENT_COSIGN_UNREAD' }
+  | { type: 'INCREMENT_REQUEST_UNREAD' }
