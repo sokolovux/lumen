@@ -1,4 +1,4 @@
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { PatientDetailTabs, PAST_VISITS } from '@/components/patient/PatientDetailTabs'
@@ -8,7 +8,15 @@ import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
 
 export function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>()
+  const [searchParams] = useSearchParams()
   const { state, dispatch } = useAppState()
+
+  const tabParam = searchParams.get('tab')
+  const labParam = searchParams.get('lab')
+  const defaultTab = ['visits', 'demographics', 'problems', 'labs', 'audit'].includes(tabParam ?? '')
+    ? tabParam!
+    : 'visits'
+  const highlightLabId = labParam ?? undefined
 
   const patient = PATIENTS.find((p) => p.id === patientId)
 
@@ -41,6 +49,8 @@ export function PatientDetailPage() {
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           <PatientDetailTabs
+            defaultTab={defaultTab}
+            highlightLabId={highlightLabId}
             onOpenTodayVisit={handleOpenTodayVisit}
             onOpenPastVisit={handleOpenPastVisit}
           />

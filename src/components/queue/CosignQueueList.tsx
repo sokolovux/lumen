@@ -1,54 +1,72 @@
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
 
 export function CosignQueueList() {
   const { state, dispatch } = useAppState()
   const navigate = useNavigate()
+  const isPhysician = state.role === 'physician'
 
-  const hasPendingNote = state.noteStatus === 'submitted'
+  const hasNoteInReview = state.hasSubmittedOnce
 
-  const handleOpen = () => {
+  const handleItemClick = () => {
     dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'queue' })
-    dispatch({ type: 'MARK_COSIGN_READ' })
-    navigate(`/patients/${JORDAN_REYES_ID}`)
+    if (isPhysician) {
+      dispatch({ type: 'MARK_PHYSICIAN_COSIGN_VIEWED' })
+    } else {
+      dispatch({ type: 'MARK_PA_NOTES_REVIEW_VIEWED' })
+    }
     dispatch({ type: 'OPEN_VISIT', visitId: 'today' })
+    navigate(`/patients/${JORDAN_REYES_ID}`)
   }
 
-  if (!hasPendingNote) {
+  const showUnread =
+    isPhysician
+      ? state.cosignUnread > 0 && state.noteStatus === 'submitted'
+      : state.notesReviewUnread > 0 && state.noteStatus === 'returned'
+
+  if (!hasNoteInReview) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-        <p className="text-sm font-medium">No notes awaiting cosign</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Submitted notes will appear here for physician review.
+        <p className="text-sm font-medium">
+          {isPhysician ? 'No notes awaiting cosign' : 'No notes in review'}
+        </p>
+        <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+          {isPhysician
+            ? 'Submitted notes will appear here for physician review.'
+            : 'After you submit a note, its review status will appear here.'}
         </p>
       </div>
     )
   }
 
   return (
-    <Card>
+    <Card
+      className="cursor-pointer transition-shadow hover:shadow-md"
+      onClick={handleItemClick}
+    >
       <CardHeader className="flex flex-row items-start justify-between p-4">
         <div>
           <div className="flex items-center gap-2">
             <p className="font-medium">Jordan Reyes</p>
-            {state.cosignUnread > 0 && (
+            {showUnread && (
               <Badge variant="destructive" className="h-5 text-xs">New</Badge>
             )}
           </div>
           <p className="text-xs text-muted-foreground">Today&apos;s visit · Aug 10, 2026</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isPhysician
+              ? 'Click to open visit panel and cosign or return'
+              : 'Click to open visit panel and view status'}
+          </p>
         </div>
         <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
           {getNoteStatusLabel(state.noteStatus)}
         </Badge>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
-        <Button size="sm" onClick={handleOpen}>Review Note</Button>
-      </CardContent>
     </Card>
   )
 }

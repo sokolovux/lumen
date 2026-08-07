@@ -33,8 +33,11 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
 
   const handleSubmit = () => {
     dispatch({ type: 'SUBMIT_NOTE' })
-    dispatch({ type: 'INCREMENT_COSIGN_UNREAD' })
-    toast.success('Note submitted for cosign')
+    toast.success(
+      state.noteStatus === 'returned'
+        ? 'Note resubmitted for cosign'
+        : 'Note submitted for cosign',
+    )
   }
 
   const handleCosign = () => {
@@ -98,9 +101,14 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
       )}
 
       <div className="mt-2 flex flex-wrap gap-2">
-        {canSubmit && (
+        {canSubmit && (state.noteStatus === 'not_started' || state.noteStatus === 'draft') && (
           <Button size="sm" onClick={handleSubmit}>
             Submit for Cosign
+          </Button>
+        )}
+        {canSubmit && state.noteStatus === 'returned' && (
+          <Button size="sm" onClick={handleSubmit}>
+            Resubmit for Cosign
           </Button>
         )}
         {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (

@@ -49,6 +49,14 @@ export function canPaViewLab(lab: LabResult): boolean {
   return lab.status === 'active' || lab.status === 'released'
 }
 
+export function isPaApprovedLabStatus(status: LabStatus): boolean {
+  return status === 'granted_unstarted' || status === 'active' || status === 'released'
+}
+
+export function hasPaRequestedLab(lab: LabResult): boolean {
+  return lab.requestId != null
+}
+
 export function durationToMs(duration: string): number {
   switch (duration) {
     case '10s': return 10_000

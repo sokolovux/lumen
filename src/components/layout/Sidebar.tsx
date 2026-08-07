@@ -11,15 +11,38 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 
-const navItems = [
+const sharedNavItems = [
   { to: '/schedule', label: 'Schedule', icon: Calendar },
   { to: '/patients', label: 'Patients', icon: Users },
-  { to: '/queue', label: 'Cosign Queue', icon: ClipboardList, badgeKey: 'cosign' as const },
-  { to: '/requests', label: 'Access Requests', icon: Inbox, badgeKey: 'request' as const },
-]
+  {
+    to: '/queue',
+    icon: ClipboardList,
+    labelForRole: { physician: 'Cosign Queue', pa: 'Notes Review' } as const,
+    badgeForRole: { physician: 'cosign' as const, pa: 'notesReview' as const },
+  },
+  {
+    to: '/requests',
+    icon: Inbox,
+    labelForRole: { physician: 'Access Requests', pa: 'My Requests' } as const,
+    badgeForRole: { physician: 'request' as const, pa: 'paApproval' as const },
+  },
+] as const
 
 export function Sidebar() {
   const { state } = useAppState()
+
+  const badgeCount = (key: 'cosign' | 'notesReview' | 'request' | 'paApproval') => {
+    switch (key) {
+      case 'cosign':
+        return state.noteStatus === 'submitted' ? state.cosignUnread : 0
+      case 'notesReview':
+        return state.noteStatus === 'returned' ? state.notesReviewUnread : 0
+      case 'request':
+        return state.requestUnread
+      case 'paApproval':
+        return state.paApprovalUnread
+    }
+  }
 
   return (
     <aside className="flex h-full w-56 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
@@ -30,17 +53,17 @@ export function Sidebar() {
       <Separator />
       <ScrollArea className="flex-1 px-2 py-3">
         <nav className="flex flex-col gap-1">
-          {navItems.map(({ to, label, icon: Icon, badgeKey }) => {
-            const count =
-              badgeKey === 'cosign'
-                ? state.cosignUnread
-                : badgeKey === 'request'
-                  ? state.requestUnread
-                  : 0
+          {sharedNavItems.map((item) => {
+            const label = 'label' in item ? item.label : item.labelForRole[state.role]
+            const badgeKey =
+              'badgeForRole' in item ? item.badgeForRole[state.role] : undefined
+            const count = badgeKey ? badgeCount(badgeKey) : 0
+            const Icon = item.icon
+
             return (
               <NavLink
-                key={to}
-                to={to}
+                key={item.to}
+                to={item.to}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',

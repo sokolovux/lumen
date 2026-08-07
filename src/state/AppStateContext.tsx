@@ -63,8 +63,11 @@ export const initialState: AppState = {
   auditLog: [],
   meds: createInitialMeds(),
   cosignUnread: 0,
+  notesReviewUnread: 0,
   requestUnread: 0,
   viewedRequests: [],
+  paApprovalUnread: 0,
+  viewedPaApprovals: [],
   breadcrumbOrigin: 'schedule',
   scheduleView: 'today',
   expiryModalLabId: null,
@@ -72,8 +75,26 @@ export const initialState: AppState = {
   pendingGrantDuration: null,
 }
 
+function createFreshInitialState(): AppState {
+  return {
+    ...initialState,
+    labs: createInitialLabs(),
+    meds: createInitialMeds(),
+    noteHistory: [],
+    auditLog: [],
+    viewedRequests: [],
+    viewedPaApprovals: [],
+  }
+}
+
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case 'RESET_DEMO':
+      auditCounter = 0
+      noteVersionCounter = 0
+      medEventCounter = 0
+      return createFreshInitialState()
+
     case 'SET_ROLE':
       return { ...state, role: action.role }
 
@@ -142,6 +163,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
             timestamp: formatTimestamp(),
           },
         ],
+        notesReviewUnread: 0,
+        cosignUnread: state.cosignUnread + 1,
         auditLog: [
           ...state.auditLog,
           logAudit(state, state.role, 'Submit Note', `Note submitted (v${version})`),
@@ -154,7 +177,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         noteStatus: 'cosigned',
-        cosignUnread: Math.max(0, state.cosignUnread - 1),
+        cosignUnread: 0,
         noteHistory: [
           ...state.noteHistory,
           {
@@ -178,7 +201,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         noteStatus: 'returned',
         returnFeedback: action.feedback,
-        cosignUnread: Math.max(0, state.cosignUnread - 1),
+        cosignUnread: 0,
+        notesReviewUnread: state.notesReviewUnread + 1,
         noteHistory: [
           ...state.noteHistory,
           {
@@ -237,11 +261,24 @@ function appReducer(state: AppState, action: AppAction): AppState {
       }
     }
 
-    case 'GRANT_LAB_ACCESS':
+    case 'GRANT_LAB_ACCESS': {
+      const lab = state.labs.find((l) => l.id === action.labId)
+      const requestId = lab?.requestId
+      const alreadyViewed = requestId ? state.viewedRequests.includes(requestId) : false
       return {
         ...state,
         pendingGrantLabId: action.labId,
         pendingGrantDuration: action.duration,
+        requestUnread: alreadyViewed
+          ? state.requestUnread
+          : Math.max(0, state.requestUnread - 1),
+        viewedRequests:
+          requestId && !alreadyViewed
+            ? [...state.viewedRequests, requestId]
+            : state.viewedRequests,
+        paApprovalUnread: state.viewedPaApprovals.includes(action.labId)
+          ? state.paApprovalUnread
+          : state.paApprovalUnread + 1,
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? {
@@ -256,6 +293,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
           logAudit(state, 'physician', 'Grant Lab Access', `Granted ${action.duration} access to ${action.labId}`),
         ],
       }
+    }
 
     case 'CONFIRM_LAB_GRANT': {
       const lab = state.labs.find((l) => l.id === action.labId)
@@ -282,10 +320,19 @@ function appReducer(state: AppState, action: AppAction): AppState {
       }
     }
 
-    case 'DENY_LAB_ACCESS':
+    case 'DENY_LAB_ACCESS': {
+      const lab = state.labs.find((l) => l.id === action.labId)
+      const requestId = lab?.requestId
+      const alreadyViewed = requestId ? state.viewedRequests.includes(requestId) : false
       return {
         ...state,
-        requestUnread: Math.max(0, state.requestUnread - 1),
+        requestUnread: alreadyViewed
+          ? state.requestUnread
+          : Math.max(0, state.requestUnread - 1),
+        viewedRequests:
+          requestId && !alreadyViewed
+            ? [...state.viewedRequests, requestId]
+            : state.viewedRequests,
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? {
@@ -300,10 +347,18 @@ function appReducer(state: AppState, action: AppAction): AppState {
           logAudit(state, 'physician', 'Deny Lab Access', `Access denied: ${action.feedback}`),
         ],
       }
+    }
 
-    case 'RELEASE_LAB':
+    case 'RELEASE_LAB': {
+      const lab = state.labs.find((l) => l.id === action.labId)
+      const wasRequested = lab?.requestId != null
+      const approvalAlreadyViewed = state.viewedPaApprovals.includes(action.labId)
       return {
         ...state,
+        paApprovalUnread:
+          wasRequested && !approvalAlreadyViewed
+            ? state.paApprovalUnread + 1
+            : state.paApprovalUnread,
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? { ...lab, status: 'released' as const, grantExpiresAt: undefined }
@@ -314,6 +369,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
           logAudit(state, 'physician', 'Release Lab', `Permanently released ${action.labId}`),
         ],
       }
+    }
 
     case 'EXPIRE_LAB':
       return {
@@ -439,23 +495,33 @@ function appReducer(state: AppState, action: AppAction): AppState {
       }
     }
 
-    case 'MARK_COSIGN_READ':
+    case 'MARK_PHYSICIAN_COSIGN_VIEWED':
       return { ...state, cosignUnread: 0 }
+
+    case 'MARK_PA_NOTES_REVIEW_VIEWED':
+      return { ...state, notesReviewUnread: 0 }
 
     case 'MARK_REQUEST_READ':
       return {
         ...state,
-        requestUnread: Math.max(0, state.requestUnread - 1),
+        requestUnread: state.viewedRequests.includes(action.requestId)
+          ? state.requestUnread
+          : Math.max(0, state.requestUnread - 1),
         viewedRequests: state.viewedRequests.includes(action.requestId)
           ? state.viewedRequests
           : [...state.viewedRequests, action.requestId],
       }
 
-    case 'INCREMENT_COSIGN_UNREAD':
-      return { ...state, cosignUnread: state.cosignUnread + 1 }
-
-    case 'INCREMENT_REQUEST_UNREAD':
-      return { ...state, requestUnread: state.requestUnread + 1 }
+    case 'MARK_PA_APPROVAL_VIEWED':
+      return {
+        ...state,
+        paApprovalUnread: state.viewedPaApprovals.includes(action.labId)
+          ? state.paApprovalUnread
+          : Math.max(0, state.paApprovalUnread - 1),
+        viewedPaApprovals: state.viewedPaApprovals.includes(action.labId)
+          ? state.viewedPaApprovals
+          : [...state.viewedPaApprovals, action.labId],
+      }
 
     default:
       return state

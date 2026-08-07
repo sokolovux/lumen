@@ -112,9 +112,16 @@ export interface AppState {
   labs: LabResult[]
   auditLog: AuditEvent[]
   meds: Medication[]
+  /** Physician: unread submitted notes awaiting cosign */
   cosignUnread: number
+  /** PA: unread returned notes awaiting resubmit */
+  notesReviewUnread: number
+  /** Physician: unopened lab access requests */
   requestUnread: number
   viewedRequests: string[]
+  /** PA: unopened approved lab access grants */
+  paApprovalUnread: number
+  viewedPaApprovals: string[]
   breadcrumbOrigin: BreadcrumbOrigin
   scheduleView: ScheduleView
   expiryModalLabId: string | null
@@ -123,6 +130,7 @@ export interface AppState {
 }
 
 export type AppAction =
+  | { type: 'RESET_DEMO' }
   | { type: 'SET_ROLE'; role: Role }
   | { type: 'SET_SCHEDULE_VIEW'; view: ScheduleView }
   | { type: 'SET_BREADCRUMB_ORIGIN'; origin: BreadcrumbOrigin }
@@ -147,7 +155,7 @@ export type AppAction =
   | { type: 'CONTINUE_MED'; medId: string }
   | { type: 'DISCONTINUE_MED'; medId: string }
   | { type: 'ADD_MEDICATION'; name: string; dose: string; frequency: string }
-  | { type: 'MARK_COSIGN_READ' }
+  | { type: 'MARK_PHYSICIAN_COSIGN_VIEWED' }
+  | { type: 'MARK_PA_NOTES_REVIEW_VIEWED' }
   | { type: 'MARK_REQUEST_READ'; requestId: string }
-  | { type: 'INCREMENT_COSIGN_UNREAD' }
-  | { type: 'INCREMENT_REQUEST_UNREAD' }
+  | { type: 'MARK_PA_APPROVAL_VIEWED'; labId: string }

@@ -15,16 +15,20 @@ const PAST_VISITS = [
 interface PatientDetailTabsProps {
   onOpenTodayVisit: () => void
   onOpenPastVisit: (visitId: string) => void
+  defaultTab?: string
+  highlightLabId?: string
 }
 
 export function PatientDetailTabs({
   onOpenTodayVisit,
   onOpenPastVisit,
+  defaultTab = 'visits',
+  highlightLabId,
 }: PatientDetailTabsProps) {
   const { state } = useAppState()
 
   return (
-    <Tabs defaultValue="visits" className="flex-1">
+    <Tabs defaultValue={defaultTab} key={`${defaultTab}-${highlightLabId ?? ''}`} className="flex-1">
       <TabsList>
         <TabsTrigger value="visits">Visits</TabsTrigger>
         <TabsTrigger value="demographics">Demographics</TabsTrigger>
@@ -104,7 +108,11 @@ export function PatientDetailTabs({
 
       <TabsContent value="labs" className="mt-4 space-y-3">
         {state.labs.map((lab) => (
-          <LabResultCard key={lab.id} lab={lab} />
+          <LabResultCard
+            key={lab.id}
+            lab={lab}
+            highlighted={lab.id === highlightLabId}
+          />
         ))}
       </TabsContent>
 

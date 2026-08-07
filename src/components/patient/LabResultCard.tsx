@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { GrantDuration, LabResult } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import {
   canPaViewLab,
   formatCountdown,
@@ -16,16 +17,24 @@ import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 
 interface LabResultCardProps {
   lab: LabResult
+  highlighted?: boolean
 }
 
-export function LabResultCard({ lab }: LabResultCardProps) {
+export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) {
   const { state, dispatch } = useAppState()
+  const cardRef = useRef<HTMLDivElement>(null)
   const [grantOpen, setGrantOpen] = useState(false)
   const [denyOpen, setDenyOpen] = useState(false)
   const isPa = state.role === 'pa'
   const isPhysician = state.role === 'physician'
   const canView = isPhysician || canPaViewLab(lab)
   const now = Date.now()
+
+  useEffect(() => {
+    if (highlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [highlighted])
 
   const statusColor = (() => {
     switch (lab.status) {
@@ -75,6 +84,11 @@ export function LabResultCard({ lab }: LabResultCardProps) {
 
   return (
     <>
+      <div
+        ref={cardRef}
+        id={`lab-${lab.id}`}
+        className={cn(highlighted && 'rounded-lg ring-2 ring-primary ring-offset-2')}
+      >
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4 pb-2">
           <div>
@@ -140,6 +154,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
           </div>
         </CardContent>
       </Card>
+      </div>
 
       <GrantAccessDialog
         open={grantOpen}
