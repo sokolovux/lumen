@@ -3,7 +3,6 @@ import { useAppState } from '@/state/AppStateContext'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { PatientDetailTabs, PAST_VISITS } from '@/components/patient/PatientDetailTabs'
 import { VisitPanel } from '@/components/patient/VisitPanel'
-import { ExpiryLightbox } from '@/components/patient/ExpiryLightbox'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
 
 export function PatientDetailPage() {
@@ -40,12 +39,11 @@ export function PatientDetailPage() {
   const showVisitPanel = state.selectedVisitId !== null
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full overflow-hidden">
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="border-b px-6 py-4">
           <Breadcrumb origin={state.breadcrumbOrigin} patientName={patient.name} />
           <h1 className="mt-2 text-xl font-semibold">{patient.name}</h1>
-          <p className="text-sm text-muted-foreground">{patient.mrn}</p>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           <PatientDetailTabs
@@ -56,17 +54,17 @@ export function PatientDetailPage() {
           />
         </div>
       </div>
-      {showVisitPanel && (
-        <VisitPanel
-          visitLabel={
-            state.selectedVisitId === 'today'
-              ? 'Today\'s Visit'
-              : pastVisit?.label ?? 'Past Visit'
-          }
-          isPastVisit={state.selectedVisitId !== 'today'}
-        />
-      )}
-      <ExpiryLightbox />
+      <VisitPanel
+        open={showVisitPanel}
+        visitLabel={
+          state.selectedVisitId === 'today'
+            ? "Today's visit"
+            : pastVisit?.label ?? 'Past visit'
+        }
+        isPastVisit={
+          state.selectedVisitId !== null && state.selectedVisitId !== 'today'
+        }
+      />
     </div>
   )
 }

@@ -9,7 +9,7 @@ interface KanbanColumnProps {
   statusKey: string
   label: string
   appointments: Appointment[]
-  visitState: Pick<AppState, 'checkedIn' | 'visitStarted' | 'visitFinished' | 'noteStatus'>
+  visitState: Pick<AppState, 'visitStarted' | 'visitFinished' | 'noteStatus'>
 }
 
 function columnStatus(
@@ -27,7 +27,10 @@ function displayStatus(
   visitState: KanbanColumnProps['visitState'],
 ): Appointment['status'] {
   const base = columnStatus(apt, visitState)
-  if (base === 'completed') return 'completed'
+  // Column already conveys stage — hide late/status pills from with PA onward
+  if (base === 'with_pa' || base === 'with_physician' || base === 'finished') {
+    return 'scheduled'
+  }
   if (isLateAppointment(apt.time, base)) return 'late'
   return base
 }

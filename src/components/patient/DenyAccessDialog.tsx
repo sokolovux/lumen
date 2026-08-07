@@ -34,7 +34,7 @@ export function DenyAccessDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Deny Access Request</DialogTitle>
+          <DialogTitle>Deny access request</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
           Deny access to <strong>{labName}</strong>. Written feedback is required.
@@ -50,7 +50,7 @@ export function DenyAccessDialog({
             Cancel
           </Button>
           <Button variant="destructive" onClick={handleDeny} disabled={!feedback.trim()}>
-            Deny Access
+            Deny access
           </Button>
         </DialogFooter>
       </DialogContent>

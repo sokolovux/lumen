@@ -49,7 +49,6 @@ export const initialState: AppState = {
   role: 'pa',
   selectedVisitId: null,
   visitStarted: false,
-  checkedIn: false,
   vitalsSubmitted: false,
   noteStatus: 'not_started',
   hasSubmittedOnce: false,
@@ -64,10 +63,8 @@ export const initialState: AppState = {
   meds: createInitialMeds(),
   cosignUnread: 0,
   notesReviewUnread: 0,
-  requestUnread: 0,
   viewedRequests: [],
-  paApprovalUnread: 0,
-  viewedPaApprovals: [],
+  paUnseenResolution: [],
   breadcrumbOrigin: 'schedule',
   scheduleView: 'today',
   expiryModalLabId: null,
@@ -83,8 +80,20 @@ function createFreshInitialState(): AppState {
     noteHistory: [],
     auditLog: [],
     viewedRequests: [],
-    viewedPaApprovals: [],
+    paUnseenResolution: [],
   }
+}
+
+function withPaUnseenResolution(state: AppState, labId: string): string[] {
+  return state.paUnseenResolution.includes(labId)
+    ? state.paUnseenResolution
+    : [...state.paUnseenResolution, labId]
+}
+
+function withViewedRequest(state: AppState, labId: string): string[] {
+  return state.viewedRequests.includes(labId)
+    ? state.viewedRequests
+    : [...state.viewedRequests, labId]
 }
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -104,19 +113,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_BREADCRUMB_ORIGIN':
       return { ...state, breadcrumbOrigin: action.origin }
 
-    case 'OPEN_VISIT': {
-      const isToday = action.visitId === 'today'
-      const events = [...state.auditLog]
-      if (isToday && !state.checkedIn) {
-        events.push(logAudit(state, state.role, 'Check In', 'Patient checked in for today\'s visit'))
-      }
+    case 'OPEN_VISIT':
       return {
         ...state,
         selectedVisitId: action.visitId,
-        checkedIn: isToday ? true : state.checkedIn,
-        auditLog: events,
       }
-    }
 
     case 'CLOSE_VISIT':
       return { ...state, selectedVisitId: null }
@@ -127,7 +128,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         visitStarted: true,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Start Visit', 'Visit started'),
+          logAudit(state, state.role, 'Start visit', 'Visit started'),
         ],
       }
 
@@ -137,7 +138,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         vitalsSubmitted: true,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Submit Vitals', 'Vitals submitted'),
+          logAudit(state, state.role, 'Submit vitals', 'Vitals submitted'),
         ],
       }
 
@@ -167,7 +168,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         cosignUnread: state.cosignUnread + 1,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Submit Note', `Note submitted (v${version})`),
+          logAudit(state, state.role, 'Submit note', `Note submitted (v${version})`),
         ],
       }
     }
@@ -190,7 +191,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Cosign Note', `Note cosigned (v${version})`),
+          logAudit(state, 'physician', 'Cosign note', `Note cosigned (v${version})`),
         ],
       }
     }
@@ -216,7 +217,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Return Note', `Note returned: ${action.feedback}`),
+          logAudit(state, 'physician', 'Return note', `Note returned: ${action.feedback}`),
         ],
       }
     }
@@ -227,7 +228,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         visitFinished: true,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Finish Visit', 'Visit finished'),
+          logAudit(state, 'physician', 'Finish visit', 'Visit finished'),
         ],
       }
 
@@ -239,7 +240,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         confidentialNoteContent: action.content,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Save Confidential Note', exists ? 'Confidential note saved' : 'Confidential note cleared'),
+          logAudit(state, 'physician', 'Save confidential note', exists ? 'Confidential note saved' : 'Confidential note cleared'),
         ],
       }
     }
@@ -248,37 +249,31 @@ function appReducer(state: AppState, action: AppAction): AppState {
       const requestId = `req-${action.labId}`
       return {
         ...state,
-        requestUnread: state.requestUnread + 1,
         labs: state.labs.map((lab) =>
           lab.id === action.labId
-            ? { ...lab, status: 'requested' as const, requestId }
+            ? {
+                ...lab,
+                status: 'requested' as const,
+                everRequested: true,
+                requestId,
+                denialReason: undefined,
+              }
             : lab,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'pa', 'Request Lab Access', `Requested access to ${action.labId}`),
+          logAudit(state, 'pa', 'Request lab access', `Requested access to ${action.labId}`),
         ],
       }
     }
 
     case 'GRANT_LAB_ACCESS': {
-      const lab = state.labs.find((l) => l.id === action.labId)
-      const requestId = lab?.requestId
-      const alreadyViewed = requestId ? state.viewedRequests.includes(requestId) : false
       return {
         ...state,
         pendingGrantLabId: action.labId,
         pendingGrantDuration: action.duration,
-        requestUnread: alreadyViewed
-          ? state.requestUnread
-          : Math.max(0, state.requestUnread - 1),
-        viewedRequests:
-          requestId && !alreadyViewed
-            ? [...state.viewedRequests, requestId]
-            : state.viewedRequests,
-        paApprovalUnread: state.viewedPaApprovals.includes(action.labId)
-          ? state.paApprovalUnread
-          : state.paApprovalUnread + 1,
+        viewedRequests: withViewedRequest(state, action.labId),
+        paUnseenResolution: withPaUnseenResolution(state, action.labId),
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? {
@@ -290,7 +285,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Grant Lab Access', `Granted ${action.duration} access to ${action.labId}`),
+          logAudit(state, 'physician', 'Grant lab access', `Granted ${action.duration} access to ${action.labId}`),
         ],
       }
     }
@@ -315,50 +310,43 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'pa', 'Confirm Lab Grant', `Temporary access confirmed for ${action.labId}`),
+          logAudit(state, 'pa', 'Confirm lab grant', `Temporary access confirmed for ${action.labId}`),
         ],
       }
     }
 
     case 'DENY_LAB_ACCESS': {
-      const lab = state.labs.find((l) => l.id === action.labId)
-      const requestId = lab?.requestId
-      const alreadyViewed = requestId ? state.viewedRequests.includes(requestId) : false
       return {
         ...state,
-        requestUnread: alreadyViewed
-          ? state.requestUnread
-          : Math.max(0, state.requestUnread - 1),
-        viewedRequests:
-          requestId && !alreadyViewed
-            ? [...state.viewedRequests, requestId]
-            : state.viewedRequests,
+        viewedRequests: withViewedRequest(state, action.labId),
+        paUnseenResolution: withPaUnseenResolution(state, action.labId),
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? {
                 ...lab,
                 status: 'denied' as const,
-                denialFeedback: action.feedback,
+                denialReason: action.feedback,
               }
             : lab,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Deny Lab Access', `Access denied: ${action.feedback}`),
+          logAudit(state, 'physician', 'Deny lab access', `Access denied: ${action.feedback}`),
         ],
       }
     }
 
     case 'RELEASE_LAB': {
       const lab = state.labs.find((l) => l.id === action.labId)
-      const wasRequested = lab?.requestId != null
-      const approvalAlreadyViewed = state.viewedPaApprovals.includes(action.labId)
+      const notifyPa = lab?.everRequested === true
       return {
         ...state,
-        paApprovalUnread:
-          wasRequested && !approvalAlreadyViewed
-            ? state.paApprovalUnread + 1
-            : state.paApprovalUnread,
+        viewedRequests: notifyPa
+          ? withViewedRequest(state, action.labId)
+          : state.viewedRequests,
+        paUnseenResolution: notifyPa
+          ? withPaUnseenResolution(state, action.labId)
+          : state.paUnseenResolution,
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? { ...lab, status: 'released' as const, grantExpiresAt: undefined }
@@ -366,7 +354,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Release Lab', `Permanently released ${action.labId}`),
+          logAudit(state, 'physician', 'Release lab', `Permanently released ${action.labId}`),
         ],
       }
     }
@@ -382,7 +370,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Lab Access Expired', `Temporary access expired for ${action.labId}`),
+          logAudit(state, state.role, 'Lab access expired', `Temporary access expired for ${action.labId}`),
         ],
       }
 
@@ -392,10 +380,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'TICK_LAB_TIMERS': {
       const now = Date.now()
       let expiredLabId: string | null = null
+      let anyActive = false
       const labs = state.labs.map((lab) => {
-        if (lab.status === 'active' && lab.grantExpiresAt && lab.grantExpiresAt <= now) {
-          expiredLabId = lab.id
-          return { ...lab, status: 'expired' as const, grantExpiresAt: undefined }
+        if (lab.status === 'active' && lab.grantExpiresAt) {
+          anyActive = true
+          if (lab.grantExpiresAt <= now) {
+            expiredLabId = lab.id
+            return { ...lab, status: 'expired' as const, grantExpiresAt: undefined }
+          }
         }
         return lab
       })
@@ -403,14 +395,18 @@ function appReducer(state: AppState, action: AppAction): AppState {
         return {
           ...state,
           labs,
-          expiryModalLabId: expiredLabId,
+          expiryModalLabId: null,
           auditLog: [
             ...state.auditLog,
-            logAudit(state, state.role, 'Lab Access Expired', `Temporary access expired for ${expiredLabId}`),
+            logAudit(state, state.role, 'Lab access expired', `Temporary access expired for ${expiredLabId}`),
           ],
         }
       }
-      return state.labs === labs ? state : { ...state, labs }
+      // Re-render every second while a countdown is live so cards/views tick
+      if (anyActive) {
+        return { ...state, labs: [...state.labs] }
+      }
+      return state
     }
 
     case 'CONTINUE_MED':
@@ -435,7 +431,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Continue Medication', `Continued ${action.medId}`),
+          logAudit(state, state.role, 'Continue medication', `Continued ${action.medId}`),
         ],
       }
 
@@ -461,7 +457,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Discontinue Medication', `Discontinued ${action.medId}`),
+          logAudit(state, state.role, 'Discontinue medication', `Discontinued ${action.medId}`),
         ],
       }
 
@@ -490,7 +486,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Add Medication', `Added ${action.name}`),
+          logAudit(state, state.role, 'Add medication', `Added ${action.name}`),
         ],
       }
     }
@@ -504,23 +500,13 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'MARK_REQUEST_READ':
       return {
         ...state,
-        requestUnread: state.viewedRequests.includes(action.requestId)
-          ? state.requestUnread
-          : Math.max(0, state.requestUnread - 1),
-        viewedRequests: state.viewedRequests.includes(action.requestId)
-          ? state.viewedRequests
-          : [...state.viewedRequests, action.requestId],
+        viewedRequests: withViewedRequest(state, action.labId),
       }
 
-    case 'MARK_PA_APPROVAL_VIEWED':
+    case 'MARK_PA_RESOLUTION_SEEN':
       return {
         ...state,
-        paApprovalUnread: state.viewedPaApprovals.includes(action.labId)
-          ? state.paApprovalUnread
-          : Math.max(0, state.paApprovalUnread - 1),
-        viewedPaApprovals: state.viewedPaApprovals.includes(action.labId)
-          ? state.viewedPaApprovals
-          : [...state.viewedPaApprovals, action.labId],
+        paUnseenResolution: state.paUnseenResolution.filter((id) => id !== action.labId),
       }
 
     default:

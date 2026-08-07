@@ -21,7 +21,7 @@ export function ConfidentialNoteSection({ readOnly = false }: ConfidentialNoteSe
 
   return (
     <section>
-      <h3 className="mb-1 text-sm font-medium">Confidential Note</h3>
+      <h3 className="mb-1 text-sm font-medium">Confidential note</h3>
       <p className="mb-2 text-xs text-muted-foreground">
         Physician-only. Hidden from PA — no request path.
       </p>
@@ -35,7 +35,7 @@ export function ConfidentialNoteSection({ readOnly = false }: ConfidentialNoteSe
       />
       {!readOnly && (
         <Button size="sm" className="mt-2" onClick={handleSave}>
-          Save Confidential Note
+          Save confidential note
         </Button>
       )}
     </section>

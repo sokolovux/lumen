@@ -17,11 +17,11 @@ import {
 import { useState } from 'react'
 
 const DURATIONS: { value: GrantDuration; label: string }[] = [
-  { value: '10s', label: '10 seconds (demo)' },
-  { value: '10m', label: '10 minutes' },
-  { value: '1h', label: '1 hour' },
-  { value: '4h', label: '4 hours' },
-  { value: '24h', label: '24 hours' },
+  { value: '10s', label: '10s (demo)' },
+  { value: '10m', label: '10m' },
+  { value: '1h', label: '1h' },
+  { value: '4h', label: '4h' },
+  { value: '24h', label: '24h' },
 ]
 
 interface GrantAccessDialogProps {
@@ -43,7 +43,7 @@ export function GrantAccessDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Grant Temporary Access</DialogTitle>
+          <DialogTitle>Grant temporary access</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
           Grant temporary access to <strong>{labName}</strong>. Timer starts when the PA confirms.
@@ -64,7 +64,7 @@ export function GrantAccessDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={() => onGrant(duration)}>Grant Access</Button>
+          <Button onClick={() => onGrant(duration)}>Grant access</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

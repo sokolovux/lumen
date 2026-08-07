@@ -40,7 +40,7 @@ export function VitalsSection({ readOnly = false }: VitalsSectionProps) {
                 toast.success('Vitals submitted')
               }}
             >
-              Submit Vitals
+              Submit vitals
             </Button>
           )}
         </div>

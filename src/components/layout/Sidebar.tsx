@@ -17,13 +17,13 @@ const sharedNavItems = [
   {
     to: '/queue',
     icon: ClipboardList,
-    labelForRole: { physician: 'Cosign Queue', pa: 'Notes Review' } as const,
+    labelForRole: { physician: 'Cosign queue', pa: 'Notes review' } as const,
     badgeForRole: { physician: 'cosign' as const, pa: 'notesReview' as const },
   },
   {
     to: '/requests',
     icon: Inbox,
-    labelForRole: { physician: 'Access Requests', pa: 'My Requests' } as const,
+    labelForRole: { physician: 'Access requests', pa: 'My requests' } as const,
     badgeForRole: { physician: 'request' as const, pa: 'paApproval' as const },
   },
 ] as const
@@ -38,9 +38,11 @@ export function Sidebar() {
       case 'notesReview':
         return state.noteStatus === 'returned' ? state.notesReviewUnread : 0
       case 'request':
-        return state.requestUnread
+        return state.labs.filter(
+          (lab) => lab.status === 'requested' && !state.viewedRequests.includes(lab.id),
+        ).length
       case 'paApproval':
-        return state.paApprovalUnread
+        return state.paUnseenResolution.length
     }
   }
 
@@ -48,7 +50,7 @@ export function Sidebar() {
     <aside className="flex h-full w-56 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="px-4 py-5">
         <h1 className="text-lg font-semibold tracking-tight">Concordare</h1>
-        <p className="text-xs text-muted-foreground">EHR Prototype</p>
+        <p className="text-xs text-muted-foreground">EHR prototype</p>
       </div>
       <Separator />
       <ScrollArea className="flex-1 px-2 py-3">

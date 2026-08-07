@@ -29,17 +29,17 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
 
   return (
     <Card
-      className="cursor-pointer transition-shadow hover:shadow-md"
+      className="cursor-pointer gap-1 py-2 transition-shadow hover:shadow-md"
       onClick={handleClick}
     >
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 p-3 pb-1">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 px-3 py-0">
         <div>
           <p className="text-sm font-medium">{appointment.patientName}</p>
           <p className="text-xs text-muted-foreground">{appointment.time}</p>
         </div>
         <StatusPill status={displayStatus} />
       </CardHeader>
-      <CardContent className="p-3 pt-0">
+      <CardContent className="px-3 py-0">
         <p className="text-xs text-muted-foreground">MRN placeholder</p>
       </CardContent>
     </Card>

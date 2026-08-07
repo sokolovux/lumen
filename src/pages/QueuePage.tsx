@@ -9,13 +9,8 @@ export function QueuePage() {
     <div className="flex h-full flex-col">
       <div className="border-b px-6 py-4">
         <h1 className="text-xl font-semibold">
-          {isPhysician ? 'Cosign Queue' : 'Notes Review'}
+          {isPhysician ? 'Cosign queue' : 'Notes review'}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {isPhysician
-            ? 'Notes awaiting your cosign or return'
-            : 'Status of your submitted notes'}
-        </p>
       </div>
       <div className="flex-1 overflow-y-auto p-6">
         <CosignQueueList />

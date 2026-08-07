@@ -31,12 +31,12 @@ export function AddMedicationDialog() {
   return (
     <>
       <Button size="sm" onClick={() => setOpen(true)}>
-        Add Medication
+        Add medication
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Medication</DialogTitle>
+            <DialogTitle>Add medication</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <Input placeholder="Medication name" value={name} onChange={(e) => setName(e.target.value)} />

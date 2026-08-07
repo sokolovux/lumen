@@ -69,7 +69,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
   return (
     <section>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-medium">Clinical Note</h3>
+        <h3 className="text-sm font-medium">Clinical note</h3>
         <Badge variant="outline" className={statusVariant}>
           {getNoteStatusLabel(state.noteStatus)}
         </Badge>
@@ -103,12 +103,12 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
       <div className="mt-2 flex flex-wrap gap-2">
         {canSubmit && (state.noteStatus === 'not_started' || state.noteStatus === 'draft') && (
           <Button size="sm" onClick={handleSubmit}>
-            Submit for Cosign
+            Submit for cosign
           </Button>
         )}
         {canSubmit && state.noteStatus === 'returned' && (
           <Button size="sm" onClick={handleSubmit}>
-            Resubmit for Cosign
+            Resubmit for cosign
           </Button>
         )}
         {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (
@@ -117,7 +117,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
               Cosign
             </Button>
             <Button size="sm" variant="outline" onClick={() => setReturnDialogOpen(true)}>
-              Return for Revision
+              Return for revision
             </Button>
           </>
         )}
@@ -125,7 +125,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
 
       {state.noteHistory.length > 0 && (
         <div className="mt-3">
-          <p className="mb-1 text-xs font-medium text-muted-foreground">Version History</p>
+          <p className="mb-1 text-xs font-medium text-muted-foreground">Version history</p>
           <ul className="space-y-1">
             {state.noteHistory.map((v) => (
               <li key={v.id} className="text-xs text-muted-foreground">
@@ -140,7 +140,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
       <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Return Note for Revision</DialogTitle>
+            <DialogTitle>Return note for revision</DialogTitle>
           </DialogHeader>
           <Textarea
             placeholder="Provide feedback for the PA..."
@@ -153,7 +153,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
               Cancel
             </Button>
             <Button onClick={handleReturn} disabled={!returnFeedback.trim()}>
-              Return Note
+              Return note
             </Button>
           </DialogFooter>
         </DialogContent>

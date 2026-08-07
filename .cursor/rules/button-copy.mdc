@@ -1,0 +1,12 @@
+---
+description: Button labels must not use ellipses
+alwaysApply: true
+---
+
+# Button copy — no ellipses
+
+Do not use ellipses (`…` or `...`) in button labels. Prefer a complete verb or verb phrase; the dialog or next step conveys that more input follows.
+
+Examples: Grant, Deny, Release — not Grant…, Deny..., Release….
+
+See `design.md` → UI copy → Buttons.

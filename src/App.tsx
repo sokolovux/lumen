@@ -8,6 +8,7 @@ import { PatientsPage } from '@/pages/PatientsPage'
 import { PatientDetailPage } from '@/pages/PatientDetailPage'
 import { QueuePage } from '@/pages/QueuePage'
 import { RequestsPage } from '@/pages/RequestsPage'
+import { DesignSystemPage } from '@/pages/DesignSystemPage'
 
 function AppLayout() {
   return (
@@ -22,6 +23,7 @@ function AppLayout() {
             <Route path="/patients/:patientId" element={<PatientDetailPage />} />
             <Route path="/queue" element={<QueuePage />} />
             <Route path="/requests" element={<RequestsPage />} />
+            <Route path="/ds" element={<DesignSystemPage />} />
             <Route path="*" element={<Navigate to="/schedule" replace />} />
           </Routes>
         </main>

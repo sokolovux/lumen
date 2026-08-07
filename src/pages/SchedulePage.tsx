@@ -8,8 +8,6 @@ import {
   TODAY_KANBAN_COLUMNS,
   WEEK_DATES,
 } from '@/lib/scheduleData'
-import { formatFixedDate } from '@/lib/fixedClock'
-
 const DAY_LABELS = ['Mon Aug 10', 'Tue Aug 11', 'Wed Aug 12', 'Thu Aug 13', 'Fri Aug 14']
 
 export function SchedulePage() {
@@ -21,7 +19,6 @@ export function SchedulePage() {
   )
 
   const visitState = {
-    checkedIn: state.checkedIn,
     visitStarted: state.visitStarted,
     visitFinished: state.visitFinished,
     noteStatus: state.noteStatus,
@@ -30,10 +27,7 @@ export function SchedulePage() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b px-6 py-4">
-        <div>
-          <h1 className="text-xl font-semibold">Schedule</h1>
-          <p className="text-sm text-muted-foreground">{formatFixedDate()}</p>
-        </div>
+        <h1 className="text-xl font-semibold">Schedule</h1>
         <ScheduleToggle />
       </div>
       <div className="flex-1 overflow-x-auto p-4">

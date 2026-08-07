@@ -9,7 +9,7 @@ export function ScheduleToggle() {
     <div className="flex rounded-lg border bg-background p-0.5">
       {([
         { key: 'today' as const, label: 'Today' },
-        { key: 'fullWeek' as const, label: 'Full Week' },
+        { key: 'fullWeek' as const, label: 'Full week' },
       ]).map(({ key, label }) => (
         <Button
           key={key}

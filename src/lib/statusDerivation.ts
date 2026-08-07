@@ -3,21 +3,22 @@ import { isLateAppointment } from '@/lib/scheduleData'
 
 export function jordanStatus(state: Pick<
   AppState,
-  'checkedIn' | 'visitStarted' | 'visitFinished' | 'noteStatus'
+  'visitStarted' | 'visitFinished' | 'noteStatus'
 >): ScheduleStatus {
-  if (state.visitFinished && state.noteStatus === 'cosigned') return 'completed'
-  if (state.noteStatus === 'submitted') return 'awaiting_cosign'
-  if (state.visitStarted && !state.visitFinished) return 'in_progress'
-  if (state.checkedIn) return 'checked_in'
+  if (state.visitFinished) return 'finished'
+  if (state.noteStatus === 'submitted' || state.noteStatus === 'cosigned') {
+    return 'with_physician'
+  }
+  if (state.visitStarted) return 'with_pa'
   return 'scheduled'
 }
 
 export function jordanDisplayStatus(
-  state: Pick<AppState, 'checkedIn' | 'visitStarted' | 'visitFinished' | 'noteStatus'>,
+  state: Pick<AppState, 'visitStarted' | 'visitFinished' | 'noteStatus'>,
   appointmentTime = '10:30 AM',
 ): ScheduleStatus {
   const base = jordanStatus(state)
-  if (base === 'completed') return 'completed'
+  if (base === 'finished') return 'finished'
   if (isLateAppointment(appointmentTime, base)) return 'late'
   return base
 }
@@ -25,11 +26,11 @@ export function jordanDisplayStatus(
 export function getLabStatusLabel(status: LabStatus): string {
   switch (status) {
     case 'pending': return 'Locked'
-    case 'requested': return 'Access Requested'
-    case 'granted_unstarted': return 'Grant Pending Confirmation'
-    case 'active': return 'Temporary Access'
-    case 'expired': return 'Access Expired'
-    case 'denied': return 'Access Denied'
+    case 'requested': return 'Access requested'
+    case 'granted_unstarted': return 'Grant pending confirmation'
+    case 'active': return 'Temporary access'
+    case 'expired': return 'Access expired'
+    case 'denied': return 'Access denied'
     case 'released': return 'Released'
   }
 }
@@ -37,10 +38,9 @@ export function getLabStatusLabel(status: LabStatus): string {
 export function getScheduleStatusLabel(status: ScheduleStatus): string {
   switch (status) {
     case 'scheduled': return 'Scheduled'
-    case 'checked_in': return 'Checked In'
-    case 'in_progress': return 'In Progress'
-    case 'awaiting_cosign': return 'Awaiting Cosign'
-    case 'completed': return 'Completed'
+    case 'with_pa': return 'With PA'
+    case 'with_physician': return 'With physician'
+    case 'finished': return 'Finished'
     case 'late': return 'Late'
   }
 }
@@ -54,7 +54,17 @@ export function isPaApprovedLabStatus(status: LabStatus): boolean {
 }
 
 export function hasPaRequestedLab(lab: LabResult): boolean {
-  return lab.requestId != null
+  return lab.everRequested
+}
+
+export function isPaResolvedLabStatus(status: LabStatus): boolean {
+  return (
+    status === 'granted_unstarted'
+    || status === 'active'
+    || status === 'expired'
+    || status === 'denied'
+    || status === 'released'
+  )
 }
 
 export function durationToMs(duration: string): number {
@@ -74,17 +84,40 @@ export function formatCountdown(expiresAt: number, now: number): string {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`
-  if (minutes > 0) return `${minutes}m ${seconds}s`
-  return `${seconds}s`
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+  }
+  return `${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
+export function formatGrantDurationLabel(duration: string): string {
+  switch (duration) {
+    case '10s': return '10s'
+    case '10m': return '10m'
+    case '1h': return '1h'
+    case '4h': return '4h'
+    case '24h': return '24h'
+    default: return duration
+  }
+}
+
+export function formatGrantDurationPhrase(duration: string): string {
+  switch (duration) {
+    case '10s': return '10-second'
+    case '10m': return '10-minute'
+    case '1h': return '1-hour'
+    case '4h': return '4-hour'
+    case '24h': return '24-hour'
+    default: return duration
+  }
 }
 
 export function getNoteStatusLabel(status: AppState['noteStatus']): string {
   switch (status) {
-    case 'not_started': return 'Not Started'
+    case 'not_started': return 'Not started'
     case 'draft': return 'Draft'
-    case 'submitted': return 'Submitted — Awaiting Cosign'
-    case 'returned': return 'Returned for Revision'
+    case 'submitted': return 'Submitted — awaiting cosign'
+    case 'returned': return 'Returned for revision'
     case 'cosigned': return 'Cosigned'
   }
 }

@@ -8,7 +8,7 @@ interface DayColumnProps {
   date: string
   label: string
   appointments: Appointment[]
-  visitState: Pick<AppState, 'checkedIn' | 'visitStarted' | 'visitFinished' | 'noteStatus'>
+  visitState: Pick<AppState, 'visitStarted' | 'visitFinished' | 'noteStatus'>
 }
 
 function columnStatus(
@@ -26,7 +26,7 @@ function displayStatus(
   visitState: DayColumnProps['visitState'],
 ): Appointment['status'] {
   const base = columnStatus(apt, visitState)
-  if (base === 'completed') return 'completed'
+  if (base === 'finished') return 'finished'
   if (isLateAppointment(apt.time, base)) return 'late'
   return base
 }
@@ -36,8 +36,8 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
     .filter((apt) => apt.date === date)
     .sort((a, b) => parseAppointmentTime(a.time) - parseAppointmentTime(b.time))
 
-  const active = dayAppointments.filter((apt) => columnStatus(apt, visitState) !== 'completed')
-  const completed = dayAppointments.filter((apt) => columnStatus(apt, visitState) === 'completed')
+  const active = dayAppointments.filter((apt) => columnStatus(apt, visitState) !== 'finished')
+  const finished = dayAppointments.filter((apt) => columnStatus(apt, visitState) === 'finished')
 
   return (
     <div className="flex min-w-[200px] flex-1 flex-col rounded-lg border bg-muted/20">
@@ -46,7 +46,7 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
         <p className="text-xs text-muted-foreground">{dayAppointments.length} appointments</p>
       </div>
       <div className="flex flex-col gap-2 p-2">
-        {active.length === 0 && completed.length === 0 ? (
+        {active.length === 0 && finished.length === 0 ? (
           <p className="px-2 py-4 text-center text-xs text-muted-foreground">No appointments</p>
         ) : (
           <>
@@ -57,11 +57,11 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
                 displayStatus={displayStatus(apt, visitState)}
               />
             ))}
-            {completed.length > 0 && (
+            {finished.length > 0 && (
               <>
                 <Separator className="my-1" />
-                <p className="px-1 text-xs font-medium text-muted-foreground">Completed</p>
-                {completed.map((apt) => (
+                <p className="px-1 text-xs font-medium text-muted-foreground">Finished</p>
+                {finished.map((apt) => (
                   <AppointmentCard
                     key={apt.id}
                     appointment={apt}

@@ -20,10 +20,9 @@ export type GrantDuration = '10s' | '10m' | '1h' | '4h' | '24h'
 
 export type ScheduleStatus =
   | 'scheduled'
-  | 'checked_in'
-  | 'in_progress'
-  | 'awaiting_cosign'
-  | 'completed'
+  | 'with_pa'
+  | 'with_physician'
+  | 'finished'
   | 'late'
 
 export type BreadcrumbOrigin = 'schedule' | 'queue' | 'requests' | 'patients'
@@ -45,11 +44,14 @@ export interface LabResult {
   type: 'lab' | 'imaging'
   orderDate: string
   status: LabStatus
+  /** True the moment PA requests access; never reset */
+  everRequested: boolean
   requestId?: string
   grantDuration?: GrantDuration
+  /** Set when PA confirms/starts the countdown, not at grant time */
   grantExpiresAt?: number
   grantConfirmedAt?: number
-  denialFeedback?: string
+  denialReason?: string
 }
 
 export interface AuditEvent {
@@ -99,7 +101,6 @@ export interface AppState {
   role: Role
   selectedVisitId: 'today' | string | null
   visitStarted: boolean
-  checkedIn: boolean
   vitalsSubmitted: boolean
   noteStatus: NoteStatus
   hasSubmittedOnce: boolean
@@ -116,12 +117,10 @@ export interface AppState {
   cosignUnread: number
   /** PA: unread returned notes awaiting resubmit */
   notesReviewUnread: number
-  /** Physician: unopened lab access requests */
-  requestUnread: number
+  /** Physician: lab ids of incoming requests that have been opened/viewed */
   viewedRequests: string[]
-  /** PA: unopened approved lab access grants */
-  paApprovalUnread: number
-  viewedPaApprovals: string[]
+  /** PA: lab ids of outcomes not yet seen via Resolved-tab viewport entry */
+  paUnseenResolution: string[]
   breadcrumbOrigin: BreadcrumbOrigin
   scheduleView: ScheduleView
   expiryModalLabId: string | null
@@ -157,5 +156,5 @@ export type AppAction =
   | { type: 'ADD_MEDICATION'; name: string; dose: string; frequency: string }
   | { type: 'MARK_PHYSICIAN_COSIGN_VIEWED' }
   | { type: 'MARK_PA_NOTES_REVIEW_VIEWED' }
-  | { type: 'MARK_REQUEST_READ'; requestId: string }
-  | { type: 'MARK_PA_APPROVAL_VIEWED'; labId: string }
+  | { type: 'MARK_REQUEST_READ'; labId: string }
+  | { type: 'MARK_PA_RESOLUTION_SEEN'; labId: string }

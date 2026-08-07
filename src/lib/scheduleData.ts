@@ -22,23 +22,23 @@ export const WEEK_DATES = [
 /** Seeded placeholder appointments — Jordan's status is derived, not from this list */
 export const SEEDED_APPOINTMENTS: Appointment[] = [
   { id: 'apt-1', patientId: JORDAN_REYES_ID, patientName: 'Jordan Reyes', time: '10:30 AM', date: '2026-08-10', status: 'scheduled', isInteractive: true },
-  { id: 'apt-2', patientId: 'maria-chen', patientName: 'Maria Chen', time: '9:00 AM', date: '2026-08-10', status: 'completed' },
-  { id: 'apt-3', patientId: 'david-kim', patientName: 'David Kim', time: '9:30 AM', date: '2026-08-10', status: 'in_progress' },
+  { id: 'apt-2', patientId: 'maria-chen', patientName: 'Maria Chen', time: '9:00 AM', date: '2026-08-10', status: 'finished' },
+  { id: 'apt-3', patientId: 'david-kim', patientName: 'David Kim', time: '9:30 AM', date: '2026-08-10', status: 'with_pa' },
   { id: 'apt-4', patientId: 'sarah-patel', patientName: 'Sarah Patel', time: '11:30 AM', date: '2026-08-10', status: 'scheduled' },
   { id: 'apt-5', patientId: 'james-wilson', patientName: 'James Wilson', time: '1:00 PM', date: '2026-08-10', status: 'scheduled' },
   { id: 'apt-6', patientId: 'maria-chen', patientName: 'Maria Chen', time: '10:00 AM', date: '2026-08-11', status: 'scheduled' },
-  { id: 'apt-7', patientId: 'david-kim', patientName: 'David Kim', time: '2:00 PM', date: '2026-08-11', status: 'awaiting_cosign' },
-  { id: 'apt-8', patientId: 'sarah-patel', patientName: 'Sarah Patel', time: '9:00 AM', date: '2026-08-12', status: 'checked_in' },
+  { id: 'apt-7', patientId: 'david-kim', patientName: 'David Kim', time: '2:00 PM', date: '2026-08-11', status: 'with_physician' },
+  { id: 'apt-8', patientId: 'sarah-patel', patientName: 'Sarah Patel', time: '9:00 AM', date: '2026-08-12', status: 'scheduled' },
   { id: 'apt-9', patientId: 'james-wilson', patientName: 'James Wilson', time: '11:00 AM', date: '2026-08-13', status: 'scheduled' },
-  { id: 'apt-10', patientId: 'maria-chen', patientName: 'Maria Chen', time: '3:00 PM', date: '2026-08-14', status: 'completed' },
+  { id: 'apt-10', patientId: 'maria-chen', patientName: 'Maria Chen', time: '3:00 PM', date: '2026-08-14', status: 'finished' },
 ]
 
 export function createInitialLabs(): LabResult[] {
   return [
-    { id: 'lab-1', name: 'CBC with Differential', type: 'lab', orderDate: 'Aug 5, 2026', status: 'pending' },
-    { id: 'lab-2', name: 'Comprehensive Metabolic Panel', type: 'lab', orderDate: 'Aug 5, 2026', status: 'pending' },
-    { id: 'lab-3', name: 'Chest X-Ray', type: 'imaging', orderDate: 'Aug 7, 2026', status: 'pending' },
-    { id: 'lab-4', name: 'HbA1c', type: 'lab', orderDate: 'Aug 3, 2026', status: 'released' },
+    { id: 'lab-1', name: 'CBC with Differential', type: 'lab', orderDate: 'Aug 5, 2026', status: 'pending', everRequested: false },
+    { id: 'lab-2', name: 'Comprehensive Metabolic Panel', type: 'lab', orderDate: 'Aug 5, 2026', status: 'pending', everRequested: false },
+    { id: 'lab-3', name: 'Chest X-Ray', type: 'imaging', orderDate: 'Aug 7, 2026', status: 'pending', everRequested: false },
+    { id: 'lab-4', name: 'HbA1c', type: 'lab', orderDate: 'Aug 3, 2026', status: 'released', everRequested: false },
   ]
 }
 
@@ -65,10 +65,9 @@ export function createInitialMeds(): Medication[] {
 
 export const TODAY_KANBAN_COLUMNS: { key: string; label: string }[] = [
   { key: 'scheduled', label: 'Scheduled' },
-  { key: 'checked_in', label: 'Checked In' },
-  { key: 'in_progress', label: 'In Progress' },
-  { key: 'awaiting_cosign', label: 'Awaiting Cosign' },
-  { key: 'completed', label: 'Completed' },
+  { key: 'with_pa', label: 'With PA' },
+  { key: 'with_physician', label: 'With physician' },
+  { key: 'finished', label: 'Finished' },
 ]
 
 export function parseAppointmentTime(time: string): number {
@@ -83,7 +82,7 @@ export function parseAppointmentTime(time: string): number {
 }
 
 export function isLateAppointment(time: string, status: string): boolean {
-  if (status === 'completed') return false
+  if (status === 'finished') return false
   const aptMinutes = parseAppointmentTime(time)
   const fixedMinutes = 11 * 60
   return aptMinutes < fixedMinutes

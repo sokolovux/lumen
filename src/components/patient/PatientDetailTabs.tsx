@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 
 const PAST_VISITS = [
   { id: 'visit-2026-08-03', label: 'Aug 3, 2026 — Follow-up' },
-  { id: 'visit-2026-07-20', label: 'Jul 20, 2026 — Annual Physical' },
+  { id: 'visit-2026-07-20', label: 'Jul 20, 2026 — Annual physical' },
 ]
 
 interface PatientDetailTabsProps {
@@ -32,10 +32,10 @@ export function PatientDetailTabs({
       <TabsList>
         <TabsTrigger value="visits">Visits</TabsTrigger>
         <TabsTrigger value="demographics">Demographics</TabsTrigger>
-        <TabsTrigger value="problems">Problems & Meds</TabsTrigger>
-        <TabsTrigger value="labs">Labs & Results</TabsTrigger>
+        <TabsTrigger value="problems">Problems & meds</TabsTrigger>
+        <TabsTrigger value="labs">Labs & results</TabsTrigger>
         {state.role === 'physician' && (
-          <TabsTrigger value="audit">Audit Trail</TabsTrigger>
+          <TabsTrigger value="audit">Audit trail</TabsTrigger>
         )}
       </TabsList>
 
@@ -43,7 +43,7 @@ export function PatientDetailTabs({
         <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Today&apos;s Visit</p>
+              <p className="font-medium">Today&apos;s visit</p>
               <p className="text-xs text-muted-foreground">Aug 10, 2026 · 10:30 AM</p>
             </div>
             <Button
@@ -51,11 +51,11 @@ export function PatientDetailTabs({
               variant={state.selectedVisitId === 'today' ? 'secondary' : 'default'}
               onClick={onOpenTodayVisit}
             >
-              {state.selectedVisitId === 'today' ? 'Visit Open' : 'Open Visit'}
+              {state.selectedVisitId === 'today' ? 'Visit open' : 'Open visit'}
             </Button>
           </div>
         </div>
-        <p className="text-xs font-medium text-muted-foreground">Past Visits</p>
+        <p className="text-xs font-medium text-muted-foreground">Past visits</p>
         {PAST_VISITS.map((visit) => (
           <div key={visit.id} className="rounded-lg border p-4">
             <div className="flex items-center justify-between">
@@ -73,7 +73,7 @@ export function PatientDetailTabs({
       </TabsContent>
 
       <TabsContent value="demographics" className="mt-4 space-y-3">
-        {['Name', 'Date of Birth', 'MRN', 'Address', 'Phone', 'Insurance'].map((field) => (
+        {['Name', 'Date of birth', 'MRN', 'Address', 'Phone', 'Insurance'].map((field) => (
           <div key={field} className="flex items-center justify-between border-b pb-2">
             <span className="text-sm text-muted-foreground">{field}</span>
             <Skeleton className="h-4 w-32" />
@@ -83,7 +83,7 @@ export function PatientDetailTabs({
 
       <TabsContent value="problems" className="mt-4 space-y-4">
         <div>
-          <h3 className="mb-2 text-sm font-medium">Problem List</h3>
+          <h3 className="mb-2 text-sm font-medium">Problem list</h3>
           <div className="space-y-2">
             {['Hypertension', 'Type 2 Diabetes'].map((problem) => (
               <div key={problem} className="rounded-md border p-2">

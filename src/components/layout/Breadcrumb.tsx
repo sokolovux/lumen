@@ -11,8 +11,8 @@ import {
 
 const originConfig: Record<BreadcrumbOrigin, { label: string; path: string }> = {
   schedule: { label: 'Schedule', path: '/schedule' },
-  queue: { label: 'Cosign Queue', path: '/queue' },
-  requests: { label: 'Access Requests', path: '/requests' },
+  queue: { label: 'Cosign queue', path: '/queue' },
+  requests: { label: 'Access requests', path: '/requests' },
   patients: { label: 'Patients', path: '/patients' },
 }
 
