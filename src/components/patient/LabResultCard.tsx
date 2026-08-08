@@ -10,14 +10,25 @@ import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
 import {
   formatCountdown,
   formatGrantDurationLabel,
+  formatGrantDurationPhrase,
+  getLabStatusLabel,
+  getLabStatusTint,
 } from '@/lib/statusDerivation'
 import { DEMO_PA_NAME } from '@/lib/scheduleData'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
-import { StartWindowDialog } from '@/components/patient/StartWindowDialog'
 import { LabDocumentView } from '@/components/patient/LabDocumentView'
-import { LabStatusBadge } from '@/components/patient/LabStatusBadge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface LabResultCardProps {
   lab: LabResult
@@ -102,7 +113,12 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center gap-1.5">
-              <LabStatusBadge status={lab.status} />
+              <Badge
+                variant="outline"
+                className={getLabStatusTint(lab.status, state.role)}
+              >
+                {getLabStatusLabel(lab.status, state.role)}
+              </Badge>
               {justReleased && (
                 <Badge
                   variant="outline"
@@ -114,7 +130,7 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
             </div>
             <div className="min-w-0">
               <p className="font-medium">{lab.name}</p>
-              <p className="text-xs text-muted-foreground capitalize">
+              <p className="text-sm text-muted-foreground capitalize">
                 {lab.type} · Ordered {lab.orderDate}
               </p>
               {isPa && lab.status === 'active' && lab.grantExpiresAt && (
@@ -169,13 +185,21 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
         labName={lab.name}
         onConfirm={handleRelease}
       />
-      <StartWindowDialog
-        open={startWindowOpen}
-        onOpenChange={setStartWindowOpen}
-        labName={lab.name}
-        duration={lab.grantDuration ?? '10m'}
-        onConfirm={handleStartWindow}
-      />
+      <AlertDialog open={startWindowOpen} onOpenChange={setStartWindowOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start access window?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Start your {formatGrantDurationPhrase(lab.grantDuration ?? '10m')} window for{' '}
+              <strong>{lab.name}</strong> now? The countdown begins only after you confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleStartWindow}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <LabDocumentView
         labId={lab.id}
         open={documentOpen}

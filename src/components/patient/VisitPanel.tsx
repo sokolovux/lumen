@@ -4,9 +4,9 @@ import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { VitalsSection } from '@/components/patient/VitalsSection'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
 import { NoteSection } from '@/components/patient/NoteSection'
-import { ConfidentialNoteSection } from '@/components/patient/ConfidentialNoteSection'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +27,7 @@ export function VisitPanel({
   const [visible, setVisible] = useState(false)
   const [displayLabel, setDisplayLabel] = useState(visitLabel)
   const [displayPast, setDisplayPast] = useState(isPastVisit)
+  const [confidentialDraft, setConfidentialDraft] = useState(state.confidentialNoteContent)
 
   useEffect(() => {
     if (open) {
@@ -41,6 +42,10 @@ export function VisitPanel({
     setVisible(false)
   }, [open, visitLabel, isPastVisit])
 
+  useEffect(() => {
+    setConfidentialDraft(state.confidentialNoteContent)
+  }, [state.confidentialNoteContent])
+
   const handleFinishVisit = () => {
     if (!state.hasSubmittedOnce) return
     dispatch({ type: 'FINISH_VISIT' })
@@ -52,6 +57,7 @@ export function VisitPanel({
   if (!mounted) return null
 
   const isToday = !displayPast
+  const showClinicalSections = state.visitStarted || displayPast
 
   return (
     <div
@@ -100,18 +106,77 @@ export function VisitPanel({
               </Button>
             )}
 
-            {(state.visitStarted || displayPast) && (
+            {showClinicalSections && (
               <>
-                <VitalsSection readOnly={displayPast} />
+                <section>
+                  <h6 className="mb-2">Vitals</h6>
+                  {state.vitalsSubmitted || displayPast ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {['BP', 'HR', 'Temp', 'SpO2'].map((label) => (
+                        <div key={label} className="rounded-md border p-2">
+                          <p className="text-xs text-muted-foreground">{label}</p>
+                          <Skeleton className="mt-1 h-4 w-16" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        {['BP', 'HR', 'Temp', 'SpO2'].map((label) => (
+                          <div key={label} className="rounded-md border p-2">
+                            <p className="text-xs text-muted-foreground">{label}</p>
+                            <Skeleton className="mt-1 h-4 w-full" />
+                          </div>
+                        ))}
+                      </div>
+                      {state.role === 'pa' && state.visitStarted && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            dispatch({ type: 'SUBMIT_VITALS' })
+                            toast.success('Vitals submitted')
+                          }}
+                        >
+                          Submit vitals
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </section>
                 <Separator />
                 <NoteSection readOnly={displayPast} />
               </>
             )}
 
-            {isPhysician && (state.visitStarted || displayPast) && (
+            {isPhysician && showClinicalSections && (
               <>
                 <Separator />
-                <ConfidentialNoteSection readOnly={displayPast} />
+                <section>
+                  <h6 className="mb-1">Confidential note</h6>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    Physician-only. Hidden from PA — no request path.
+                  </p>
+                  <Textarea
+                    placeholder="Confidential physician note..."
+                    value={confidentialDraft}
+                    onChange={(e) => setConfidentialDraft(e.target.value)}
+                    rows={4}
+                    disabled={displayPast}
+                    className="text-sm"
+                  />
+                  {!displayPast && (
+                    <Button
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        dispatch({ type: 'SAVE_CONFIDENTIAL_NOTE', content: confidentialDraft })
+                        toast.success('Confidential note saved')
+                      }}
+                    >
+                      Save confidential note
+                    </Button>
+                  )}
+                </section>
               </>
             )}
 
@@ -134,7 +199,7 @@ export function VisitPanel({
             )}
 
             {state.visitFinished && isToday && (
-              <p className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
+              <p className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
                 Visit finished — documentation review continues
               </p>
             )}

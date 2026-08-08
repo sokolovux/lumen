@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useAppState } from '@/state/AppStateContext'
-import { ScheduleToggle } from '@/components/schedule/ScheduleToggle'
+import { Button } from '@/components/ui/button'
 import { KanbanColumn } from '@/components/schedule/KanbanColumn'
 import { DayColumn } from '@/components/schedule/DayColumn'
 import {
@@ -8,10 +8,11 @@ import {
   TODAY_KANBAN_COLUMNS,
   WEEK_DATES,
 } from '@/lib/scheduleData'
+
 const DAY_LABELS = ['Mon Aug 10', 'Tue Aug 11', 'Wed Aug 12', 'Thu Aug 13', 'Fri Aug 14']
 
 export function SchedulePage() {
-  const { state } = useAppState()
+  const { state, dispatch } = useAppState()
 
   const todayAppointments = useMemo(
     () => SEEDED_APPOINTMENTS.filter((apt) => apt.date === '2026-08-10'),
@@ -28,7 +29,21 @@ export function SchedulePage() {
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b px-6 py-4">
         <h4>Schedule</h4>
-        <ScheduleToggle />
+        <div className="flex rounded-lg border bg-background p-0.5">
+          {([
+            { key: 'today' as const, label: 'Today' },
+            { key: 'fullWeek' as const, label: 'Full week' },
+          ]).map(({ key, label }) => (
+            <Button
+              key={key}
+              variant={state.scheduleView === key ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => dispatch({ type: 'SET_SCHEDULE_VIEW', view: key })}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
       <div className="flex-1 overflow-x-auto p-4">
         {state.scheduleView === 'today' ? (

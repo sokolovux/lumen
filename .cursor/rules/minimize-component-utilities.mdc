@@ -1,27 +1,39 @@
 ---
-description: Minimize utility overrides on existing UI components; ask first
+description: Utilities-first layout; ask before new components; naked existing ones
 alwaysApply: true
 ---
 
-# Minimize utilities on components
+# Utilities, components, and `@apply`
 
-Prefer the styles already defined on shared UI primitives (`Button`, `Badge`, `Card`, `Dialog`, etc.). Do **not** sprinkle Tailwind utilities on call sites to restyle them.
+Follow `design.md` → Components.
 
-For `Card` and its slots, follow **naked cards** (`.cursor/rules/naked-cards.mdc`) — no utilities unless the user explicitly allows an exception.
+## Default: utilities first
 
-- Fix or extend the **primitive** (`src/components/ui/…`) when a change should apply systematically
-- Layout/spacing around a component is fine; overriding its type, color, weight, radius, or size tokens at the call site is not
-- Semantic tints that the design system already documents (e.g. badge status colors, `notificationBadgeClassName`) are allowed
+Prefer Tailwind utilities for layout and UI composition. Use native elements and existing primitives before inventing structure.
 
-If a call-site utility override seems necessary, **ask the user first**, then proceed only after they confirm.
+## Ask before creating components
 
-Examples:
+If you believe a **new** component is necessary, **ask the user first** and wait for permission. Do not create it proactively.
 
-- ✅ Change Badge weight in `badge.jsx`
-- ✅ `<Badge variant="outline" className={notificationBadgeClassName}>New</Badge>`
-- ✅ `<Badge className={cn(countBadgeClassName, notificationBadgeClassName)}>3</Badge>`
-- ✅ `<Button variant={selected ? 'default' : 'ghost'} size="sm">` — use variants, not color utilities
-- ❌ `<Button className="h-8 px-4 bg-primary text-primary-foreground">` to fake a selected state
-- ❌ `<Badge className="h-5 text-xs px-1.5">` when the primitive / helpers already set size
+## Existing components stay naked
 
-See `design.md` → Components → Utilities.
+Once a component exists, do **not** put Tailwind utilities on it at the call site unless you ask and get permission.
+
+Allowed without re-asking only when already documented (e.g. Button `variant`/`size`, Card `interactive`/`highlighted`/`size`, Badge outline helpers / status tints).
+
+Specializations: naked cards (`.cursor/rules/naked-cards.mdc`), naked headings (`.cursor/rules/naked-headings.mdc`).
+
+## Repeated need → `@apply` in the component
+
+If the same utilities would be needed repeatedly on a component, put them **inside the component** with `@apply` (co-located CSS or `@layer components`), then keep call sites naked. Do not copy-paste chrome utilities across call sites.
+
+```tsx
+// ✅
+<div className="flex gap-2">
+  <Button variant="outline">Deny</Button>
+</div>
+
+// ❌ without asking
+<Button className="h-8 px-4">Deny</Button>
+function NewWidget() { … }
+```

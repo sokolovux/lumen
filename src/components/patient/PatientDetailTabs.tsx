@@ -1,11 +1,13 @@
+import { toast } from 'sonner'
+import type { Medication } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { LabResultCard } from '@/components/patient/LabResultCard'
-import { MedicationRow } from '@/components/patient/MedicationRow'
 import { AddMedicationDialog } from '@/components/patient/AddMedicationDialog'
-import { AuditTrailTab } from '@/components/patient/AuditTrailTab'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 const PAST_VISITS = [
   { id: 'visit-2026-08-03', label: 'Aug 3, 2026 — Follow-up' },
@@ -25,7 +27,17 @@ export function PatientDetailTabs({
   defaultTab = 'visits',
   highlightLabId,
 }: PatientDetailTabsProps) {
-  const { state } = useAppState()
+  const { state, dispatch } = useAppState()
+
+  const handleContinueMed = (med: Medication) => {
+    dispatch({ type: 'CONTINUE_MED', medId: med.id })
+    toast.success(`${med.name} continued`)
+  }
+
+  const handleDiscontinueMed = (med: Medication) => {
+    dispatch({ type: 'DISCONTINUE_MED', medId: med.id })
+    toast.success(`${med.name} discontinued`)
+  }
 
   return (
     <Tabs defaultValue={defaultTab} key={`${defaultTab}-${highlightLabId ?? ''}`} className="flex-1">
@@ -100,7 +112,45 @@ export function PatientDetailTabs({
           </div>
           <div className="space-y-2">
             {state.meds.map((med) => (
-              <MedicationRow key={med.id} med={med} />
+              <div key={med.id} className="rounded-lg border p-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium">{med.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {med.dose} · {med.frequency}
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      med.status === 'active'
+                        ? 'border-green-200 bg-green-50 text-green-700'
+                        : 'border-destructive/30 bg-destructive/10 text-destructive'
+                    }
+                  >
+                    {med.status === 'active' ? 'Active' : 'Discontinued'}
+                  </Badge>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleContinueMed(med)}>
+                    Continue
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDiscontinueMed(med)}>
+                    Discontinue
+                  </Button>
+                </div>
+                {med.history.length > 0 && (
+                  <ul className="mt-2 space-y-0.5">
+                    {med.history.map((event) => (
+                      <li key={event.id} className="text-xs text-muted-foreground">
+                        {event.timestamp} — {event.action} by{' '}
+                        {event.actor === 'pa' ? 'PA' : 'Physician'}
+                        {event.detail && ` (${event.detail})`}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -118,7 +168,34 @@ export function PatientDetailTabs({
 
       {state.role === 'physician' && (
         <TabsContent value="audit" className="mt-4">
-          <AuditTrailTab />
+          {state.auditLog.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No audit events recorded yet.</p>
+          ) : (
+            <ScrollArea className="h-[400px]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-muted-foreground">
+                    <th className="pb-2 pr-4 font-medium">Timestamp</th>
+                    <th className="pb-2 pr-4 font-medium">Actor</th>
+                    <th className="pb-2 pr-4 font-medium">Action</th>
+                    <th className="pb-2 font-medium">Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...state.auditLog].reverse().map((event) => (
+                    <tr key={event.id} className="border-b">
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">{event.timestamp}</td>
+                      <td className="py-2 pr-4 capitalize">
+                        {event.actor === 'pa' ? 'PA' : 'Physician'}
+                      </td>
+                      <td className="py-2 pr-4">{event.action}</td>
+                      <td className="py-2 text-muted-foreground">{event.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollArea>
+          )}
         </TabsContent>
       )}
     </Tabs>

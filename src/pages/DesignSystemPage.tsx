@@ -69,10 +69,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { StatusPill } from '@/components/schedule/StatusPill'
 import {
   getLabStatusLabel,
+  getLabStatusTint,
   getNoteStatusLabel,
+  getScheduleStatusLabel,
+  scheduleStatusTint,
 } from '@/lib/statusDerivation'
 import type { LabStatus, NoteStatus, ScheduleStatus } from '@/state/types'
 
@@ -101,14 +103,14 @@ const SCHEDULE_STATUSES: ScheduleStatus[] = [
   'late',
 ]
 
-const LAB_STATUS_STYLES: { status: LabStatus; className: string }[] = [
-  { status: 'pending', className: '' },
-  { status: 'requested', className: 'border-blue-200 bg-blue-50 text-blue-700' },
-  { status: 'granted_unstarted', className: 'border-blue-200 bg-blue-50 text-blue-700' },
-  { status: 'active', className: 'border-blue-200 bg-blue-50 text-blue-700' },
-  { status: 'expired', className: 'text-muted-foreground' },
-  { status: 'denied', className: 'border-destructive/30 bg-destructive/10 text-destructive' },
-  { status: 'released', className: 'border-green-200 bg-green-50 text-green-700' },
+const LAB_STATUSES: LabStatus[] = [
+  'pending',
+  'requested',
+  'granted_unstarted',
+  'active',
+  'expired',
+  'denied',
+  'released',
 ]
 
 const NOTE_STATUS_STYLES: { status: NoteStatus; className: string }[] = [
@@ -452,6 +454,37 @@ export function DesignSystemPage() {
                   </div>
                 </CardContent>
               </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tabs</CardTitle>
+                  <CardDescription>
+                    Line tabs only. TabsList defaults to variant=&quot;line&quot;.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Underline active state (line)</p>
+                    <p className="text-destructive">✗ Muted pill TabsList variant=&quot;default&quot;</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Utilities &amp; components</CardTitle>
+                  <CardDescription>
+                    Utilities first for layout. Ask before new components; keep
+                    existing ones naked.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Compose with utilities + existing primitives</p>
+                    <p className="text-emerald-700">✓ Repeated chrome → @apply in the component</p>
+                    <p className="text-destructive">✗ New component without asking</p>
+                    <p className="text-destructive">✗ Utilities on existing components without permission</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </Section>
 
@@ -495,19 +528,31 @@ export function DesignSystemPage() {
               </BadgeRow>
 
               <BadgeRow label="Schedule status pills">
-                {SCHEDULE_STATUSES.map((status) => (
-                  <div key={status} className="flex items-center gap-2">
-                    <StatusPill status={status} />
-                    {status === 'scheduled' ? (
-                      <span className="text-xs text-muted-foreground">Scheduled (hidden)</span>
-                    ) : null}
-                  </div>
-                ))}
+                {SCHEDULE_STATUSES.map((status) => {
+                  const tint = scheduleStatusTint[status]
+                  return (
+                    <div key={status} className="flex items-center gap-2">
+                      {tint ? (
+                        <Badge variant="outline" className={tint}>
+                          {getScheduleStatusLabel(status)}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          Scheduled (hidden)
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
               </BadgeRow>
 
               <BadgeRow label="Lab & imaging status">
-                {LAB_STATUS_STYLES.map(({ status, className }) => (
-                  <Badge key={status} variant="outline" className={className}>
+                {LAB_STATUSES.map((status) => (
+                  <Badge
+                    key={status}
+                    variant="outline"
+                    className={getLabStatusTint(status)}
+                  >
                     {getLabStatusLabel(status)}
                   </Badge>
                 ))}
@@ -706,7 +751,7 @@ export function DesignSystemPage() {
 
           <Separator />
 
-          <Section id="surfaces" title="Surfaces" description="Cards, tabs, tables, and avatars.">
+          <Section id="surfaces" title="Surfaces" description="Cards, line tabs, tables, and avatars.">
             <div className="space-y-4">
               <Card>
                 <CardHeader>

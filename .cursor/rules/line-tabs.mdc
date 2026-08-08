@@ -1,0 +1,27 @@
+---
+description: Use line TabsList variant only; no pill/default tabs
+alwaysApply: true
+---
+
+# Line tabs only
+
+All app tabs use the **line** `TabsList` variant (underline active state). Do not use the muted pill `default` variant.
+
+`TabsList` already defaults to `variant="line"` — omit the prop unless you must set it explicitly.
+
+```tsx
+// ✅
+<Tabs defaultValue="visits">
+  <TabsList>
+    <TabsTrigger value="visits">Visits</TabsTrigger>
+  </TabsList>
+</Tabs>
+
+// ✅ Explicit (same as default)
+<TabsList variant="line">…</TabsList>
+
+// ❌
+<TabsList variant="default">…</TabsList>
+```
+
+See `design.md` → Components → Tabs.

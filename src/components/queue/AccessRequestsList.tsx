@@ -13,12 +13,12 @@ import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import {
   formatCountdown,
   getLabStatusLabel,
+  getLabStatusTint,
   isPaResolvedLabStatus,
 } from '@/lib/statusDerivation'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
-import { LabStatusBadge } from '@/components/patient/LabStatusBadge'
 
 export function AccessRequestsList() {
   const { state } = useAppState()
@@ -124,7 +124,12 @@ function PhysicianAccessRequestsList() {
                   <Card key={lab.id}>
                     <CardHeader>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <LabStatusBadge status={lab.status} surface="requests" />
+                        <Badge
+                          variant="outline"
+                          className={getLabStatusTint(lab.status, state.role, 'requests')}
+                        >
+                          {getLabStatusLabel(lab.status, state.role, 'requests')}
+                        </Badge>
                         {isUnread && (
                           <Badge
                             variant="outline"
@@ -136,7 +141,7 @@ function PhysicianAccessRequestsList() {
                       </div>
                       <div>
                         <p className="font-medium">{lab.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
                         </p>
                       </div>
@@ -223,7 +228,7 @@ function PhysicianAccessRequestsList() {
 }
 
 function PhysicianHistoryRow({ lab }: { lab: LabResult }) {
-  const { dispatch } = useAppState()
+  const { state, dispatch } = useAppState()
   const navigate = useNavigate()
   const now = Date.now()
 
@@ -235,10 +240,15 @@ function PhysicianHistoryRow({ lab }: { lab: LabResult }) {
   return (
     <Card>
       <CardHeader>
-        <LabStatusBadge status={lab.status} surface="requests" />
+        <Badge
+          variant="outline"
+          className={getLabStatusTint(lab.status, state.role, 'requests')}
+        >
+          {getLabStatusLabel(lab.status, state.role, 'requests')}
+        </Badge>
         <div className="min-w-0">
           <p className="font-medium">{lab.name}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
           </p>
           <p className="mt-1 text-xs font-medium">
@@ -250,7 +260,7 @@ function PhysicianHistoryRow({ lab }: { lab: LabResult }) {
             </p>
           )}
           {lab.status === 'denied' && lab.denialReason && (
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               Feedback: {lab.denialReason}
             </p>
           )}
@@ -346,13 +356,18 @@ function PaMyRequestsList() {
             {awaitingLabs.map((lab) => (
               <Card key={lab.id}>
                 <CardHeader>
-                  <LabStatusBadge status={lab.status} surface="requests" />
+                  <Badge
+                    variant="outline"
+                    className={getLabStatusTint(lab.status, state.role, 'requests')}
+                  >
+                    {getLabStatusLabel(lab.status, state.role, 'requests')}
+                  </Badge>
                   <div>
                     <p className="font-medium">{lab.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Waiting for physician response
                     </p>
                   </div>
@@ -373,7 +388,7 @@ function ResolvedRequestRow({
   lab: LabResult
   isUnseen: boolean
 }) {
-  const { dispatch } = useAppState()
+  const { state, dispatch } = useAppState()
   const navigate = useNavigate()
   const rowRef = useRef<HTMLDivElement>(null)
   const now = Date.now()
@@ -412,7 +427,12 @@ function ResolvedRequestRow({
       <Card highlighted={isUnseen}>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-1.5">
-            <LabStatusBadge status={lab.status} surface="requests" />
+            <Badge
+              variant="outline"
+              className={getLabStatusTint(lab.status, state.role, 'requests')}
+            >
+              {getLabStatusLabel(lab.status, state.role, 'requests')}
+            </Badge>
             {isUnseen && (
               <Badge
                 variant="outline"
@@ -424,7 +444,7 @@ function ResolvedRequestRow({
           </div>
           <div className="min-w-0">
             <p className="font-medium">{lab.name}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
             </p>
             <p className="mt-1 text-xs font-medium">
@@ -475,7 +495,7 @@ function EmptyState({ title, description }: { title: string; description: string
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
       <p className="text-sm font-medium">{title}</p>
-      <p className="mt-1 max-w-sm text-xs text-muted-foreground">{description}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
     </div>
   )
 }

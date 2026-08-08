@@ -2,8 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Appointment } from '@/state/types'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
-import { StatusPill } from '@/components/schedule/StatusPill'
+import { Badge } from '@/components/ui/badge'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
+import {
+  getScheduleStatusLabel,
+  scheduleStatusTint,
+} from '@/lib/statusDerivation'
 import { useAppState } from '@/state/AppStateContext'
 
 interface AppointmentCardProps {
@@ -27,6 +31,8 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
     })
   }
 
+  const statusTint = scheduleStatusTint[displayStatus]
+
   return (
     <Card size="sm" interactive onClick={handleClick}>
       <CardHeader>
@@ -34,9 +40,13 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
           <p className="text-sm font-medium">{appointment.patientName}</p>
           <p className="text-xs text-muted-foreground">{appointment.time}</p>
         </div>
-        <CardAction>
-          <StatusPill status={displayStatus} />
-        </CardAction>
+        {statusTint && (
+          <CardAction>
+            <Badge variant="outline" className={statusTint}>
+              {getScheduleStatusLabel(displayStatus)}
+            </Badge>
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent>
         <p className="text-xs text-muted-foreground">MRN placeholder</p>

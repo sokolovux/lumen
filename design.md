@@ -2,13 +2,57 @@
 
 ## Components
 
-### Utilities on primitives
+### Layout and utilities (default)
 
-Minimize Tailwind utilities on existing shared components at the call site. Prefer changing the primitive in `src/components/ui/` when a style should apply everywhere.
+**Prefer Tailwind utilities** when building layout and UI. Compose pages and features with native elements, existing primitives, and utility classes first.
 
-Layout/spacing around a component is fine. Do not override type, color, weight, radius, or size tokens on `Button`, `Badge`, `Card`, etc. unless the design system already documents that override (e.g. badge status tints, `notificationBadgeClassName`).
+Do **not** invent a new component by default. If you believe a new component is necessary, **ask first** and wait for permission before creating it.
 
-If a call-site override seems necessary, ask first, then proceed only after confirmation.
+### Existing components (naked by default)
+
+Once a component exists (shared UI under `src/components/ui/`, or any product component), call sites must use it **naked** — no Tailwind utilities on that component unless you **ask and get permission**.
+
+Documented exceptions (props, helpers, or semantic tints already in this file) do not require re-asking — e.g. Badge `notificationBadgeClassName` / status tints, Card `interactive` / `highlighted` / `size`, Button `variant` / `size`.
+
+### Repeated styles → `@apply` in the component
+
+If the same utilities keep appearing on a component (or would, by judgment), do **not** keep repeating them at call sites. Apply them **systematically inside the component** with `@apply` (typically co-located CSS or `@layer components` targeting the component’s root / `data-slot`), then keep call sites naked.
+
+```tsx
+// ✅ Layout with utilities; existing primitives naked
+<div className="flex flex-wrap gap-2">
+  <Button variant="secondary">View</Button>
+  <Button variant="outline">Release permanently</Button>
+</div>
+
+// ✅ Inner layout wrappers are fine — they are not the component
+<Card>
+  <CardContent>
+    <div className="flex flex-wrap gap-2">…</div>
+  </CardContent>
+</Card>
+
+// ❌ New component without asking
+function ActionRow({ children }) { … }
+
+// ❌ Utilities on an existing component without permission
+<Button className="h-8 px-4 bg-primary">…</Button>
+<Card className="gap-2 py-0">…</Card>
+```
+
+### Tabs
+
+Use **line** tabs only (`TabsList` defaults to `variant="line"`). Do not use the muted pill `default` variant in the product.
+
+```tsx
+// ✅
+<TabsList>
+  <TabsTrigger value="visits">Visits</TabsTrigger>
+</TabsList>
+
+// ❌
+<TabsList variant="default">…</TabsList>
+```
 
 ### Cards
 

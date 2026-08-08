@@ -42,6 +42,32 @@ export function getLabStatusLabel(
   }
 }
 
+/** Outline Badge tints for lab statuses. Physician labs surface treats denied as neutral. */
+export function getLabStatusTint(
+  status: LabStatus,
+  role?: 'pa' | 'physician',
+  surface: 'labs' | 'requests' = 'labs',
+): string {
+  const physicianChartLocked =
+    surface === 'labs' && role === 'physician'
+  switch (status) {
+    case 'requested':
+    case 'granted_unstarted':
+    case 'active':
+      return 'border-blue-200 bg-blue-50 text-blue-700'
+    case 'expired':
+      return 'text-muted-foreground'
+    case 'denied':
+      return physicianChartLocked
+        ? ''
+        : 'border-destructive/30 bg-destructive/10 text-destructive'
+    case 'released':
+      return 'border-green-200 bg-green-50 text-green-700'
+    default:
+      return ''
+  }
+}
+
 export function getScheduleStatusLabel(status: ScheduleStatus): string {
   switch (status) {
     case 'scheduled': return 'Scheduled'
@@ -50,6 +76,14 @@ export function getScheduleStatusLabel(status: ScheduleStatus): string {
     case 'finished': return 'Finished'
     case 'late': return 'Late'
   }
+}
+
+/** Outline Badge tints for schedule statuses. `scheduled` has no pill. */
+export const scheduleStatusTint: Partial<Record<ScheduleStatus, string>> = {
+  with_pa: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  with_physician: 'border-blue-200 bg-blue-50 text-blue-700',
+  finished: 'border-green-200 bg-green-50 text-green-700',
+  late: 'border-amber-200 bg-amber-50 text-amber-700',
 }
 
 export function canPaViewLab(lab: LabResult): boolean {
