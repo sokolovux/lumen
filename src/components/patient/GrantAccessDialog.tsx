@@ -64,7 +64,9 @@ export function GrantAccessDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={() => onGrant(duration)}>Grant access</Button>
+          <Button variant="success" onClick={() => onGrant(duration)}>
+            Grant access
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

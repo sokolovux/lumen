@@ -2,6 +2,8 @@ import type { Appointment, LabResult, Medication, Patient } from '@/state/types'
 import { formatTimestamp } from '@/lib/fixedClock'
 
 export const JORDAN_REYES_ID = 'jordan-reyes'
+/** Display name for the demo PA in physician-facing request copy */
+export const DEMO_PA_NAME = 'Sam Whitfield'
 
 export const PATIENTS: Patient[] = [
   { id: JORDAN_REYES_ID, name: 'Jordan Reyes', mrn: 'MRN-48291', dob: '03/14/1988', isInteractive: true },

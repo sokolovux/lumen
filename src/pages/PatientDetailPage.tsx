@@ -43,7 +43,7 @@ export function PatientDetailPage() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="border-b px-6 py-4">
           <Breadcrumb origin={state.breadcrumbOrigin} patientName={patient.name} />
-          <h1 className="mt-2 text-xl font-semibold">{patient.name}</h1>
+          <h4 className="mt-2">{patient.name}</h4>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           <PatientDetailTabs

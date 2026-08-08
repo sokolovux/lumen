@@ -2,7 +2,8 @@ import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { CheckIcon, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -104,8 +105,8 @@ const LAB_STATUS_STYLES: { status: LabStatus; className: string }[] = [
   { status: 'pending', className: '' },
   { status: 'requested', className: 'border-blue-200 bg-blue-50 text-blue-700' },
   { status: 'granted_unstarted', className: 'border-blue-200 bg-blue-50 text-blue-700' },
-  { status: 'active', className: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
-  { status: 'expired', className: 'border-amber-200 bg-amber-50 text-amber-700' },
+  { status: 'active', className: 'border-blue-200 bg-blue-50 text-blue-700' },
+  { status: 'expired', className: 'text-muted-foreground' },
   { status: 'denied', className: 'border-destructive/30 bg-destructive/10 text-destructive' },
   { status: 'released', className: 'border-green-200 bg-green-50 text-green-700' },
 ]
@@ -127,7 +128,7 @@ function BadgeRow({
 }) {
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium">{label}</h3>
+      <h6>{label}</h6>
       <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-4">
         {children}
       </div>
@@ -163,7 +164,7 @@ function Section({
   return (
     <section id={id} className="scroll-mt-6 space-y-4">
       <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <h5>{title}</h5>
         {description && (
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         )}
@@ -203,7 +204,7 @@ export function DesignSystemPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b px-6 py-4">
-        <h1 className="text-xl font-semibold">Design system</h1>
+        <h4>Design system</h4>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -233,11 +234,11 @@ export function DesignSystemPage() {
           <Section
             id="foundations"
             title="Foundations"
-            description="Olive-tinted light theme, Lato type, and shared radius tokens."
+            description="Olive-tinted light theme, Geist type, and shared radius tokens."
           >
             <div className="space-y-6">
               <div>
-                <h3 className="mb-2 text-sm font-medium">Color</h3>
+                <h6 className="mb-2">Color</h6>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                   {COLOR_TOKENS.map((token) => (
                     <Swatch key={token.name} {...token} />
@@ -246,7 +247,7 @@ export function DesignSystemPage() {
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-medium">Chart</h3>
+                <h6 className="mb-2">Chart</h6>
                 <div className="flex gap-2">
                   {CHART_TOKENS.map((token, i) => (
                     <div
@@ -259,49 +260,42 @@ export function DesignSystemPage() {
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-medium">Typography</h3>
+                <h6 className="mb-2">Typography</h6>
                 <Card>
-                  <CardContent className="space-y-4 p-4 font-sans">
-                    <div className="space-y-3">
-                      <h1 className="text-4xl font-semibold tracking-tight">
-                        Heading 1
-                      </h1>
-                      <h2 className="text-3xl font-semibold tracking-tight">
-                        Heading 2
-                      </h2>
-                      <h3 className="text-2xl font-semibold tracking-tight">
-                        Heading 3
-                      </h3>
-                      <h4 className="text-xl font-semibold">
-                        Heading 4
-                      </h4>
-                      <h5 className="text-lg font-semibold">
-                        Heading 5
-                      </h5>
-                      <h6 className="text-base font-semibold">
-                        Heading 6
-                      </h6>
-                    </div>
-                    <Separator />
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Body emphasis (text-sm medium)</p>
-                      <p className="text-sm">
-                        Body copy uses Lato. Prefer sentence case for all UI labels.
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Muted helper text (text-xs muted-foreground)
-                      </p>
-                      <p className="text-sm">
-                        Inline code uses{' '}
-                        <Kbd>⌘</Kbd> <Kbd>B</Kbd> style affordances where needed.
-                      </p>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <h1>Heading 1</h1>
+                        <h2>Heading 2</h2>
+                        <h3>Heading 3</h3>
+                        <h4>Heading 4</h4>
+                        <h5>Heading 5</h5>
+                        <h6>Heading 6</h6>
+                      </div>
+                      <Separator />
+                      <div className="space-y-2">
+                        <p>
+                          Unstyled paragraph — inherits body text-base (no size utilities).
+                        </p>
+                        <p className="text-sm font-medium">Body emphasis (text-sm medium)</p>
+                        <p className="text-sm">
+                          Body copy uses Geist. Prefer sentence case for all UI labels.
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          text-muted-foreground — secondary copy
+                        </p>
+                        <p className="text-sm">
+                          Inline code uses{' '}
+                          <Kbd>⌘</Kbd> <Kbd>B</Kbd> style affordances where needed.
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-medium">Radius</h3>
+                <h6 className="mb-2">Radius</h6>
                 <div className="flex flex-wrap items-end gap-3">
                   {[
                     ['rounded-sm', 'sm'],
@@ -329,48 +323,133 @@ export function DesignSystemPage() {
           >
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader>
                   <CardTitle>Sentence case</CardTitle>
                   <CardDescription>
                     All UI copy uses sentence case, except medications, test names,
                     lab results, and patient names.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <p className="text-emerald-700">✓ Grant temporary access</p>
-                  <p className="text-emerald-700">✓ Access requests</p>
-                  <p className="text-destructive">✗ Grant Temporary Access</p>
-                  <p className="text-muted-foreground">
-                    Keep: Lisinopril, HbA1c, Chest X-Ray, Jordan Reyes
-                  </p>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Grant temporary access</p>
+                    <p className="text-emerald-700">✓ Access requests</p>
+                    <p className="text-destructive">✗ Grant Temporary Access</p>
+                    <p className="text-muted-foreground">
+                      Keep: Lisinopril, HbA1c, Chest X-Ray, Jordan Reyes
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader>
                   <CardTitle>Schedule columns</CardTitle>
                   <CardDescription>
                     Today view uses exactly four stage columns. No checked-in status.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <p><span className="font-medium">Scheduled</span> — not started</p>
-                  <p><span className="font-medium">With PA</span> — vitals + first note</p>
-                  <p><span className="font-medium">With physician</span> — transferred</p>
-                  <p><span className="font-medium">Finished</span> — finish visit clicked</p>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Scheduled</span> — not started</p>
+                    <p><span className="font-medium">With PA</span> — vitals + first note</p>
+                    <p><span className="font-medium">With physician</span> — transferred</p>
+                    <p><span className="font-medium">Finished</span> — finish visit clicked</p>
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader>
+                  <CardTitle>Default text size</CardTitle>
+                  <CardDescription>
+                    Body and content copy inherit base (unstyled p). Size utilities
+                    only when intentional.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Unstyled p / inherit text-base</p>
+                    <p className="text-emerald-700">✓ Naked h1–h6 (styles in @layer base)</p>
+                    <p className="text-emerald-700">✓ Button text-base · Badge text-sm</p>
+                    <p className="text-destructive">✗ Heading with text-* / font-* utilities</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
                   <CardTitle>Button labels</CardTitle>
                   <CardDescription>
                     No ellipses in buttons. The dialog covers the incomplete step.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <p className="text-emerald-700">✓ Grant</p>
-                  <p className="text-emerald-700">✓ Deny</p>
-                  <p className="text-destructive">✗ Grant…</p>
-                  <p className="text-destructive">✗ Deny...</p>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Grant</p>
+                    <p className="text-emerald-700">✓ Deny</p>
+                    <p className="text-emerald-700">✓ Release permanently</p>
+                    <p className="text-destructive">✗ Grant…</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Button groups</CardTitle>
+                  <CardDescription>
+                    Primary → secondary left to right. Reverse when the group is
+                    right-aligned.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Left: Grant → Deny → Release permanently</p>
+                    <p className="text-emerald-700">✓ Right footer: Cancel → Grant</p>
+                    <p className="text-destructive">✗ Left: Release permanently → View (View primary)</p>
+                    <p className="text-destructive">✗ Right footer: Grant → Cancel</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Theme</CardTitle>
+                  <CardDescription>
+                    Light by default and light-only. OS dark mode must not flip the app.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Forced light ThemeProvider</p>
+                    <p className="text-emerald-700">✓ Toasts use resolved light theme</p>
+                    <p className="text-destructive">✗ theme=&quot;system&quot; as app default</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Badges</CardTitle>
+                  <CardDescription>
+                    Outline only. Color meaning comes from className tints.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ variant=&quot;outline&quot;</p>
+                    <p className="text-emerald-700">✓ Blue tint for New / unread</p>
+                    <p className="text-destructive">✗ Filled default / destructive badges</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Cards</CardTitle>
+                  <CardDescription>
+                    Naked Card slots. Layout utilities go on inner elements only.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-emerald-700">✓ Equal padding from the primitive</p>
+                    <p className="text-emerald-700">✓ interactive · highlighted · size props</p>
+                    <p className="text-destructive">✗ className on Card / Header / Content</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -381,28 +460,37 @@ export function DesignSystemPage() {
           <Section
             id="badges"
             title="Badges"
-            description="Every badge style currently used in the product UI."
+            description="Outline only. Use className tints for status and notification color."
           >
             <div className="space-y-6">
-              <BadgeRow label="Base variants">
-                <Badge>Default</Badge>
-                <Badge variant="secondary">Secondary</Badge>
+              <BadgeRow label="Product rule — outline only">
                 <Badge variant="outline">Outline</Badge>
-                <Badge variant="destructive">Destructive</Badge>
-                <Badge variant="ghost">Ghost</Badge>
-                <Badge variant="link">Link</Badge>
+                <Badge variant="outline" className={notificationBadgeClassName}>
+                  Notification tint
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="border-destructive/30 bg-destructive/10 text-destructive"
+                >
+                  Restricted tint
+                </Badge>
               </BadgeRow>
 
               <BadgeRow label="Unread / new indicators">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">Sidebar count</span>
-                  <Badge variant="destructive" className="h-5 min-w-5 justify-center px-1.5 text-xs">
+                  <Badge
+                    variant="outline"
+                    className={cn(countBadgeClassName, notificationBadgeClassName)}
+                  >
                     3
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">Queue / requests</span>
-                  <Badge variant="destructive" className="h-5 text-xs">New</Badge>
+                  <Badge variant="outline" className={notificationBadgeClassName}>
+                    New
+                  </Badge>
                 </div>
               </BadgeRow>
 
@@ -461,35 +549,61 @@ export function DesignSystemPage() {
 
           <Separator />
 
-          <Section id="buttons" title="Buttons" description="Variants and sizes from shadcn Button.">
+          <Section
+            id="buttons"
+            title="Buttons"
+            description="Variants, sizes, and group order: primary → secondary left to right; reverse when right-aligned."
+          >
             <Card>
-              <CardContent className="space-y-4 p-4">
-                <div className="flex flex-wrap gap-2">
-                  <Button>Default</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="outline">Outline</Button>
-                  <Button variant="ghost">Ghost</Button>
-                  <Button variant="destructive">Destructive</Button>
-                  <Button variant="link">Link</Button>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button size="xs">Extra small</Button>
-                  <Button size="sm">Small</Button>
-                  <Button size="default">Default</Button>
-                  <Button size="lg">Large</Button>
-                  <Button size="icon" aria-label="Add">
-                    <PlusIcon />
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button disabled>Disabled</Button>
-                  <Button
-                    onClick={() => toast.success('Toast example', {
-                      description: 'Sonner notification from the design system page.',
-                    })}
-                  >
-                    Show toast
-                  </Button>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    <Button>Default</Button>
+                    <Button variant="secondary">Secondary</Button>
+                    <Button variant="outline">Outline</Button>
+                    <Button variant="ghost">Ghost</Button>
+                    <Button variant="success">Success</Button>
+                    <Button variant="destructive">Destructive</Button>
+                    <Button variant="link">Link</Button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="xs">Extra small</Button>
+                    <Button size="sm">Small</Button>
+                    <Button size="default">Default</Button>
+                    <Button size="lg">Large</Button>
+                    <Button size="icon" aria-label="Add">
+                      <PlusIcon />
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button disabled>Disabled</Button>
+                    <Button
+                      onClick={() => toast.success('Toast example', {
+                        description: 'Sonner notification from the design system page.',
+                      })}
+                    >
+                      Show toast
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Left-aligned group — primary first
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="success">Grant</Button>
+                      <Button size="sm" variant="destructive">Deny</Button>
+                      <Button size="sm" variant="outline">Release permanently</Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Right-aligned group — primary on the right
+                    </p>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button size="sm" variant="outline">Cancel</Button>
+                      <Button size="sm" variant="success">Grant access</Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -499,52 +613,54 @@ export function DesignSystemPage() {
 
           <Section id="forms" title="Forms" description="Inputs and controls used across charts and dialogs.">
             <Card>
-              <CardContent className="grid gap-6 p-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="ds-name">Patient name</Label>
-                  <Input id="ds-name" placeholder="Jordan Reyes" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Duration</Label>
-                  <Select defaultValue="10m">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10s">10 seconds (demo)</SelectItem>
-                      <SelectItem value="10m">10 minutes</SelectItem>
-                      <SelectItem value="1h">1 hour</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="ds-note">Clinical note</Label>
-                  <Textarea id="ds-note" placeholder="Enter note text…" rows={3} />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="ds-check"
-                    checked={checked}
-                    onCheckedChange={(v) => setChecked(v === true)}
-                  />
-                  <Label htmlFor="ds-check">Confirm access</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="ds-switch"
-                    checked={enabled}
-                    onCheckedChange={setEnabled}
-                  />
-                  <Label htmlFor="ds-switch">Enable reminder</Label>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Slider ({sliderValue[0]}%)</Label>
-                  <Slider
-                    value={sliderValue}
-                    onValueChange={setSliderValue}
-                    max={100}
-                    step={1}
-                  />
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ds-name">Patient name</Label>
+                    <Input id="ds-name" placeholder="Jordan Reyes" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Duration</Label>
+                    <Select defaultValue="10m">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10s">10 seconds (demo)</SelectItem>
+                        <SelectItem value="10m">10 minutes</SelectItem>
+                        <SelectItem value="1h">1 hour</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="ds-note">Clinical note</Label>
+                    <Textarea id="ds-note" placeholder="Enter note text…" rows={3} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="ds-check"
+                      checked={checked}
+                      onCheckedChange={(v) => setChecked(v === true)}
+                    />
+                    <Label htmlFor="ds-check">Confirm access</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="ds-switch"
+                      checked={enabled}
+                      onCheckedChange={setEnabled}
+                    />
+                    <Label htmlFor="ds-switch">Enable reminder</Label>
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Slider ({sliderValue[0]}%)</Label>
+                    <Slider
+                      value={sliderValue}
+                      onValueChange={setSliderValue}
+                      max={100}
+                      step={1}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -563,22 +679,24 @@ export function DesignSystemPage() {
               </Alert>
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Progress</CardTitle>
+                  <CardHeader>
+                    <CardTitle>Progress</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Progress value={62} />
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Loading</CardTitle>
+                  <CardHeader>
+                    <CardTitle>Loading</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex items-center gap-4">
-                    <Spinner />
-                    <div className="flex flex-1 flex-col gap-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <Spinner />
+                      <div className="flex flex-1 flex-col gap-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -594,17 +712,37 @@ export function DesignSystemPage() {
                 <CardHeader>
                   <CardTitle>Card title</CardTitle>
                   <CardDescription>
-                    Cards group related chart content and queue items.
+                    Naked by default — equal padding, no call-site utilities on Card slots.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Body content sits here with muted supporting copy.
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Body content sits here with muted supporting copy.
+                  </p>
                 </CardContent>
-                <CardFooter className="gap-2">
+                <CardFooter>
                   <Button size="sm">Primary action</Button>
                   <Button size="sm" variant="outline">Cancel</Button>
                 </CardFooter>
               </Card>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card size="sm" interactive>
+                  <CardHeader>
+                    <CardTitle>Interactive · sm</CardTitle>
+                    <CardDescription>
+                      size=&quot;sm&quot; and interactive for clickable cards.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card highlighted>
+                  <CardHeader>
+                    <CardTitle>Highlighted</CardTitle>
+                    <CardDescription>
+                      highlighted for unseen / emphasis rings.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
 
               <Tabs defaultValue="visits">
                 <TabsList>
@@ -678,7 +816,7 @@ export function DesignSystemPage() {
                   </DialogHeader>
                   <DialogFooter>
                     <Button variant="outline">Cancel</Button>
-                    <Button>Grant access</Button>
+                    <Button variant="success">Grant access</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -774,8 +912,8 @@ export function DesignSystemPage() {
           >
             <div className="flex flex-wrap gap-2">
               {UI_COMPONENTS.map((name) => (
-                <Badge key={name} variant="outline" className="font-mono text-xs font-normal">
-                  {name}
+                <Badge key={name} variant="outline">
+                  <span className="font-mono">{name}</span>
                 </Badge>
               ))}
             </div>

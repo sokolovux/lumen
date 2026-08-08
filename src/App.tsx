@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/theme-provider'
 import { AppStateProvider } from '@/state/AppStateContext'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { DemoControlsBar } from '@/components/layout/DemoControlsBar'
@@ -18,6 +19,7 @@ function AppLayout() {
         <Sidebar />
         <main className="flex-1 overflow-hidden bg-background">
           <Routes>
+            <Route path="/" element={<Navigate to="/schedule" replace />} />
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/patients" element={<PatientsPage />} />
             <Route path="/patients/:patientId" element={<PatientDetailPage />} />
@@ -35,10 +37,12 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <AppStateProvider>
-      <BrowserRouter>
-        <AppLayout />
-      </BrowserRouter>
-    </AppStateProvider>
+    <ThemeProvider>
+      <AppStateProvider>
+        <BrowserRouter>
+          <AppLayout />
+        </BrowserRouter>
+      </AppStateProvider>
+    </ThemeProvider>
   )
 }

@@ -13,7 +13,6 @@ interface ReleasePermanentlyDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   labName: string
-  notifiesPa?: boolean
   onConfirm: () => void
 }
 
@@ -21,25 +20,20 @@ export function ReleasePermanentlyDialog({
   open,
   onOpenChange,
   labName,
-  notifiesPa = false,
   onConfirm,
 }: ReleasePermanentlyDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Release permanently?</AlertDialogTitle>
+          <AlertDialogTitle>Release this result permanently?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently unlock <strong>{labName}</strong> for the PA.
-            This action cannot be undone.
-            {notifiesPa && ' The PA will be notified.'}
+            Release <strong>{labName}</strong> permanently? This can&apos;t be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onConfirm}>
-            Release permanently
-          </AlertDialogAction>
+          <AlertDialogAction onClick={onConfirm}>Confirm</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

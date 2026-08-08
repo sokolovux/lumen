@@ -31,19 +31,21 @@ export function PatientRoster() {
         return (
           <Card
             key={patient.id}
-            className="cursor-pointer gap-2 py-0 transition-shadow hover:shadow-md"
+            interactive
             onClick={() => handlePatientClick(patient.id, patient.isInteractive)}
           >
-            <CardHeader className="flex flex-row items-center gap-3 px-4 pt-4 pb-0">
-              <Avatar>
-                <AvatarFallback>{initials}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium">{patient.name}</p>
-                <p className="text-xs text-muted-foreground">{patient.mrn}</p>
+            <CardHeader>
+              <div className="flex flex-row items-center gap-3">
+                <Avatar>
+                  <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{patient.name}</p>
+                  <p className="text-xs text-muted-foreground">{patient.mrn}</p>
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="px-4 pt-0 pb-4">
+            <CardContent>
               <Skeleton className="h-3 w-24" />
             </CardContent>
           </Card>

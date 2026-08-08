@@ -257,6 +257,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
                 everRequested: true,
                 requestId,
                 denialReason: undefined,
+                denialDismissed: undefined,
               }
             : lab,
         ),
@@ -285,7 +286,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Grant lab access', `Granted ${action.duration} access to ${action.labId}`),
+          logAudit(
+            state,
+            'physician',
+            'Granted access',
+            `Granted ${action.duration} access`,
+          ),
         ],
       }
     }
@@ -325,37 +331,79 @@ function appReducer(state: AppState, action: AppAction): AppState {
             ? {
                 ...lab,
                 status: 'denied' as const,
+                everDenied: true,
                 denialReason: action.feedback,
+                denialDismissed: false,
               }
             : lab,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Deny lab access', `Access denied: ${action.feedback}`),
+          logAudit(
+            state,
+            'physician',
+            'Denied access request',
+            action.feedback,
+          ),
         ],
       }
     }
 
     case 'RELEASE_LAB': {
       const lab = state.labs.find((l) => l.id === action.labId)
-      const notifyPa = lab?.everRequested === true
+      const isResponseToRequest = lab?.status === 'requested'
       return {
         ...state,
-        viewedRequests: notifyPa
+        viewedRequests: isResponseToRequest
           ? withViewedRequest(state, action.labId)
           : state.viewedRequests,
-        paUnseenResolution: notifyPa
+        paUnseenResolution: isResponseToRequest
           ? withPaUnseenResolution(state, action.labId)
           : state.paUnseenResolution,
-        labs: state.labs.map((lab) =>
-          lab.id === action.labId
-            ? { ...lab, status: 'released' as const, grantExpiresAt: undefined }
-            : lab,
+        labs: state.labs.map((item) =>
+          item.id === action.labId
+            ? {
+                ...item,
+                status: 'released' as const,
+                grantExpiresAt: undefined,
+                justReleased: true,
+                denialReason: undefined,
+              }
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Release lab', `Permanently released ${action.labId}`),
+          logAudit(
+            state,
+            'physician',
+            'Released result',
+            isResponseToRequest
+              ? 'Released result in response to request'
+              : 'Released result (direct release)',
+          ),
         ],
+      }
+    }
+
+    case 'MARK_LAB_RESULT_VIEWED': {
+      return {
+        ...state,
+        labs: state.labs.map((lab) =>
+          lab.id === action.labId && lab.justReleased
+            ? { ...lab, justReleased: false }
+            : lab,
+        ),
+      }
+    }
+
+    case 'DISMISS_LAB_DENIAL': {
+      return {
+        ...state,
+        labs: state.labs.map((lab) =>
+          lab.id === action.labId && lab.status === 'denied'
+            ? { ...lab, denialDismissed: true }
+            : lab,
+        ),
       }
     }
 

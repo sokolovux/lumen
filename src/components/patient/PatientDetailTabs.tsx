@@ -83,7 +83,7 @@ export function PatientDetailTabs({
 
       <TabsContent value="problems" className="mt-4 space-y-4">
         <div>
-          <h3 className="mb-2 text-sm font-medium">Problem list</h3>
+          <h6 className="mb-2">Problem list</h6>
           <div className="space-y-2">
             {['Hypertension', 'Type 2 Diabetes'].map((problem) => (
               <div key={problem} className="rounded-md border p-2">
@@ -95,7 +95,7 @@ export function PatientDetailTabs({
         </div>
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-medium">Medications</h3>
+            <h6>Medications</h6>
             <AddMedicationDialog />
           </div>
           <div className="space-y-2">

@@ -46,12 +46,18 @@ export interface LabResult {
   status: LabStatus
   /** True the moment PA requests access; never reset */
   everRequested: boolean
+  /** True the first time a physician denies; never reset (drives "Request access again") */
+  everDenied?: boolean
   requestId?: string
   grantDuration?: GrantDuration
   /** Set when PA confirms/starts the countdown, not at grant time */
   grantExpiresAt?: number
   grantConfirmedAt?: number
   denialReason?: string
+  /** PA: set on permanent release; cleared the first time PA opens this result */
+  justReleased?: boolean
+  /** PA display-only: denial block dismissed on Labs tab; audit / My Requests unchanged */
+  denialDismissed?: boolean
 }
 
 export interface AuditEvent {
@@ -148,6 +154,8 @@ export type AppAction =
   | { type: 'CONFIRM_LAB_GRANT'; labId: string }
   | { type: 'DENY_LAB_ACCESS'; labId: string; feedback: string }
   | { type: 'RELEASE_LAB'; labId: string }
+  | { type: 'MARK_LAB_RESULT_VIEWED'; labId: string }
+  | { type: 'DISMISS_LAB_DENIAL'; labId: string }
   | { type: 'EXPIRE_LAB'; labId: string }
   | { type: 'DISMISS_EXPIRY_MODAL' }
   | { type: 'TICK_LAB_TIMERS' }

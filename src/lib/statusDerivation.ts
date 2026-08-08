@@ -23,14 +23,21 @@ export function jordanDisplayStatus(
   return base
 }
 
-export function getLabStatusLabel(status: LabStatus): string {
+/** Labs chart: physician sees pending/denied as neutral "Unreleased". Requests queue uses true outcome labels. */
+export function getLabStatusLabel(
+  status: LabStatus,
+  role?: 'pa' | 'physician',
+  surface: 'labs' | 'requests' = 'labs',
+): string {
+  const physicianChartLocked =
+    surface === 'labs' && role === 'physician'
   switch (status) {
-    case 'pending': return 'Locked'
+    case 'pending': return physicianChartLocked ? 'Unreleased' : 'Locked'
     case 'requested': return 'Access requested'
     case 'granted_unstarted': return 'Grant pending confirmation'
     case 'active': return 'Temporary access'
     case 'expired': return 'Access expired'
-    case 'denied': return 'Access denied'
+    case 'denied': return physicianChartLocked ? 'Unreleased' : 'Access denied'
     case 'released': return 'Released'
   }
 }
@@ -88,6 +95,16 @@ export function formatCountdown(expiresAt: number, now: number): string {
     return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
   }
   return `${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
+/** Always H:MM:SS for live “Available for …” tags */
+export function formatCountdownHms(expiresAt: number, now: number): string {
+  const remaining = Math.max(0, expiresAt - now)
+  const totalSeconds = Math.floor(remaining / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 export function formatGrantDurationLabel(duration: string): string {

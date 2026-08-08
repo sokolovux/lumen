@@ -21,7 +21,7 @@ export function ConfidentialNoteSection({ readOnly = false }: ConfidentialNoteSe
 
   return (
     <section>
-      <h3 className="mb-1 text-sm font-medium">Confidential note</h3>
+      <h6 className="mb-1">Confidential note</h6>
       <p className="mb-2 text-xs text-muted-foreground">
         Physician-only. Hidden from PA — no request path.
       </p>

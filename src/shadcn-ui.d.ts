@@ -14,11 +14,14 @@ declare module '@/components/ui/card' {
   export const CardFooter: FC<UIProps>
   export const CardTitle: FC<UIProps>
   export const CardDescription: FC<UIProps>
+  export const CardAction: FC<UIProps>
 }
 
 declare module '@/components/ui/badge' {
   export const Badge: FC<UIProps>
   export const badgeVariants: (...args: unknown[]) => string
+  export const notificationBadgeClassName: string
+  export const countBadgeClassName: string
 }
 
 declare module '@/components/ui/dialog' {

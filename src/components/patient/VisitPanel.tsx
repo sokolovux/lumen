@@ -73,7 +73,7 @@ export function VisitPanel({
       >
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div>
-            <h2 className="text-sm font-semibold">{displayLabel}</h2>
+            <h6>{displayLabel}</h6>
             <p className="text-xs text-muted-foreground">
               {displayPast ? 'Past visit' : "Today's visit"}
             </p>

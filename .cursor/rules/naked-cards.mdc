@@ -1,0 +1,40 @@
+---
+description: Use naked Card primitives; styles come from card.css
+alwaysApply: true
+---
+
+# Naked cards
+
+Card chrome lives in `src/components/ui/card.css` (`@apply` on `data-slot`). Use **naked** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, and `CardFooter` — no Tailwind `className` utilities on them by default.
+
+Equal padding on all sides comes from the primitive (`p-(--card-spacing)`). Do not re-add `p-*` / `px-*` / `py-*` / `gap-*` on Card sections at the call site.
+
+Put content layout (stacks, grids, button rows) on **inner** elements, not on Card slots.
+
+Allowed without asking:
+
+- Props: `size="sm" | "default"`, `interactive`, `highlighted`
+- Runtime state only when a documented Card prop cannot express it — ask first
+
+```tsx
+// ✅
+<Card>
+  <CardHeader>
+    <CardTitle>Access request</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="flex flex-wrap gap-2">…</div>
+  </CardContent>
+</Card>
+
+<Card interactive onClick={…}>…</Card>
+<Card size="sm" highlighted={isUnseen}>…</Card>
+
+// ❌
+<Card className="gap-2 py-0">
+  <CardHeader className="px-4 pt-4 pb-0">…</CardHeader>
+  <CardContent className="space-y-3 px-4 pb-4">…</CardContent>
+</Card>
+```
+
+See `design.md` → Components → Cards.

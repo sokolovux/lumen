@@ -1,0 +1,27 @@
+---
+description: Minimize utility overrides on existing UI components; ask first
+alwaysApply: true
+---
+
+# Minimize utilities on components
+
+Prefer the styles already defined on shared UI primitives (`Button`, `Badge`, `Card`, `Dialog`, etc.). Do **not** sprinkle Tailwind utilities on call sites to restyle them.
+
+For `Card` and its slots, follow **naked cards** (`.cursor/rules/naked-cards.mdc`) — no utilities unless the user explicitly allows an exception.
+
+- Fix or extend the **primitive** (`src/components/ui/…`) when a change should apply systematically
+- Layout/spacing around a component is fine; overriding its type, color, weight, radius, or size tokens at the call site is not
+- Semantic tints that the design system already documents (e.g. badge status colors, `notificationBadgeClassName`) are allowed
+
+If a call-site utility override seems necessary, **ask the user first**, then proceed only after they confirm.
+
+Examples:
+
+- ✅ Change Badge weight in `badge.jsx`
+- ✅ `<Badge variant="outline" className={notificationBadgeClassName}>New</Badge>`
+- ✅ `<Badge className={cn(countBadgeClassName, notificationBadgeClassName)}>3</Badge>`
+- ✅ `<Button variant={selected ? 'default' : 'ghost'} size="sm">` — use variants, not color utilities
+- ❌ `<Button className="h-8 px-4 bg-primary text-primary-foreground">` to fake a selected state
+- ❌ `<Badge className="h-5 text-xs px-1.5">` when the primitive / helpers already set size
+
+See `design.md` → Components → Utilities.

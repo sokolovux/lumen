@@ -1,0 +1,23 @@
+---
+description: Use naked h1–h6 tags; size/weight come from base styles
+alwaysApply: true
+---
+
+# Naked headings
+
+Heading styles live on the element in `@layer base` (`src/index.css`). Use **naked** `<h1>`–`<h6>` with no size, weight, or tracking utilities.
+
+Pick the level that matches the intended scale; do not restyle a heading with `text-*` / `font-*` / `tracking-*` at the call site.
+
+Only add utilities when the user explicitly asks for an exception (e.g. layout margin).
+
+```tsx
+// ✅
+<h1>Schedule</h1>
+<h4>Patients</h4>
+
+// ❌
+<h1 className="text-xl font-semibold tracking-tight">Schedule</h1>
+```
+
+See `design.md` → Typography → Headings.

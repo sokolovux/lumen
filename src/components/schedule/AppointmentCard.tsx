@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Appointment } from '@/state/types'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
 import { StatusPill } from '@/components/schedule/StatusPill'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import { useAppState } from '@/state/AppStateContext'
@@ -28,18 +28,17 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
   }
 
   return (
-    <Card
-      className="cursor-pointer gap-1 py-2 transition-shadow hover:shadow-md"
-      onClick={handleClick}
-    >
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 px-3 py-0">
+    <Card size="sm" interactive onClick={handleClick}>
+      <CardHeader>
         <div>
           <p className="text-sm font-medium">{appointment.patientName}</p>
           <p className="text-xs text-muted-foreground">{appointment.time}</p>
         </div>
-        <StatusPill status={displayStatus} />
+        <CardAction>
+          <StatusPill status={displayStatus} />
+        </CardAction>
       </CardHeader>
-      <CardContent className="px-3 py-0">
+      <CardContent>
         <p className="text-xs text-muted-foreground">MRN placeholder</p>
       </CardContent>
     </Card>

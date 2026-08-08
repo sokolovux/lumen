@@ -20,7 +20,8 @@ interface LabDocumentViewProps {
 export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewProps) {
   const { state } = useAppState()
   const lab = state.labs.find((l) => l.id === labId)
-  const isExpired = lab?.status === 'expired'
+  const isPa = state.role === 'pa'
+  const showExpiredOverlay = isPa && lab?.status === 'expired'
 
   if (!lab) return null
 
@@ -38,14 +39,14 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
           <div
             className={cn(
               'space-y-3 p-4 transition-[filter] duration-300',
-              isExpired && 'pointer-events-none select-none blur-sm',
+              showExpiredOverlay && 'pointer-events-none select-none blur-sm',
             )}
           >
             <Skeleton className="h-4 w-2/3" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
             <Skeleton className="h-4 w-4/5" />
-            <div className="pt-2 space-y-2">
+            <div className="space-y-2 pt-2">
               <Skeleton className="h-20 w-full" />
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-4 w-3/4" />
@@ -56,7 +57,7 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
             </p>
           </div>
 
-          {isExpired && (
+          {showExpiredOverlay && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 text-center">
               <p className="text-base font-semibold">Access has expired</p>
               <p className="max-w-sm text-sm text-muted-foreground">
@@ -68,7 +69,7 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
           )}
         </div>
 
-        {!isExpired && (
+        {!showExpiredOverlay && (
           <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close

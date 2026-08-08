@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
-import { Card, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardAction, CardHeader } from '@/components/ui/card'
+import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
 
@@ -44,16 +44,18 @@ export function CosignQueueList() {
   }
 
   return (
-    <Card
-      className="cursor-pointer transition-shadow hover:shadow-md"
-      onClick={handleItemClick}
-    >
-      <CardHeader className="flex flex-row items-start justify-between p-4">
+    <Card interactive onClick={handleItemClick}>
+      <CardHeader>
         <div>
           <div className="flex items-center gap-2">
             <p className="font-medium">Jordan Reyes</p>
             {showUnread && (
-              <Badge variant="destructive" className="h-5 text-xs">New</Badge>
+              <Badge
+                variant="outline"
+                className={notificationBadgeClassName}
+              >
+                New
+              </Badge>
             )}
           </div>
           <p className="text-xs text-muted-foreground">Today&apos;s visit · Aug 10, 2026</p>
@@ -63,9 +65,11 @@ export function CosignQueueList() {
               : 'Click to open visit panel and view status'}
           </p>
         </div>
-        <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
-          {getNoteStatusLabel(state.noteStatus)}
-        </Badge>
+        <CardAction>
+          <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
+            {getNoteStatusLabel(state.noteStatus)}
+          </Badge>
+        </CardAction>
       </CardHeader>
     </Card>
   )

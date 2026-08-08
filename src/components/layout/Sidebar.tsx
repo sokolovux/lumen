@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAppState } from '@/state/AppStateContext'
-import { Badge } from '@/components/ui/badge'
+import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 
@@ -49,7 +49,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-full w-56 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="px-4 py-5">
-        <h1 className="text-lg font-semibold tracking-tight">Concordare</h1>
+        <h5>Concordare</h5>
         <p className="text-xs text-muted-foreground">EHR prototype</p>
       </div>
       <Separator />
@@ -78,7 +78,10 @@ export function Sidebar() {
                 <Icon className="size-4 shrink-0" />
                 <span className="flex-1">{label}</span>
                 {count > 0 && (
-                  <Badge variant="destructive" className="h-5 min-w-5 justify-center px-1.5 text-xs">
+                  <Badge
+                    variant="outline"
+                    className={cn(countBadgeClassName, notificationBadgeClassName)}
+                  >
                     {count}
                   </Badge>
                 )}

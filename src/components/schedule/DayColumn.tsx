@@ -42,7 +42,7 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
   return (
     <div className="flex min-w-[200px] flex-1 flex-col rounded-lg border bg-muted/20">
       <div className="border-b px-3 py-2">
-        <h3 className="text-sm font-medium">{label}</h3>
+        <h6>{label}</h6>
         <p className="text-xs text-muted-foreground">{dayAppointments.length} appointments</p>
       </div>
       <div className="flex flex-col gap-2 p-2">

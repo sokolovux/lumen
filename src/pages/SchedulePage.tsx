@@ -27,7 +27,7 @@ export function SchedulePage() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b px-6 py-4">
-        <h1 className="text-xl font-semibold">Schedule</h1>
+        <h4>Schedule</h4>
         <ScheduleToggle />
       </div>
       <div className="flex-1 overflow-x-auto p-4">

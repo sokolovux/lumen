@@ -1,0 +1,17 @@
+---
+description: Button groups order primary→secondary; reverse when right-aligned
+alwaysApply: true
+---
+
+# Button group order
+
+When two or more buttons sit together in a group, order by priority:
+
+- **Default (left / start aligned):** primary → secondary → tertiary (left to right)
+- **Right-aligned groups** (`justify-end`, `DialogFooter`, `AlertDialogFooter`, `ml-auto`, etc.): reverse that order so primary sits on the right edge (secondary → primary)
+
+Destructive actions follow the same priority ladder (usually after the primary affirmative, before weaker tertiary actions—or last when they are the least emphasized).
+
+Segmented controls / mutually exclusive toggles (e.g. PA | Physician, Today | Full week) are not action-priority groups; keep a stable logical order.
+
+See `design.md` → UI copy → Button groups.

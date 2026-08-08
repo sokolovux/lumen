@@ -1,6 +1,5 @@
 import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 export function ScheduleToggle() {
   const { state, dispatch } = useAppState()
@@ -13,12 +12,8 @@ export function ScheduleToggle() {
       ]).map(({ key, label }) => (
         <Button
           key={key}
-          variant="ghost"
+          variant={state.scheduleView === key ? 'default' : 'ghost'}
           size="sm"
-          className={cn(
-            'h-8 px-4',
-            state.scheduleView === key && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
-          )}
           onClick={() => dispatch({ type: 'SET_SCHEDULE_VIEW', view: key })}
         >
           {label}

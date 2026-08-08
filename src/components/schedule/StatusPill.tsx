@@ -31,7 +31,7 @@ export function StatusPill({ status, className }: StatusPillProps) {
   return (
     <Badge
       variant="outline"
-      className={cn('font-normal', variantClass, className)}
+      className={cn(variantClass, className)}
     >
       {label}
     </Badge>

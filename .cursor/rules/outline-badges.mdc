@@ -1,0 +1,15 @@
+---
+description: Badges must use outline variant only
+alwaysApply: true
+---
+
+# Outline badges only
+
+All `Badge` usage must be `variant="outline"`. Never use filled badge variants.
+
+- Unread counts and **New** labels use outline + `notificationBadgeClassName` (blue tint) from `@/components/ui/badge`
+- Numeric counts use `countBadgeClassName` (optionally with `notificationBadgeClassName`) — do not re-declare size utilities
+- Status colors are outline + semantic className tints (blue / amber / green / destructive), not badge variants
+- Weight is `font-normal` on the Badge primitive — do not add `font-medium`
+
+See `design.md` → Badges.

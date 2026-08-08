@@ -69,7 +69,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
   return (
     <section>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-medium">Clinical note</h3>
+        <h6>Clinical note</h6>
         <Badge variant="outline" className={statusVariant}>
           {getNoteStatusLabel(state.noteStatus)}
         </Badge>

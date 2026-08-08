@@ -1,0 +1,20 @@
+---
+description: Default body text inherits base size; override only when intentional
+alwaysApply: true
+---
+
+# Text size — default to `<p>` / base
+
+Body copy, text inside content components, and common UI text **inherit the app base size** (`text-base` on `body`, same as an unstyled `<p>`).
+
+Do **not** set `text-sm` / `text-xs` / etc. on layout shells or content wrappers (Card, Dialog content, Sheet content, TabsContent, page sections) just to “match the UI.”
+
+Only add a size utility when deliberately denser or larger:
+
+- ✅ `<p>Supporting copy</p>` or no size class (inherits base)
+- ✅ `<p className="text-xs text-muted-foreground">Ordered Aug 5</p>` — intentional meta
+- ✅ Button uses `text-base` + `font-normal`; Badge uses `text-sm` + `font-normal` (on the primitives)
+- ✅ Input and other control chrome may define their own size tokens
+- ❌ `<Card className="text-sm">` or Dialog/Sheet roots forcing `text-sm` for all children
+
+See `design.md` → Typography → Default size.

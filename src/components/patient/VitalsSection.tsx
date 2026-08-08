@@ -12,7 +12,7 @@ export function VitalsSection({ readOnly = false }: VitalsSectionProps) {
 
   return (
     <section>
-      <h3 className="mb-2 text-sm font-medium">Vitals</h3>
+      <h6 className="mb-2">Vitals</h6>
       {state.vitalsSubmitted || readOnly ? (
         <div className="grid grid-cols-2 gap-2">
           {['BP', 'HR', 'Temp', 'SpO2'].map((label) => (

@@ -33,7 +33,7 @@ export function StartWindowDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Start access window?</AlertDialogTitle>
           <AlertDialogDescription>
-            Start your {phrase} access window for <strong>{labName}</strong> now?
+            Start your {phrase} window for <strong>{labName}</strong> now?
             The countdown begins only after you confirm.
           </AlertDialogDescription>
         </AlertDialogHeader>

@@ -1,20 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, Check, Lock, Unlock, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import type { GrantDuration, LabResult } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
 import {
   formatCountdown,
   formatGrantDurationLabel,
 } from '@/lib/statusDerivation'
+import { DEMO_PA_NAME } from '@/lib/scheduleData'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
 import { StartWindowDialog } from '@/components/patient/StartWindowDialog'
 import { LabDocumentView } from '@/components/patient/LabDocumentView'
+import { LabStatusBadge } from '@/components/patient/LabStatusBadge'
 
 interface LabResultCardProps {
   lab: LabResult
@@ -32,13 +35,20 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
   const isPa = state.role === 'pa'
   const isPhysician = state.role === 'physician'
   const now = Date.now()
-  const isReleased = lab.status === 'released'
+  const durationLabel = formatGrantDurationLabel(lab.grantDuration ?? '10m')
 
   useEffect(() => {
     if (highlighted && cardRef.current) {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [highlighted])
+
+  const openDocument = () => {
+    if (isPa && lab.status === 'released' && lab.justReleased) {
+      dispatch({ type: 'MARK_LAB_RESULT_VIEWED', labId: lab.id })
+    }
+    setDocumentOpen(true)
+  }
 
   const handleRequest = () => {
     dispatch({ type: 'REQUEST_LAB_ACCESS', labId: lab.id })
@@ -74,91 +84,69 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
   }
 
   const handleRelease = () => {
+    const asResponse = lab.status === 'requested'
     dispatch({ type: 'RELEASE_LAB', labId: lab.id })
     setReleaseOpen(false)
     toast.success(
-      lab.everRequested
+      asResponse
         ? 'Result permanently released — PA notified'
         : 'Result permanently released',
     )
   }
 
-  const durationLabel = formatGrantDurationLabel(lab.grantDuration ?? '10m')
+  const justReleased = isPa && lab.status === 'released' && lab.justReleased
 
   return (
     <>
-      <div
-        ref={cardRef}
-        id={`lab-${lab.id}`}
-        className={cn(highlighted && 'rounded-lg ring-2 ring-primary ring-offset-2')}
-      >
-        <Card className="gap-2 py-0">
-          <CardHeader className="space-y-0 px-4 pt-4 pb-0">
-            <p className="text-sm font-medium">{lab.name}</p>
-            <p className="text-xs text-muted-foreground capitalize">
-              {lab.type} · Ordered {lab.orderDate}
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-3 px-4 pt-0 pb-4">
-            {isReleased ? (
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Result value</p>
-                <Skeleton className="h-5 w-32" />
-              </div>
-            ) : (
-              <StatusLine lab={lab} now={now} />
-            )}
-
-            <div className="flex flex-wrap gap-2">
-              {isPa && lab.status === 'pending' && (
-                <Button size="sm" variant="outline" onClick={handleRequest}>
-                  Request access
-                </Button>
-              )}
-              {isPa && lab.status === 'requested' && (
-                <Button size="sm" variant="outline" disabled>
-                  Waiting on Dr. Osei
-                </Button>
-              )}
-              {isPa && lab.status === 'granted_unstarted' && (
-                <Button size="sm" onClick={() => setStartWindowOpen(true)}>
-                  Start {durationLabel} window
-                </Button>
-              )}
-              {isPa && lab.status === 'active' && (
-                <Button size="sm" onClick={() => setDocumentOpen(true)}>
-                  View
-                </Button>
-              )}
-              {isPa && (lab.status === 'expired' || lab.status === 'denied') && (
-                <Button size="sm" variant="outline" onClick={handleRequest}>
-                  Request again
-                </Button>
-              )}
-
-              {isPhysician && lab.status === 'pending' && (
-                <Button size="sm" variant="secondary" onClick={() => setReleaseOpen(true)}>
-                  Release to record
-                </Button>
-              )}
-              {isPhysician && lab.status === 'requested' && (
-                <>
-                  <Button size="sm" onClick={handleOpenGrant}>
-                    Grant
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={handleOpenDeny}>
-                    Deny
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setReleaseOpen(true)}
-                  >
-                    Release
-                  </Button>
-                </>
+      <div ref={cardRef} id={`lab-${lab.id}`}>
+        <Card>
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <LabStatusBadge status={lab.status} />
+              {justReleased && (
+                <Badge
+                  variant="outline"
+                  className={notificationBadgeClassName}
+                >
+                  New
+                </Badge>
               )}
             </div>
+            <div className="min-w-0">
+              <p className="font-medium">{lab.name}</p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {lab.type} · Ordered {lab.orderDate}
+              </p>
+              {isPa && lab.status === 'active' && lab.grantExpiresAt && (
+                <p className="mt-1 text-xs font-medium text-blue-700">
+                  Available for {formatCountdown(lab.grantExpiresAt, now)}
+                </p>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isPa && (
+              <PaActions
+                lab={lab}
+                durationLabel={durationLabel}
+                onRequest={handleRequest}
+                onStartWindow={() => setStartWindowOpen(true)}
+                onView={openDocument}
+                onDismissDenial={() =>
+                  dispatch({ type: 'DISMISS_LAB_DENIAL', labId: lab.id })
+                }
+              />
+            )}
+
+            {isPhysician && (
+              <PhysicianActions
+                lab={lab}
+                onView={openDocument}
+                onRelease={() => setReleaseOpen(true)}
+                onGrant={handleOpenGrant}
+                onDeny={handleOpenDeny}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
@@ -179,7 +167,6 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
         open={releaseOpen}
         onOpenChange={setReleaseOpen}
         labName={lab.name}
-        notifiesPa={lab.everRequested}
         onConfirm={handleRelease}
       />
       <StartWindowDialog
@@ -198,52 +185,151 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
   )
 }
 
-function StatusLine({ lab, now }: { lab: LabResult; now: number }) {
+function PaActions({
+  lab,
+  durationLabel,
+  onRequest,
+  onStartWindow,
+  onView,
+  onDismissDenial,
+}: {
+  lab: LabResult
+  durationLabel: string
+  onRequest: () => void
+  onStartWindow: () => void
+  onView: () => void
+  onDismissDenial: () => void
+}) {
+  const requestLabel = lab.everDenied ? 'Request access again' : 'Request access'
+
   switch (lab.status) {
-    case 'pending':
+    case 'released':
       return (
-        <p className="text-xs text-muted-foreground">
-          Pending physician release
-        </p>
-      )
-    case 'requested':
-      return (
-        <p className="text-xs font-medium text-blue-700">
-          Access requested — awaiting response
-        </p>
+        <Button variant="secondary" onClick={onView}>
+          View
+          <ArrowRight className="size-3.5" />
+        </Button>
       )
     case 'granted_unstarted':
-      return null
+      return (
+        <Button variant="secondary" onClick={onStartWindow}>
+          <Unlock className="size-3.5" />
+          View for {durationLabel}
+        </Button>
+      )
     case 'active':
       return (
-        <p className="text-xs font-medium text-emerald-700">
-          Access open —{' '}
-          {lab.grantExpiresAt
-            ? formatCountdown(lab.grantExpiresAt, now)
-            : '0:00'}{' '}
-          remaining
-        </p>
+        <Button variant="secondary" onClick={onView}>
+          View
+          <ArrowRight className="size-3.5" />
+        </Button>
       )
     case 'expired':
       return (
-        <p className="text-xs font-medium text-amber-700">
-          Access expired
-        </p>
+        <Button variant="outline" onClick={onRequest}>
+          <Lock className="size-3.5" />
+          Request access again
+        </Button>
+      )
+    case 'pending':
+      return (
+        <Button variant="outline" onClick={onRequest}>
+          <Lock className="size-3.5" />
+          {requestLabel}
+        </Button>
+      )
+    case 'requested':
+      return (
+        <Button variant="outline" disabled>
+          <Lock className="size-3.5" />
+          {requestLabel}
+        </Button>
       )
     case 'denied':
+      if (lab.denialDismissed) {
+        return (
+          <Button variant="outline" onClick={onRequest}>
+            <Lock className="size-3.5" />
+            {requestLabel}
+          </Button>
+        )
+      }
       return (
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-destructive">
-            Request denied
-          </p>
-          {lab.denialReason && (
-            <p className="text-xs text-destructive">
-              {lab.denialReason}
-            </p>
-          )}
+        <div className="space-y-3">
+          <Button variant="outline" onClick={onRequest}>
+            <Lock className="size-3.5" />
+            {requestLabel}
+          </Button>
+          <div className="relative rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
+            <button
+              type="button"
+              onClick={onDismissDenial}
+              className={cn(
+                'absolute top-2 right-2 rounded-md p-0.5 text-destructive/70',
+                'hover:bg-destructive/10 hover:text-destructive',
+              )}
+              aria-label="Dismiss denial"
+            >
+              <X className="size-3.5" />
+            </button>
+            <p className="text-sm font-medium">Request was denied.</p>
+            <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
+            <p className="mt-0.5 text-sm">{lab.denialReason}</p>
+          </div>
         </div>
       )
     default:
       return null
   }
+}
+
+function PhysicianActions({
+  lab,
+  onView,
+  onRelease,
+  onGrant,
+  onDeny,
+}: {
+  lab: LabResult
+  onView: () => void
+  onRelease: () => void
+  onGrant: () => void
+  onDeny: () => void
+}) {
+  const canRelease = lab.status !== 'released'
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" onClick={onView}>
+          View
+          <ArrowRight className="size-3.5" />
+        </Button>
+        {canRelease && (
+          <Button variant="outline" onClick={onRelease}>
+            <Unlock className="size-3.5" />
+            Release permanently
+          </Button>
+        )}
+      </div>
+
+      {lab.status === 'requested' && (
+        <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
+          <p className="text-xs text-muted-foreground">
+            Pending request from {DEMO_PA_NAME}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="success" onClick={onGrant}>
+              <Check className="size-3.5" />
+              Grant
+            </Button>
+            <Button size="sm" variant="destructive" onClick={onDeny}>
+              <X className="size-3.5" />
+              Deny
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }

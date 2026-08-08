@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Check, Unlock, X } from 'lucide-react'
 import { toast } from 'sonner'
-import type { GrantDuration, LabResult, LabStatus } from '@/state/types'
+import type { GrantDuration, LabResult } from '@/state/types'
 import { cn } from '@/lib/utils'
 import { useAppState } from '@/state/AppStateContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
@@ -17,6 +18,7 @@ import {
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
+import { LabStatusBadge } from '@/components/patient/LabStatusBadge'
 
 export function AccessRequestsList() {
   const { state } = useAppState()
@@ -31,11 +33,17 @@ function PhysicianAccessRequestsList() {
   const [denyLabId, setDenyLabId] = useState<string | null>(null)
   const [releaseLabId, setReleaseLabId] = useState<string | null>(null)
 
-  const requestedLabs = state.labs.filter((lab) => lab.status === 'requested')
+  const unresolvedLabs = state.labs.filter((lab) => lab.status === 'requested')
+  const historyLabs = state.labs.filter(
+    (lab) => lab.everRequested && isPaResolvedLabStatus(lab.status),
+  )
+  const unreadCount = unresolvedLabs.filter(
+    (lab) => !state.viewedRequests.includes(lab.id),
+  ).length
 
-  const grantLab = requestedLabs.find((l) => l.id === grantLabId)
-  const denyLab = requestedLabs.find((l) => l.id === denyLabId)
-  const releaseLab = requestedLabs.find((l) => l.id === releaseLabId)
+  const grantLab = unresolvedLabs.find((l) => l.id === grantLabId)
+  const denyLab = unresolvedLabs.find((l) => l.id === denyLabId)
+  const releaseLab = unresolvedLabs.find((l) => l.id === releaseLabId)
 
   const markViewed = (labId: string) => {
     dispatch({ type: 'MARK_REQUEST_READ', labId })
@@ -77,61 +85,112 @@ function PhysicianAccessRequestsList() {
     toast.success('Result permanently released — PA notified')
   }
 
-  if (requestedLabs.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-        <p className="text-sm font-medium">No pending access requests</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Lab and imaging access requests from PAs will appear here.
-        </p>
-      </div>
-    )
-  }
-
   return (
     <>
-      <div className="space-y-3">
-        {requestedLabs.map((lab) => {
-          const isUnread = !state.viewedRequests.includes(lab.id)
-          return (
-            <Card key={lab.id} className="gap-2 py-0">
-              <CardHeader className="flex flex-row items-start justify-between px-4 pt-4 pb-0">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">{lab.name}</p>
-                    {isUnread && (
-                      <Badge variant="destructive" className="h-5 text-xs">New</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
-                  </p>
-                </div>
-                <LabStatusBadge status={lab.status} />
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2 px-4 pt-0 pb-4">
-                <Button size="sm" onClick={() => handleOpenGrant(lab.id)}>
-                  Grant
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleOpenDeny(lab.id)}
-                >
-                  Deny
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => handleOpenRelease(lab.id)}
-                >
-                  Release
-                </Button>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+      <Tabs defaultValue="unresolved">
+        <TabsList>
+          <TabsTrigger value="unresolved">
+            Unresolved
+            {unreadCount > 0 && (
+              <Badge
+                variant="outline"
+                className={cn('ml-1.5', countBadgeClassName, notificationBadgeClassName)}
+              >
+                {unreadCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            History
+            {historyLabs.length > 0 && (
+              <Badge variant="outline" className={cn('ml-1.5', countBadgeClassName)}>
+                {historyLabs.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="unresolved" className="mt-4">
+          {unresolvedLabs.length === 0 ? (
+            <EmptyState
+              title="No unresolved requests"
+              description="Lab and imaging access requests from PAs will appear here."
+            />
+          ) : (
+            <div className="space-y-3">
+              {unresolvedLabs.map((lab) => {
+                const isUnread = !state.viewedRequests.includes(lab.id)
+                return (
+                  <Card key={lab.id}>
+                    <CardHeader>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <LabStatusBadge status={lab.status} surface="requests" />
+                        {isUnread && (
+                          <Badge
+                            variant="outline"
+                            className={notificationBadgeClassName}
+                          >
+                            New
+                          </Badge>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{lab.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
+                        </p>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="success"
+                          onClick={() => handleOpenGrant(lab.id)}
+                        >
+                          <Check className="size-3.5" />
+                          Grant
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleOpenDeny(lab.id)}
+                        >
+                          <X className="size-3.5" />
+                          Deny
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleOpenRelease(lab.id)}
+                        >
+                          <Unlock className="size-3.5" />
+                          Release permanently
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-4">
+          {historyLabs.length === 0 ? (
+            <EmptyState
+              title="No request history"
+              description="Granted, denied, and permanently released requests will appear here."
+            />
+          ) : (
+            <div className="space-y-3">
+              {historyLabs.map((lab) => (
+                <PhysicianHistoryRow key={lab.id} lab={lab} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {grantLab && (
         <GrantAccessDialog
@@ -156,12 +215,71 @@ function PhysicianAccessRequestsList() {
           open={releaseLabId !== null}
           onOpenChange={(open) => { if (!open) setReleaseLabId(null) }}
           labName={releaseLab.name}
-          notifiesPa
           onConfirm={handleRelease}
         />
       )}
     </>
   )
+}
+
+function PhysicianHistoryRow({ lab }: { lab: LabResult }) {
+  const { dispatch } = useAppState()
+  const navigate = useNavigate()
+  const now = Date.now()
+
+  const handleViewResult = () => {
+    dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
+    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs&lab=${lab.id}`)
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <LabStatusBadge status={lab.status} surface="requests" />
+        <div className="min-w-0">
+          <p className="font-medium">{lab.name}</p>
+          <p className="text-xs text-muted-foreground">
+            Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
+          </p>
+          <p className="mt-1 text-xs font-medium">
+            {physicianHistoryOutcomeLabel(lab)}
+          </p>
+          {lab.status === 'active' && lab.grantExpiresAt && (
+            <p className="mt-1 text-xs font-medium text-blue-700">
+              Available for {formatCountdown(lab.grantExpiresAt, now)}
+            </p>
+          )}
+          {lab.status === 'denied' && lab.denialReason && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Feedback: {lab.denialReason}
+            </p>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Button size="sm" variant="secondary" onClick={handleViewResult}>
+          View result
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+function physicianHistoryOutcomeLabel(lab: LabResult): string {
+  switch (lab.status) {
+    case 'granted_unstarted':
+      return 'Granted — awaiting PA confirmation'
+    case 'active':
+      return 'Granted — temporary access active'
+    case 'expired':
+      return 'Temporary access expired'
+    case 'denied':
+      return 'Denied'
+    case 'released':
+      return 'Permanently released'
+    default:
+      return getLabStatusLabel(lab.status, 'physician', 'requests')
+  }
 }
 
 function PaMyRequestsList() {
@@ -180,7 +298,10 @@ function PaMyRequestsList() {
         <TabsTrigger value="resolved">
           Resolved
           {state.paUnseenResolution.length > 0 && (
-            <Badge variant="destructive" className="ml-1.5 h-5 px-1.5 text-xs">
+            <Badge
+              variant="outline"
+              className={cn('ml-1.5', countBadgeClassName, notificationBadgeClassName)}
+            >
               {state.paUnseenResolution.length}
             </Badge>
           )}
@@ -188,7 +309,7 @@ function PaMyRequestsList() {
         <TabsTrigger value="awaiting">
           Awaiting response
           {awaitingLabs.length > 0 && (
-            <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
+            <Badge variant="outline" className={cn('ml-1.5', countBadgeClassName)}>
               {awaitingLabs.length}
             </Badge>
           )}
@@ -223,8 +344,9 @@ function PaMyRequestsList() {
         ) : (
           <div className="space-y-3">
             {awaitingLabs.map((lab) => (
-              <Card key={lab.id} className="gap-2 py-0">
-                <CardHeader className="flex flex-row items-start justify-between px-4 py-4">
+              <Card key={lab.id}>
+                <CardHeader>
+                  <LabStatusBadge status={lab.status} surface="requests" />
                   <div>
                     <p className="font-medium">{lab.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -234,7 +356,6 @@ function PaMyRequestsList() {
                       Waiting for physician response
                     </p>
                   </div>
-                  <LabStatusBadge status={lab.status} />
                 </CardHeader>
               </Card>
             ))}
@@ -288,20 +409,21 @@ function ResolvedRequestRow({
 
   return (
     <div ref={rowRef}>
-      <Card
-        className={cn(
-          'gap-2 py-0',
-          isUnseen && 'ring-2 ring-destructive/40',
-        )}
-      >
-        <CardHeader className="flex flex-row items-start justify-between px-4 pt-4 pb-0">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className="font-medium">{lab.name}</p>
-              {isUnseen && (
-                <Badge variant="destructive" className="h-5 text-xs">New</Badge>
-              )}
-            </div>
+      <Card highlighted={isUnseen}>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <LabStatusBadge status={lab.status} surface="requests" />
+            {isUnseen && (
+              <Badge
+                variant="outline"
+                className={notificationBadgeClassName}
+              >
+                New
+              </Badge>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium">{lab.name}</p>
             <p className="text-xs text-muted-foreground">
               Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
             </p>
@@ -309,8 +431,8 @@ function ResolvedRequestRow({
               {resolvedOutcomeLabel(lab)}
             </p>
             {lab.status === 'active' && lab.grantExpiresAt && (
-              <p className="mt-1 text-xs font-medium text-amber-600">
-                Expires in {formatCountdown(lab.grantExpiresAt, now)}
+              <p className="mt-1 text-xs font-medium text-blue-700">
+                Available for {formatCountdown(lab.grantExpiresAt, now)}
               </p>
             )}
             {isDenied && lab.denialReason && (
@@ -319,11 +441,10 @@ function ResolvedRequestRow({
               </p>
             )}
           </div>
-          <LabStatusBadge status={lab.status} />
         </CardHeader>
-        <CardContent className="px-4 pt-0 pb-4">
+        <CardContent>
           {canViewResult && (
-            <Button size="sm" variant="outline" onClick={handleViewResult}>
+            <Button size="sm" variant="secondary" onClick={handleViewResult}>
               View result
             </Button>
           )}
@@ -356,31 +477,5 @@ function EmptyState({ title, description }: { title: string; description: string
       <p className="text-sm font-medium">{title}</p>
       <p className="mt-1 max-w-sm text-xs text-muted-foreground">{description}</p>
     </div>
-  )
-}
-
-function LabStatusBadge({ status }: { status: LabStatus }) {
-  const colorClass = (() => {
-    switch (status) {
-      case 'requested':
-      case 'granted_unstarted':
-        return 'border-blue-200 bg-blue-50 text-blue-700'
-      case 'active':
-        return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-      case 'expired':
-        return 'border-amber-200 bg-amber-50 text-amber-700'
-      case 'denied':
-        return 'border-destructive/30 bg-destructive/10 text-destructive'
-      case 'released':
-        return 'border-green-200 bg-green-50 text-green-700'
-      default:
-        return ''
-    }
-  })()
-
-  return (
-    <Badge variant="outline" className={colorClass}>
-      {getLabStatusLabel(status)}
-    </Badge>
   )
 }
