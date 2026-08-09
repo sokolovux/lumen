@@ -1,20 +1,19 @@
 import { useState } from 'react'
-import { ArrowRight, Check, Lock, Unlock, X } from 'lucide-react'
+import { Check, Lock, Unlock, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import type { GrantDuration, LabResult } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge'
 import {
-  formatCountdown,
   formatGrantDurationLabel,
   formatGrantDurationPhrase,
-  getActiveGrantBadgeLabel,
   getLabStatusLabel,
   getLabStatusTint,
 } from '@/lib/statusDerivation'
+import { AccessTimer } from '@/components/patient/AccessTimer'
 import { DEMO_PA_NAME } from '@/lib/scheduleData'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
@@ -48,9 +47,6 @@ export function LabResultCard({ lab }: LabResultCardProps) {
   const durationLabel = formatGrantDurationLabel(lab.grantDuration ?? '10m')
 
   const openDocument = () => {
-    if (isPa && lab.status === 'released' && lab.justReleased) {
-      dispatch({ type: 'MARK_LAB_RESULT_VIEWED', labId: lab.id })
-    }
     setDocumentOpen(true)
   }
 
@@ -99,69 +95,64 @@ export function LabResultCard({ lab }: LabResultCardProps) {
     )
   }
 
-  const justReleased = isPa && lab.status === 'released' && lab.justReleased
-
-  const statusBadgeLabel =
-    lab.status === 'active' && lab.grantExpiresAt && isPhysician
-      ? getActiveGrantBadgeLabel('physician', lab.grantExpiresAt, now)
-      : getLabStatusLabel(lab.status, state.role)
+  const showTimer = lab.status === 'active' && Boolean(lab.grantExpiresAt)
+  // Labs PA only: dismissed denial reads as Locked; My Requests keeps denied
+  const badgeStatus =
+    isPa && lab.status === 'denied' && lab.denialDismissed
+      ? 'pending'
+      : lab.status
 
   return (
     <>
       <div>
         <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Badge
-                variant="outline"
-                className={getLabStatusTint(lab.status, state.role)}
-              >
-                {statusBadgeLabel}
-              </Badge>
-              {justReleased && (
-                <Badge
-                  variant="outline"
-                  className={notificationBadgeClassName}
-                >
-                  New
-                </Badge>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium">{lab.name}</p>
-              <p className="text-sm text-muted-foreground capitalize">
-                {lab.type} · Ordered {lab.orderDate}
-              </p>
-              {isPa && lab.status === 'active' && lab.grantExpiresAt && (
-                <p className="mt-1 text-xs font-medium text-blue-700">
-                  Available for {formatCountdown(lab.grantExpiresAt, now)}
-                </p>
-              )}
-            </div>
-          </CardHeader>
           <CardContent>
-            {isPa && (
-              <PaActions
-                lab={lab}
-                durationLabel={durationLabel}
-                onRequest={handleRequest}
-                onStartWindow={() => setStartWindowOpen(true)}
-                onView={openDocument}
-                onDismissDenial={() =>
-                  dispatch({ type: 'DISMISS_LAB_DENIAL', labId: lab.id })
-                }
-              />
-            )}
-
-            {isPhysician && (
-              <PhysicianActions
-                lab={lab}
-                onView={openDocument}
-                onRelease={() => setReleaseOpen(true)}
-                onGrant={handleOpenGrant}
-                onDeny={handleOpenDeny}
-              />
-            )}
+            <div className="flex flex-col items-start gap-(--card-spacing)">
+              <div className="flex w-full flex-col gap-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge
+                      variant="outline"
+                      className={getLabStatusTint(badgeStatus, state.role)}
+                    >
+                      {getLabStatusLabel(badgeStatus, state.role)}
+                    </Badge>
+                  </div>
+                  {showTimer && lab.grantExpiresAt && (
+                    <AccessTimer expiresAt={lab.grantExpiresAt} now={now} />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h6>{lab.name}</h6>
+                  <p className="text-sm text-muted-foreground capitalize">
+                    {lab.type} · Ordered {lab.orderDate}
+                  </p>
+                </div>
+              </div>
+              {isPa && (
+                <PaActions
+                  lab={lab}
+                  durationLabel={durationLabel}
+                  onRequest={handleRequest}
+                  onStartWindow={() => setStartWindowOpen(true)}
+                  onView={openDocument}
+                  onDismissDenial={() =>
+                    dispatch({ type: 'DISMISS_LAB_DENIAL', labId: lab.id })
+                  }
+                />
+              )}
+              {isPhysician && (
+                <div className="w-full">
+                  <PhysicianActions
+                    lab={lab}
+                    onView={openDocument}
+                    onRelease={() => setReleaseOpen(true)}
+                    onGrant={handleOpenGrant}
+                    onDeny={handleOpenDeny}
+                  />
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -228,23 +219,21 @@ function PaActions({
   switch (lab.status) {
     case 'released':
       return (
-        <Button variant="secondary" onClick={onView}>
+        <Button variant="outline" onClick={onView}>
           View
-          <ArrowRight className="size-3.5" />
         </Button>
       )
     case 'granted_unstarted':
       return (
-        <Button variant="secondary" onClick={onStartWindow}>
+        <Button variant="outline" onClick={onStartWindow}>
           <Unlock className="size-3.5" />
           View for {durationLabel}
         </Button>
       )
     case 'active':
       return (
-        <Button variant="secondary" onClick={onView}>
+        <Button variant="outline" onClick={onView}>
           View
-          <ArrowRight className="size-3.5" />
         </Button>
       )
     case 'expired':
@@ -278,7 +267,7 @@ function PaActions({
         )
       }
       return (
-        <div className="space-y-3">
+        <div className="w-full space-y-3">
           <Button variant="outline" onClick={onRequest}>
             <Lock className="size-3.5" />
             {requestLabel}
@@ -295,7 +284,7 @@ function PaActions({
             >
               <X className="size-3.5" />
             </button>
-            <p className="text-sm font-medium">Request was denied.</p>
+            <p className="text-sm"><strong>Request was denied.</strong></p>
             <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
             <p className="mt-0.5 text-sm">{lab.denialReason}</p>
           </div>
@@ -324,9 +313,8 @@ function PhysicianActions({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={onView}>
+        <Button variant="outline" onClick={onView}>
           View
-          <ArrowRight className="size-3.5" />
         </Button>
         {canRelease && (
           <Button variant="outline" onClick={onRelease}>
@@ -338,7 +326,7 @@ function PhysicianActions({
 
       {lab.status === 'requested' && (
         <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-foreground">
             Pending request from {DEMO_PA_NAME}
           </p>
           <div className="flex flex-wrap gap-2">

@@ -60,7 +60,7 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
             {finished.length > 0 && (
               <>
                 <Separator className="my-1" />
-                <p className="px-1 text-xs font-medium text-muted-foreground">Finished</p>
+                <p className="px-1 text-xs"><strong>Finished</strong></p>
                 {finished.map((apt) => (
                   <AppointmentCard
                     key={apt.id}

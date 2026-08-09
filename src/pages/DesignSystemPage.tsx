@@ -117,9 +117,9 @@ const LAB_STATUSES: LabStatus[] = [
 const NOTE_STATUS_STYLES: { status: NoteStatus; className: string }[] = [
   { status: 'not_started', className: '' },
   { status: 'draft', className: '' },
-  { status: 'submitted', className: 'border-blue-200 bg-blue-50 text-blue-700' },
-  { status: 'returned', className: 'border-amber-200 bg-amber-50 text-amber-700' },
-  { status: 'cosigned', className: 'border-green-200 bg-green-50 text-green-700' },
+  { status: 'submitted', className: 'border-blue-200 bg-blue-50 text-blue-600' },
+  { status: 'returned', className: 'border-amber-200 bg-amber-50 text-amber-600' },
+  { status: 'cosigned', className: 'border-green-200 bg-green-50 text-green-600' },
 ]
 
 function BadgeRow({
@@ -194,7 +194,7 @@ function Swatch({
         border ? 'ring-1 ring-border' : ''
       }`}
     >
-      <span className="text-xs font-medium">{name}</span>
+      <span className="text-xs"><strong>{name}</strong></span>
     </div>
   )
 }
@@ -238,7 +238,7 @@ export function DesignSystemPage() {
           <Section
             id="foundations"
             title="Foundations"
-            description="Olive-tinted light theme, Geist type, and shared radius tokens."
+            description="Tailwind Gray neutrals, IBM Plex Sans, and shared radius tokens."
           >
             <div className="space-y-6">
               <div>
@@ -279,14 +279,16 @@ export function DesignSystemPage() {
                       <Separator />
                       <div className="space-y-2">
                         <p>
-                          Unstyled paragraph — inherits body text-base (no size utilities).
+                          Unstyled paragraph — muted + text-base by default.
                         </p>
-                        <p className="text-sm font-medium">Body emphasis (text-sm medium)</p>
                         <p className="text-sm">
-                          Body copy uses Geist. Prefer sentence case for all UI labels.
+                          <strong>Primary emphasis (text-sm + strong)</strong>
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          text-muted-foreground — secondary copy
+                        <p className="text-sm">
+                          Body copy uses IBM Plex Sans. Prefer sentence case for all UI labels.
+                        </p>
+                        <p className="text-sm text-foreground">
+                          text-foreground — primary paragraph copy
                         </p>
                         <p className="text-sm">
                           Inline code uses{' '}
@@ -354,10 +356,10 @@ export function DesignSystemPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p><span className="font-medium">Scheduled</span> — not started</p>
-                    <p><span className="font-medium">With PA</span> — vitals + first note</p>
-                    <p><span className="font-medium">With physician</span> — transferred</p>
-                    <p><span className="font-medium">Finished</span> — finish visit clicked</p>
+                    <p><strong>Scheduled</strong> — not started</p>
+                    <p><strong>With PA</strong> — vitals + first note</p>
+                    <p><strong>With physician</strong> — transferred</p>
+                    <p><strong>Finished</strong> — finish visit clicked</p>
                   </div>
                 </CardContent>
               </Card>
@@ -505,7 +507,7 @@ export function DesignSystemPage() {
                 </Badge>
                 <Badge
                   variant="outline"
-                  className="border-destructive/30 bg-destructive/10 text-destructive"
+                  className="border-red-200 bg-red-50 text-red-600"
                 >
                   Restricted tint
                 </Badge>
@@ -571,13 +573,13 @@ export function DesignSystemPage() {
               <BadgeRow label="Medication status">
                 <Badge
                   variant="outline"
-                  className="border-green-200 bg-green-50 text-green-700"
+                  className="border-green-200 bg-green-50 text-green-600"
                 >
                   Active
                 </Badge>
                 <Badge
                   variant="outline"
-                  className="border-destructive/30 bg-destructive/10 text-destructive"
+                  className="border-red-200 bg-red-50 text-red-600"
                 >
                   Discontinued
                 </Badge>
@@ -586,7 +588,7 @@ export function DesignSystemPage() {
               <BadgeRow label="Cosign queue note status">
                 <Badge
                   variant="outline"
-                  className="border-blue-200 bg-blue-50 text-blue-700"
+                  className="border-blue-200 bg-blue-50 text-blue-600"
                 >
                   Submitted — awaiting cosign
                 </Badge>
@@ -599,14 +601,13 @@ export function DesignSystemPage() {
           <Section
             id="buttons"
             title="Buttons"
-            description="Variants, sizes, and group order: primary → secondary left to right; reverse when right-aligned."
+            description="Variants, sizes, and group order by action emphasis (primary → secondary left to right; reverse when right-aligned). No secondary button variant — use outline."
           >
             <Card>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     <Button>Default</Button>
-                    <Button variant="secondary">Secondary</Button>
                     <Button variant="outline">Outline</Button>
                     <Button variant="ghost">Ghost</Button>
                     <Button variant="success">Success</Button>
@@ -633,8 +634,8 @@ export function DesignSystemPage() {
                     </Button>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      Left-aligned group — primary first
+                    <p className="text-xs">
+                      <strong>Left-aligned group — primary first</strong>
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Button size="sm" variant="success">Grant</Button>
@@ -643,8 +644,8 @@ export function DesignSystemPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      Right-aligned group — primary on the right
+                    <p className="text-xs">
+                      <strong>Right-aligned group — primary on the right</strong>
                     </p>
                     <div className="flex flex-wrap justify-end gap-2">
                       <Button size="sm" variant="outline">Cancel</Button>
@@ -929,7 +930,7 @@ export function DesignSystemPage() {
                       <Skeleton className="h-4 w-4/5" />
                     </div>
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/70 px-4 text-center">
-                      <p className="text-sm font-semibold">Access has expired</p>
+                      <p className="text-sm"><strong>Access has expired</strong></p>
                       <p className="text-xs text-muted-foreground">
                         Your temporary access window closed.
                       </p>

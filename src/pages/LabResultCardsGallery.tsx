@@ -1,17 +1,16 @@
 import type { ReactNode } from 'react'
 import { ArrowRight, Check, Lock, Unlock, X } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DEMO_PA_NAME } from '@/lib/scheduleData'
 import {
-  formatCountdown,
   formatGrantDurationLabel,
-  getActiveGrantBadgeLabel,
   getLabStatusLabel,
   getLabStatusTint,
 } from '@/lib/statusDerivation'
+import { AccessTimer } from '@/components/patient/AccessTimer'
 import type { GrantDuration, LabStatus, Role } from '@/state/types'
 
 /** Fixed window so active demos share one expiresAt (ticks via app timer). */
@@ -29,7 +28,7 @@ function Case({
   return (
     <div className="space-y-2">
       <div>
-        <p className="font-medium">{title}</p>
+        <p><strong>{title}</strong></p>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {children}
@@ -43,8 +42,7 @@ function ResultCardShell({
   surface = 'labs',
   badgeLabel,
   plainBadge,
-  meta,
-  showNew,
+  showTimer,
   children,
 }: {
   status: LabStatus
@@ -53,55 +51,46 @@ function ResultCardShell({
   badgeLabel?: string
   /** Queue PA awaiting: outline with no status tint */
   plainBadge?: boolean
-  meta?: ReactNode
-  showNew?: boolean
+  showTimer?: boolean
   children?: ReactNode
 }) {
   const now = Date.now()
-  const label =
-    badgeLabel
-    ?? (
-      status === 'active' && role === 'physician'
-        ? getActiveGrantBadgeLabel('physician', DS_ACTIVE_EXPIRES_AT, now)
-        : getLabStatusLabel(status, role, surface)
-    )
-
-  const subtitle =
-    surface === 'requests'
-      ? 'Jordan Reyes · lab · Ordered Aug 5, 2026'
-      : 'lab · Ordered Aug 5, 2026'
+  const label = badgeLabel ?? getLabStatusLabel(status, role, surface)
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Badge
-            variant="outline"
-            className={plainBadge ? undefined : getLabStatusTint(status, role, surface)}
-          >
-            {label}
-          </Badge>
-          {showNew && (
-            <Badge variant="outline" className={notificationBadgeClassName}>
-              New
-            </Badge>
-          )}
+      <CardContent>
+        <div className="flex flex-col items-start gap-(--card-spacing)">
+          <div className="flex w-full flex-col gap-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Badge
+                  variant="outline"
+                  className={plainBadge ? undefined : getLabStatusTint(status, role, surface)}
+                >
+                  {label}
+                </Badge>
+              </div>
+              {showTimer && (
+                <AccessTimer expiresAt={DS_ACTIVE_EXPIRES_AT} now={now} />
+              )}
+            </div>
+            <div className="min-w-0">
+              <h6>HbA1c</h6>
+              {surface === 'requests' && <p>Jordan Reyes</p>}
+              <p className="text-sm text-muted-foreground capitalize">
+                lab · Ordered Aug 5, 2026
+              </p>
+            </div>
+          </div>
+          {children ? <div className="w-full">{children}</div> : null}
         </div>
-        <div className="min-w-0">
-          <p className="font-medium">HbA1c</p>
-          <p className="text-sm text-muted-foreground capitalize">
-            {subtitle}
-          </p>
-          {meta}
-        </div>
-      </CardHeader>
-      {children ? <CardContent>{children}</CardContent> : null}
+      </CardContent>
     </Card>
   )
 }
 
 function LabsPaGallery() {
-  const now = Date.now()
   const duration = formatGrantDurationLabel('10m' satisfies GrantDuration)
 
   return (
@@ -126,29 +115,20 @@ function LabsPaGallery() {
 
       <Case
         title="granted_unstarted"
-        description="Grant ready. Confirm before countdown."
+        description="Temporary access (green). Confirm before countdown."
       >
         <ResultCardShell status="granted_unstarted" role="pa">
-          <Button variant="secondary">
+          <Button variant="outline">
             <Unlock className="size-3.5" />
             View for {duration}
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case title="active" description="Countdown live. View opens document.">
-        <ResultCardShell
-          status="active"
-          role="pa"
-          meta={(
-            <p className="mt-1 text-xs font-medium text-blue-700">
-              Available for {formatCountdown(DS_ACTIVE_EXPIRES_AT, now)}
-            </p>
-          )}
-        >
-          <Button variant="secondary">
+      <Case title="active" description="Mono timer top-right. View opens document.">
+        <ResultCardShell status="active" role="pa" showTimer>
+          <Button variant="outline">
             View
-            <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
@@ -177,7 +157,7 @@ function LabsPaGallery() {
               >
                 <X className="size-3.5" />
               </button>
-              <p className="text-sm font-medium">Request was denied.</p>
+              <p className="text-sm"><strong>Request was denied.</strong></p>
               <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
               <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
             </div>
@@ -187,9 +167,9 @@ function LabsPaGallery() {
 
       <Case
         title="denied · dismissed"
-        description="Status stays denied; denial block gone. everDenied → Request access again."
+        description="Badge back to Locked; denial block gone. everDenied → Request access again."
       >
-        <ResultCardShell status="denied" role="pa">
+        <ResultCardShell status="pending" role="pa">
           <Button variant="outline">
             <Lock className="size-3.5" />
             Request access again
@@ -199,39 +179,24 @@ function LabsPaGallery() {
 
       <Case title="released" description="Permanent access.">
         <ResultCardShell status="released" role="pa">
-          <Button variant="secondary">
+          <Button variant="outline">
             View
-            <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case
-        title="released · justReleased"
-        description="New badge until first open."
-      >
-        <ResultCardShell status="released" role="pa" showNew>
-          <Button variant="secondary">
-            View
-            <ArrowRight className="size-3.5" />
-          </Button>
-        </ResultCardShell>
-      </Case>
     </div>
   )
 }
 
 function LabsPhysicianGallery() {
-  const now = Date.now()
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Case title="pending" description="Unreleased. View + Release.">
         <ResultCardShell status="pending" role="physician">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               View
-              <ArrowRight className="size-3.5" />
             </Button>
             <Button variant="outline">
               <Unlock className="size-3.5" />
@@ -245,9 +210,8 @@ function LabsPhysicianGallery() {
         <ResultCardShell status="requested" role="physician">
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Button variant="secondary">
+              <Button variant="outline">
                 View
-                <ArrowRight className="size-3.5" />
               </Button>
               <Button variant="outline">
                 <Unlock className="size-3.5" />
@@ -255,7 +219,7 @@ function LabsPhysicianGallery() {
               </Button>
             </div>
             <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-foreground">
                 Pending request from {DEMO_PA_NAME}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -275,13 +239,12 @@ function LabsPhysicianGallery() {
 
       <Case
         title="granted_unstarted"
-        description="Third-person tag. Buttons unchanged."
+        description="Temporary access (green). Buttons unchanged."
       >
         <ResultCardShell status="granted_unstarted" role="physician">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               View
-              <ArrowRight className="size-3.5" />
             </Button>
             <Button variant="outline">
               <Unlock className="size-3.5" />
@@ -293,17 +256,12 @@ function LabsPhysicianGallery() {
 
       <Case
         title="active"
-        description="Same expiresAt countdown as PA. Release converts to permanent."
+        description="Temporary access + mono timer. Release converts to permanent."
       >
-        <ResultCardShell
-          status="active"
-          role="physician"
-          badgeLabel={getActiveGrantBadgeLabel('physician', DS_ACTIVE_EXPIRES_AT, now)}
-        >
+        <ResultCardShell status="active" role="physician" showTimer>
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               View
-              <ArrowRight className="size-3.5" />
             </Button>
             <Button variant="outline">
               <Unlock className="size-3.5" />
@@ -316,9 +274,8 @@ function LabsPhysicianGallery() {
       <Case title="expired" description="Neutral outline. View + Release.">
         <ResultCardShell status="expired" role="physician">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               View
-              <ArrowRight className="size-3.5" />
             </Button>
             <Button variant="outline">
               <Unlock className="size-3.5" />
@@ -331,9 +288,8 @@ function LabsPhysicianGallery() {
       <Case title="denied" description="Chart shows Unreleased (neutral).">
         <ResultCardShell status="denied" role="physician">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary">
+            <Button variant="outline">
               View
-              <ArrowRight className="size-3.5" />
             </Button>
             <Button variant="outline">
               <Unlock className="size-3.5" />
@@ -345,9 +301,8 @@ function LabsPhysicianGallery() {
 
       <Case title="released" description="View only.">
         <ResultCardShell status="released" role="physician">
-          <Button variant="secondary">
+          <Button variant="outline">
             View
-            <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
@@ -356,8 +311,6 @@ function LabsPhysicianGallery() {
 }
 
 function QueuePhysicianGallery() {
-  const now = Date.now()
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Case
@@ -367,7 +320,7 @@ function QueuePhysicianGallery() {
         <ResultCardShell status="requested" role="physician" surface="requests">
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Button variant="secondary">
+              <Button variant="outline">
                 View in chart
                 <ArrowRight className="size-3.5" />
               </Button>
@@ -377,42 +330,7 @@ function QueuePhysicianGallery() {
               </Button>
             </div>
             <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
-              <p className="text-xs text-muted-foreground">
-                Pending request from {DEMO_PA_NAME}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="success">
-                  <Check className="size-3.5" />
-                  Grant
-                </Button>
-                <Button size="sm" variant="destructive">
-                  <X className="size-3.5" />
-                  Deny
-                </Button>
-              </div>
-            </div>
-          </div>
-        </ResultCardShell>
-      </Case>
-
-      <Case
-        title="Inbox · requested · unread"
-        description="New badge for unread inbox item."
-      >
-        <ResultCardShell status="requested" role="physician" surface="requests" showNew>
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Button variant="secondary">
-                View in chart
-                <ArrowRight className="size-3.5" />
-              </Button>
-              <Button variant="outline">
-                <Unlock className="size-3.5" />
-                Release permanently
-              </Button>
-            </div>
-            <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-foreground">
                 Pending request from {DEMO_PA_NAME}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -432,7 +350,7 @@ function QueuePhysicianGallery() {
 
       <Case
         title="History · granted_unstarted"
-        description="Badge carries the grant state; no outcome line."
+        description="Badge carries the grant state."
       >
         <ResultCardShell
           status="granted_unstarted"
@@ -440,70 +358,43 @@ function QueuePhysicianGallery() {
           surface="requests"
           badgeLabel="Granted — not yet started"
         >
-          <Button size="sm" variant="secondary">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case title="History · active" description="Live countdown on tag; no outcome line.">
-        <ResultCardShell
-          status="active"
-          role="physician"
-          surface="requests"
-          badgeLabel={getActiveGrantBadgeLabel('physician', DS_ACTIVE_EXPIRES_AT, now)}
-        >
-          <Button size="sm" variant="secondary">
+      <Case title="History · active" description="Temporary access + mono timer.">
+        <ResultCardShell status="active" role="physician" surface="requests" showTimer>
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case title="History · expired" description="Outcome + View in chart.">
-        <ResultCardShell
-          status="expired"
-          role="physician"
-          surface="requests"
-          meta={<p className="mt-1 text-xs font-medium">Temporary access expired</p>}
-        >
-          <Button size="sm" variant="secondary">
+      <Case title="History · expired" description="View in chart.">
+        <ResultCardShell status="expired" role="physician" surface="requests">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case title="History · denied" description="Feedback line + View in chart.">
-        <ResultCardShell
-          status="denied"
-          role="physician"
-          surface="requests"
-          meta={(
-            <>
-              <p className="mt-1 text-xs font-medium">Denied</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Feedback: Need more clinical context before release.
-              </p>
-            </>
-          )}
-        >
-          <Button size="sm" variant="secondary">
+      <Case title="History · denied" description="View in chart.">
+        <ResultCardShell status="denied" role="physician" surface="requests">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case title="History · released" description="Permanently released.">
-        <ResultCardShell
-          status="released"
-          role="physician"
-          surface="requests"
-          meta={<p className="mt-1 text-xs font-medium">Permanently released</p>}
-        >
-          <Button size="sm" variant="secondary">
+      <Case title="History · released" description="View in chart.">
+        <ResultCardShell status="released" role="physician" surface="requests">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -514,8 +405,6 @@ function QueuePhysicianGallery() {
 }
 
 function QueuePaGallery() {
-  const now = Date.now()
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Case
@@ -528,11 +417,6 @@ function QueuePaGallery() {
           surface="requests"
           badgeLabel="Access pending"
           plainBadge
-          meta={(
-            <p className="mt-1 text-sm text-muted-foreground">
-              Waiting for physician response
-            </p>
-          )}
         />
       </Case>
 
@@ -540,31 +424,17 @@ function QueuePaGallery() {
         title="Resolved · granted_unstarted"
         description="View in chart only (navigate, no start)."
       >
-        <ResultCardShell
-          status="granted_unstarted"
-          role="pa"
-          surface="requests"
-          meta={<p className="mt-1 text-xs font-medium">Granted — confirm to start timer</p>}
-        >
-          <Button size="sm" variant="secondary">
+        <ResultCardShell status="granted_unstarted" role="pa" surface="requests">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case title="Resolved · active" description="Temporary access + countdown meta.">
-        <ResultCardShell
-          status="active"
-          role="pa"
-          surface="requests"
-          meta={(
-            <p className="mt-1 text-xs font-medium text-blue-700">
-              Available for {formatCountdown(DS_ACTIVE_EXPIRES_AT, now)}
-            </p>
-          )}
-        >
-          <Button size="sm" variant="secondary">
+      <Case title="Resolved · active" description="Temporary access badge + View in chart.">
+        <ResultCardShell status="active" role="pa" surface="requests">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -572,26 +442,16 @@ function QueuePaGallery() {
       </Case>
 
       <Case title="Resolved · expired" description="No View in chart.">
-        <ResultCardShell
-          status="expired"
-          role="pa"
-          surface="requests"
-          meta={<p className="mt-1 text-xs font-medium">Expired</p>}
-        />
+        <ResultCardShell status="expired" role="pa" surface="requests" />
       </Case>
 
       <Case
         title="Resolved · denied"
         description="Denial block, no dismiss X, no buttons."
       >
-        <ResultCardShell
-          status="denied"
-          role="pa"
-          surface="requests"
-          meta={<p className="mt-1 text-xs font-medium">Denied</p>}
-        >
+        <ResultCardShell status="denied" role="pa" surface="requests">
           <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
-            <p className="text-sm font-medium">Request was denied.</p>
+            <p className="text-sm"><strong>Request was denied.</strong></p>
             <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
             <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
           </div>
@@ -599,36 +459,14 @@ function QueuePaGallery() {
       </Case>
 
       <Case title="Resolved · released" description="View in chart.">
-        <ResultCardShell
-          status="released"
-          role="pa"
-          surface="requests"
-          meta={<p className="mt-1 text-xs font-medium">Permanently released</p>}
-        >
-          <Button size="sm" variant="secondary">
+        <ResultCardShell status="released" role="pa" surface="requests">
+          <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
         </ResultCardShell>
       </Case>
 
-      <Case
-        title="Resolved · unseen"
-        description="New badge for unseen resolution."
-      >
-        <ResultCardShell
-          status="released"
-          role="pa"
-          surface="requests"
-          showNew
-          meta={<p className="mt-1 text-xs font-medium">Permanently released</p>}
-        >
-          <Button size="sm" variant="secondary">
-            View in chart
-            <ArrowRight className="size-3.5" />
-          </Button>
-        </ResultCardShell>
-      </Case>
     </div>
   )
 }

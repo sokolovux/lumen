@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Button group order
 
-When two or more buttons sit together in a group, order by priority:
+When two or more buttons sit together in a group, order by priority. “Primary / secondary / tertiary” means **action emphasis**, not `Button` `variant="secondary"` (that variant is banned — use `outline`).
 
 - **Default (left / start aligned):** primary → secondary → tertiary (left to right)
 - **Right-aligned groups** (`justify-end`, `DialogFooter`, `AlertDialogFooter`, `ml-auto`, etc.): reverse that order so primary sits on the right edge (secondary → primary)

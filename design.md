@@ -21,7 +21,7 @@ If the same utilities keep appearing on a component (or would, by judgment), do 
 ```tsx
 // ✅ Layout with utilities; existing primitives naked
 <div className="flex flex-wrap gap-2">
-  <Button variant="secondary">View</Button>
+  <Button variant="outline">View</Button>
   <Button variant="outline">Release permanently</Button>
 </div>
 
@@ -82,6 +82,17 @@ Card styles live in `src/components/ui/card.css` (`@apply` on `data-slot`). Use 
 
 ## Typography
 
+### Font weights
+
+Do **not** use font-weight Tailwind utilities (`font-normal`, `font-medium`, `font-semibold`, `font-bold`, etc.) at call sites.
+
+Adjust weight only with:
+
+- **Naked headings** (`h1`–`h6`) — semibold from `@layer base`
+- **`<strong>`** — `@apply font-semibold text-foreground` in `@layer base`
+
+Default body and most UI stay regular by inheritance (Button and Badge included). Primitive chrome may set weight only via `@apply` inside the component (see `src/components/ui/font-weight.css` and `card.css`), not via call-site utilities.
+
 ### Headings
 
 `h1`–`h6` styles are defined with `@apply` in `@layer base` (`src/index.css`). Use **naked** heading tags — no `text-*`, `font-*`, or `tracking-*` utilities on them unless explicitly requested as an exception.
@@ -101,15 +112,18 @@ Pick the level that matches the intended scale instead of overriding a larger le
 
 Body text, copy inside content components, and common text applications inherit the **base** size — the same as an unstyled `<p>` (`text-base` on `body` in `src/index.css`).
 
-Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Add a size utility only when you intentionally want denser or larger type (e.g. `text-xs` meta lines). Control chrome may define its own size/weight: **Button → `text-base` + `font-normal`**, **Badge → `text-sm` + `font-normal`**.
+Unstyled `<p>` also defaults to **`text-muted-foreground`** via `@apply` in `@layer base`. Add `text-foreground` (or a semantic color) only when the paragraph should be primary emphasis.
+
+Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Add a size utility only when you intentionally want denser or larger type (e.g. `text-xs` meta lines). Control chrome may define its own size: **Button → `text-base`**, **Badge → `text-sm`** (regular weight by inheritance; no weight utilities).
 
 Examples:
 
-- ✅ `<p>Jordan Reyes · lab · Ordered Aug 5</p>` with `text-xs` only on the meta line if needed
-- ✅ Unstyled `<p>` for default body copy
+- ✅ `<p>Ordered Aug 5</p>` — muted by default
+- ✅ `<p className="text-foreground">Pending request from Alex Chen</p>` — intentional primary copy
 - ✅ `<h4>Schedule</h4>` (naked; level matches scale)
 - ❌ `Card` / `DialogContent` / `SheetContent` with root `text-sm` so children shrink by default
 - ❌ `<h1 className="text-xl font-semibold">Schedule</h1>`
+- ❌ `<p className="text-muted-foreground">…</p>` when muted is already the default (redundant)
 
 ## UI copy
 
@@ -135,19 +149,23 @@ Keep medication names, test names, lab result names, and patient names in their 
 
 ### Buttons
 
+Do **not** use `Button` `variant="secondary"`. Use `variant="outline"` for that role. Do not reintroduce secondary on the Button primitive.
+
 Do not use ellipses (`…` or `...`) in button labels. The dialog or next step makes the incomplete action clear — the button should be a complete verb phrase.
 
 Examples:
 
+- ✅ `<Button variant="outline">View</Button>`
 - ✅ Grant
 - ✅ Deny
 - ✅ Release permanently
+- ❌ `<Button variant="secondary">View</Button>`
 - ❌ Grant…
 - ❌ Deny...
 
 ### Button groups
 
-When buttons are placed close together in a group, order them by priority:
+When buttons are placed close together in a group, order them by priority. Here “primary / secondary / tertiary” means **action emphasis**, not `variant="secondary"`.
 
 - **Default (left / start aligned):** primary → secondary → tertiary, left to right
 - **Right-aligned** (dialog footers, `justify-end`, trailing action clusters): reverse the order so the primary action sits on the right edge
@@ -166,7 +184,7 @@ Segmented toggles (role switch, schedule view) are mutually exclusive options, n
 
 Use **outline badges only** (`variant="outline"`). Do not use filled badge variants (`default`, `secondary`, `destructive`, `ghost`, `link`, or solid notification pills).
 
-Badge text is **regular weight** (`font-normal`) and `text-sm` — set on the Badge primitive; do not override with `font-medium`.
+Badge text is **regular weight** (inherited) and `text-sm` — set on the Badge primitive; do not add font-weight utilities.
 
 Color meaning comes from documented tint helpers on the Badge module (`notificationBadgeClassName`, status tints). Compact counts use `countBadgeClassName` — do not re-declare `h-5` / `px-*` at call sites.
 
@@ -180,7 +198,8 @@ Examples:
 ### Lab / result card tags
 
 - Green — Just released
-- Blue — Temporary access, live countdown
+- Green — Temporary access (`granted_unstarted` and `active` on Labs; live countdown uses neutral `AccessTimer` top-right in `CardContent`)
+- Blue — Access requested
 - Amber — Access pending
 - Neutral/muted — Access expired (not red; expiry is not a rejection)
 - Red — Deny control and denial-reason block only
@@ -188,6 +207,8 @@ Examples:
 ## Theme
 
 The product UI is **light by default and light-only**. Do not follow the OS dark preference for the app shell, pages, or toasts.
+
+Semantic neutrals (`background`, `foreground`, `muted`, `border`, `sidebar`, etc.) use the **Tailwind Gray** ramp via `var(--color-gray-*)` in `src/index.css`.
 
 - Root theme is forced to light via `ThemeProvider` (`src/components/theme-provider.tsx`)
 - Do not pass `theme="system"` to Sonner or other theme-aware components

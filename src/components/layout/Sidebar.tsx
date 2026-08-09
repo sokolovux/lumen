@@ -70,8 +70,8 @@ export function Sidebar() {
                   cn(
                     'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent/50',
+                      ? 'bg-gray-200 text-sidebar-accent-foreground'
+                      : 'text-sidebar-foreground hover:bg-gray-100',
                   )
                 }
               >

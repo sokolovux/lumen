@@ -186,7 +186,7 @@ export function VisitPanel({
                 <Button
                   onClick={handleFinishVisit}
                   disabled={!state.hasSubmittedOnce}
-                  variant="secondary"
+                  variant="outline"
                 >
                   Finish visit
                 </Button>

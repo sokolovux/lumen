@@ -31,8 +31,10 @@ export function CosignQueueList() {
   if (!hasNoteInReview) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-        <p className="text-sm font-medium">
-          {isPhysician ? 'No notes awaiting cosign' : 'No notes in review'}
+        <p className="text-sm">
+          <strong>
+            {isPhysician ? 'No notes awaiting cosign' : 'No notes in review'}
+          </strong>
         </p>
         <p className="mt-1 max-w-sm text-xs text-muted-foreground">
           {isPhysician
@@ -48,7 +50,7 @@ export function CosignQueueList() {
       <CardHeader>
         <div>
           <div className="flex items-center gap-2">
-            <p className="font-medium">Jordan Reyes</p>
+            <p><strong>Jordan Reyes</strong></p>
             {showUnread && (
               <Badge
                 variant="outline"
@@ -66,7 +68,7 @@ export function CosignQueueList() {
           </p>
         </div>
         <CardAction>
-          <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
+          <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-600">
             {getNoteStatusLabel(state.noteStatus)}
           </Badge>
         </CardAction>

@@ -29,7 +29,7 @@
   }
 
   [data-slot="card-header"] {
-    @apply grid auto-rows-min items-start gap-1 rounded-t-xl;
+    @apply grid auto-rows-min items-start gap-2 rounded-t-xl;
   }
 
   [data-slot="card-header"]:has([data-slot="card-action"]) {
@@ -45,7 +45,7 @@
   }
 
   [data-slot="card-title"] {
-    @apply font-heading text-base leading-snug font-medium;
+    @apply font-heading text-base leading-snug font-semibold;
   }
 
   [data-slot="card"][data-size="sm"] [data-slot="card-title"] {

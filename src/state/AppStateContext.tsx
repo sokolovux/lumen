@@ -370,7 +370,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
                 status: 'released' as const,
                 grantExpiresAt: undefined,
                 grantConfirmedAt: undefined,
-                justReleased: true,
                 denialReason: undefined,
               }
             : item,
@@ -388,17 +387,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
                 : 'Released result (direct release)',
           ),
         ],
-      }
-    }
-
-    case 'MARK_LAB_RESULT_VIEWED': {
-      return {
-        ...state,
-        labs: state.labs.map((lab) =>
-          lab.id === action.labId && lab.justReleased
-            ? { ...lab, justReleased: false }
-            : lab,
-        ),
       }
     }
 

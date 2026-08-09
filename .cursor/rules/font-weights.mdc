@@ -1,0 +1,29 @@
+---
+description: No font-weight utilities — use tags or strong
+alwaysApply: true
+---
+
+# Font weights — tags and `<strong>` only
+
+Do **not** use font-weight Tailwind utilities (`font-normal`, `font-medium`, `font-semibold`, `font-bold`, etc.) at call sites.
+
+Adjust weight only by:
+
+1. **Semantic text tags** — naked `h1`–`h6` (semibold from `@layer base`)
+2. **`<strong>`** — semibold + `text-foreground` from `@layer base`
+
+```tsx
+// ✅
+<p>Supporting copy</p>
+<p><strong>HbA1c</strong></p>
+<h6>Medications</h6>
+
+// ❌
+<p className="font-semibold">HbA1c</p>
+<p className="font-medium">Title</p>
+<span className="font-bold">…</span>
+```
+
+Primitive chrome may set weight only via `@apply` inside the component (co-located CSS / `@layer components`), never via call-site `className` weight utilities. Button and Badge stay regular by inheritance — do not add weight utilities on them.
+
+See `design.md` → Typography → Font weights.

@@ -59,7 +59,7 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
 
           {showExpiredOverlay && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 text-center">
-              <p className="text-base font-semibold">Access has expired</p>
+              <p className="text-base"><strong>Access has expired</strong></p>
               <p className="max-w-sm text-sm text-muted-foreground">
                 Your temporary access window closed. Request access again if you
                 still need this result.

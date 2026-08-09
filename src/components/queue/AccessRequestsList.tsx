@@ -79,8 +79,7 @@ function PhysicianAccessRequestsList() {
     toast.success('Result permanently released — PA notified')
   }
 
-  const handleViewInChart = (labId: string) => {
-    markViewed(labId)
+  const handleViewInChart = () => {
     dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
     navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`)
   }
@@ -118,21 +117,17 @@ function PhysicianAccessRequestsList() {
             />
           ) : (
             <div className="space-y-3">
-              {unresolvedLabs.map((lab) => {
-                const isUnread = !state.viewedRequests.includes(lab.id)
-                return (
+              {unresolvedLabs.map((lab) => (
                   <RequestQueueCard
                     key={lab.id}
                     lab={lab}
                     mode="physician-inbox"
-                    isUnread={isUnread}
                     onGrant={() => handleOpenGrant(lab.id)}
                     onDeny={() => handleOpenDeny(lab.id)}
                     onRelease={() => handleOpenRelease(lab.id)}
-                    onViewInChart={() => handleViewInChart(lab.id)}
+                    onViewInChart={handleViewInChart}
                   />
-                )
-              })}
+              ))}
             </div>
           )}
         </TabsContent>
@@ -150,7 +145,7 @@ function PhysicianAccessRequestsList() {
                   key={lab.id}
                   lab={lab}
                   mode="physician-history"
-                  onViewInChart={() => handleViewInChart(lab.id)}
+                  onViewInChart={handleViewInChart}
                 />
               ))}
             </div>
@@ -301,7 +296,6 @@ function PaResolvedRow({
     <RequestQueueCard
       lab={lab}
       mode="pa-resolved"
-      isUnread={isUnseen}
       cardRef={rowRef}
       onViewInChart={handleViewInChart}
     />
@@ -311,7 +305,7 @@ function PaResolvedRow({
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-      <p className="text-sm font-medium">{title}</p>
+      <p className="text-sm"><strong>{title}</strong></p>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
     </div>
   )

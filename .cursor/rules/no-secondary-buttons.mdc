@@ -1,0 +1,22 @@
+---
+description: Do not use Button variant secondary — use outline instead
+alwaysApply: true
+---
+
+# No secondary buttons
+
+Never use `Button` `variant="secondary"`. Use `variant="outline"` instead.
+
+- Allowed button variants in product UI: `default`, `outline`, `ghost`, `destructive`, `success`, `link` (and size props as documented)
+- Action-priority language in button groups (“primary → secondary → tertiary”) refers to **emphasis order**, not `variant="secondary"`
+- Do not reintroduce `secondary` on the Button primitive
+
+```tsx
+// ✅
+<Button variant="outline">View</Button>
+
+// ❌
+<Button variant="secondary">View</Button>
+```
+
+See `design.md` → UI copy → Buttons.

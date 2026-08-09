@@ -7,14 +7,18 @@ alwaysApply: true
 
 Body copy, text inside content components, and common UI text **inherit the app base size** (`text-base` on `body`, same as an unstyled `<p>`).
 
+Unstyled `<p>` defaults to **`text-muted-foreground`** (`@apply` in `@layer base`). Use `text-foreground` only when the paragraph should read as primary emphasis. Do not re-add `text-muted-foreground` on `<p>` by default.
+
 Do **not** set `text-sm` / `text-xs` / etc. on layout shells or content wrappers (Card, Dialog content, Sheet content, TabsContent, page sections) just to “match the UI.”
 
 Only add a size utility when deliberately denser or larger:
 
-- ✅ `<p>Supporting copy</p>` or no size class (inherits base)
-- ✅ `<p className="text-xs text-muted-foreground">Ordered Aug 5</p>` — intentional meta
-- ✅ Button uses `text-base` + `font-normal`; Badge uses `text-sm` + `font-normal` (on the primitives)
+- ✅ `<p>Supporting copy</p>` — muted + base by default
+- ✅ `<p className="text-xs">Ordered Aug 5</p>` — intentional denser meta (still muted)
+- ✅ `<p className="text-foreground">Pending request from Alex Chen</p>` — intentional primary
+- ✅ Button uses `text-base`; Badge uses `text-sm` (on the primitives; regular weight by inheritance)
 - ✅ Input and other control chrome may define their own size tokens
 - ❌ `<Card className="text-sm">` or Dialog/Sheet roots forcing `text-sm` for all children
+- ❌ `<p className="text-muted-foreground">…</p>` when muted is already the default
 
 See `design.md` → Typography → Default size.

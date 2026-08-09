@@ -45,7 +45,7 @@ export function PatientsPage() {
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{patient.name}</p>
+                      <p><strong>{patient.name}</strong></p>
                       <p className="text-xs text-muted-foreground">{patient.mrn}</p>
                     </div>
                   </div>

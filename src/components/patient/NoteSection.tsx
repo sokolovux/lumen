@@ -56,11 +56,11 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
   const statusVariant = (() => {
     switch (state.noteStatus) {
       case 'submitted':
-        return 'border-blue-200 bg-blue-50 text-blue-700'
+        return 'border-blue-200 bg-blue-50 text-blue-600'
       case 'returned':
-        return 'border-amber-200 bg-amber-50 text-amber-700'
+        return 'border-amber-200 bg-amber-50 text-amber-600'
       case 'cosigned':
-        return 'border-green-200 bg-green-50 text-green-700'
+        return 'border-green-200 bg-green-50 text-green-600'
       default:
         return ''
     }
@@ -77,7 +77,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
 
       {state.returnFeedback && state.noteStatus === 'returned' && (
         <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
-          <p className="font-medium">Return feedback</p>
+          <p><strong>Return feedback</strong></p>
           <p>{state.returnFeedback}</p>
         </div>
       )}
@@ -125,7 +125,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
 
       {state.noteHistory.length > 0 && (
         <div className="mt-3">
-          <p className="mb-1 text-xs font-medium text-muted-foreground">Version history</p>
+          <p className="mb-1 text-xs"><strong>Version history</strong></p>
           <ul className="space-y-1">
             {state.noteHistory.map((v) => (
               <li key={v.id} className="text-xs text-muted-foreground">

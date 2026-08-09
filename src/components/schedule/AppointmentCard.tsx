@@ -37,7 +37,7 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
     <Card size="sm" interactive onClick={handleClick}>
       <CardHeader>
         <div>
-          <p className="text-sm font-medium">{appointment.patientName}</p>
+          <p className="text-sm"><strong>{appointment.patientName}</strong></p>
           <p className="text-xs text-muted-foreground">{appointment.time}</p>
         </div>
         {statusTint && (

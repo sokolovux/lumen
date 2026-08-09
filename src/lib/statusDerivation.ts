@@ -35,27 +35,14 @@ export function getLabStatusLabel(
     case 'pending': return physicianChartLocked ? 'Unreleased' : 'Locked'
     case 'requested': return 'Access requested'
     case 'granted_unstarted':
-      return physicianChartLocked
-        ? 'Granted — not yet started'
+      return surface === 'labs'
+        ? 'Temporary access'
         : 'Grant pending confirmation'
     case 'active': return 'Temporary access'
     case 'expired': return 'Access expired'
     case 'denied': return physicianChartLocked ? 'Unreleased' : 'Access denied'
     case 'released': return 'Released'
   }
-}
-
-/** Live badge copy for Labs & Results when a grant is counting down (shared expiresAt). */
-export function getActiveGrantBadgeLabel(
-  role: 'pa' | 'physician',
-  expiresAt: number,
-  now: number,
-): string {
-  const remaining = formatCountdownHms(expiresAt, now)
-  if (role === 'physician') {
-    return `Access active — ${remaining} remaining`
-  }
-  return `Available for ${remaining}`
 }
 
 /** Outline Badge tints for lab statuses. Physician labs surface treats denied as neutral. */
@@ -68,15 +55,15 @@ export function getLabStatusTint(
     surface === 'labs' && role === 'physician'
   switch (status) {
     case 'requested':
+      return 'border-blue-200 bg-blue-50 text-blue-600'
     case 'granted_unstarted':
     case 'active':
-      return 'border-blue-200 bg-blue-50 text-blue-700'
+    case 'released':
+      return 'border-green-200 bg-green-50 text-green-600'
     case 'denied':
       return physicianChartLocked
         ? ''
-        : 'border-destructive/30 bg-destructive/10 text-destructive'
-    case 'released':
-      return 'border-green-200 bg-green-50 text-green-700'
+        : 'border-red-200 bg-red-50 text-red-600'
     case 'pending':
     case 'expired':
     default:
@@ -97,10 +84,10 @@ export function getScheduleStatusLabel(status: ScheduleStatus): string {
 
 /** Outline Badge tints for schedule statuses. `scheduled` has no pill. */
 export const scheduleStatusTint: Partial<Record<ScheduleStatus, string>> = {
-  with_pa: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  with_physician: 'border-blue-200 bg-blue-50 text-blue-700',
-  finished: 'border-green-200 bg-green-50 text-green-700',
-  late: 'border-amber-200 bg-amber-50 text-amber-700',
+  with_pa: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+  with_physician: 'border-blue-200 bg-blue-50 text-blue-600',
+  finished: 'border-green-200 bg-green-50 text-green-600',
+  late: 'border-amber-200 bg-amber-50 text-amber-600',
 }
 
 export function canPaViewLab(lab: LabResult): boolean {

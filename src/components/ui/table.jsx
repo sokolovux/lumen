@@ -47,7 +47,7 @@ function TableFooter({
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
+      className={cn("border-t bg-muted/50 [&>tr]:last:border-b-0", className)}
       {...props} />
   );
 }
@@ -75,7 +75,7 @@ function TableHead({
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        "h-10 px-2 text-left align-middle whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props} />

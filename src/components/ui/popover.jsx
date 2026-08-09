@@ -61,7 +61,7 @@ function PopoverTitle({
   return (
     <div
       data-slot="popover-title"
-      className={cn("font-medium", className)}
+      className={className}
       {...props} />
   );
 }

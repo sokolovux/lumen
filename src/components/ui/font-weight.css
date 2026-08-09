@@ -1,0 +1,49 @@
+/* Font weight for UI primitives — @apply only; never call-site weight utilities. */
+@layer components {
+  [data-slot="accordion-trigger"],
+  [data-slot="alert-title"],
+  [data-slot="alert-dialog-title"],
+  [data-slot="attachment-title"],
+  [data-slot="button-group-text"],
+  [data-slot="combobox-chip"],
+  [data-slot="context-menu-label"],
+  [data-slot="dialog-title"],
+  [data-slot="drawer-title"],
+  [data-slot="dropdown-menu-label"],
+  [data-slot="empty-title"],
+  [data-slot="field-label"],
+  [data-slot="field-legend"],
+  [data-slot="input-group-addon"],
+  [data-slot="item-title"],
+  [data-slot="kbd"],
+  [data-slot="label"],
+  [data-slot="menubar-trigger"],
+  [data-slot="menubar-label"],
+  [data-slot="message-header"],
+  [data-slot="message-footer"],
+  [data-slot="navigation-menu-trigger"],
+  [data-slot="popover-title"],
+  [data-slot="questionnaire-progress"],
+  [data-slot="questionnaire-title"],
+  [data-slot="questionnaire-choice-shortcut"],
+  [data-slot="sheet-title"],
+  [data-slot="table-footer"],
+  [data-slot="table-head"],
+  [data-slot="tabs-trigger"],
+  [data-slot="toggle"] {
+    @apply font-semibold;
+  }
+
+  [data-slot="input"]::file-selector-button {
+    @apply font-semibold;
+  }
+
+  [cmdk-group-heading] {
+    @apply font-semibold;
+  }
+
+  [data-slot="calendar"] .rdp-dropdowns,
+  [data-slot="calendar"] .rdp-caption_label {
+    @apply font-semibold;
+  }
+}

@@ -53,26 +53,26 @@ export function PatientDetailTabs({
         <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Today&apos;s visit</p>
+              <p><strong>Today&apos;s visit</strong></p>
               <p className="text-xs text-muted-foreground">Aug 10, 2026 · 10:30 AM</p>
             </div>
             <Button
               size="sm"
-              variant={state.selectedVisitId === 'today' ? 'secondary' : 'default'}
+              variant={state.selectedVisitId === 'today' ? 'outline' : 'default'}
               onClick={onOpenTodayVisit}
             >
               {state.selectedVisitId === 'today' ? 'Visit open' : 'Open visit'}
             </Button>
           </div>
         </div>
-        <p className="text-xs font-medium text-muted-foreground">Past visits</p>
+        <p className="text-xs"><strong>Past visits</strong></p>
         {PAST_VISITS.map((visit) => (
           <div key={visit.id} className="rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm">{visit.label}</p>
               <Button
                 size="sm"
-                variant={state.selectedVisitId === visit.id ? 'secondary' : 'outline'}
+                variant="outline"
                 onClick={() => onOpenPastVisit(visit.id)}
               >
                 {state.selectedVisitId === visit.id ? 'Open' : 'View'}
@@ -113,7 +113,7 @@ export function PatientDetailTabs({
               <div key={med.id} className="rounded-lg border p-3">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium">{med.name}</p>
+                    <p className="text-sm"><strong>{med.name}</strong></p>
                     <p className="text-xs text-muted-foreground">
                       {med.dose} · {med.frequency}
                     </p>
@@ -122,8 +122,8 @@ export function PatientDetailTabs({
                     variant="outline"
                     className={
                       med.status === 'active'
-                        ? 'border-green-200 bg-green-50 text-green-700'
-                        : 'border-destructive/30 bg-destructive/10 text-destructive'
+                        ? 'border-green-200 bg-green-50 text-green-600'
+                        : 'border-red-200 bg-red-50 text-red-600'
                     }
                   >
                     {med.status === 'active' ? 'Active' : 'Discontinued'}
@@ -169,10 +169,10 @@ export function PatientDetailTabs({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs text-muted-foreground">
-                    <th className="pb-2 pr-4 font-medium">Timestamp</th>
-                    <th className="pb-2 pr-4 font-medium">Actor</th>
-                    <th className="pb-2 pr-4 font-medium">Action</th>
-                    <th className="pb-2 font-medium">Detail</th>
+                    <th className="pb-2 pr-4"><strong>Timestamp</strong></th>
+                    <th className="pb-2 pr-4"><strong>Actor</strong></th>
+                    <th className="pb-2 pr-4"><strong>Action</strong></th>
+                    <th className="pb-2"><strong>Detail</strong></th>
                   </tr>
                 </thead>
                 <tbody>

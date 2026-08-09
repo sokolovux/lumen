@@ -54,8 +54,6 @@ export interface LabResult {
   grantExpiresAt?: number
   grantConfirmedAt?: number
   denialReason?: string
-  /** PA: set on permanent release; cleared the first time PA opens this result */
-  justReleased?: boolean
   /** PA display-only: denial block dismissed on Labs tab; audit / My Requests unchanged */
   denialDismissed?: boolean
 }
@@ -154,7 +152,6 @@ export type AppAction =
   | { type: 'CONFIRM_LAB_GRANT'; labId: string }
   | { type: 'DENY_LAB_ACCESS'; labId: string; feedback: string }
   | { type: 'RELEASE_LAB'; labId: string }
-  | { type: 'MARK_LAB_RESULT_VIEWED'; labId: string }
   | { type: 'DISMISS_LAB_DENIAL'; labId: string }
   | { type: 'EXPIRE_LAB'; labId: string }
   | { type: 'DISMISS_EXPIRY_MODAL' }

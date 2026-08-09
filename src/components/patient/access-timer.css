@@ -1,0 +1,5 @@
+@layer components {
+  [data-slot="access-timer"] [data-slot="badge"] {
+    @apply font-mono tabular-nums;
+  }
+}
