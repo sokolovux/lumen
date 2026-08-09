@@ -27,8 +27,8 @@ function displayStatus(
   visitState: KanbanColumnProps['visitState'],
 ): Appointment['status'] {
   const base = columnStatus(apt, visitState)
-  // Column already conveys stage — hide late/status pills from with PA onward
-  if (base === 'with_pa' || base === 'with_physician' || base === 'finished') {
+  // Column already conveys stage — hide late/status pills from with Assistant onward
+  if (base === 'with_assistant' || base === 'with_physician' || base === 'finished') {
     return 'scheduled'
   }
   if (isLateAppointment(apt.time, base)) return 'late'
@@ -46,12 +46,12 @@ export function KanbanColumn({
   )
 
   return (
-    <div className="flex min-w-[200px] flex-1 flex-col rounded-lg border bg-muted/20">
-      <div className="border-b px-3 py-2">
+    <div className="flex min-w-[200px] flex-1 flex-col gap-3 border-r bg-sidebar p-6 last:border-r-0">
+      <div>
         <h6>{label}</h6>
-        <p className="text-xs text-muted-foreground">{columnAppointments.length} appointments</p>
+        <p className="text-sm">{columnAppointments.length} appointments</p>
       </div>
-      <div className="flex flex-col gap-2 p-2">
+      <div className="flex flex-col gap-2">
         {columnAppointments.length === 0 ? (
           <p className="px-2 py-4 text-center text-xs text-muted-foreground">No appointments</p>
         ) : (

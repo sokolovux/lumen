@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DEMO_PA_NAME } from '@/lib/scheduleData'
+import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
 import {
   formatGrantDurationLabel,
   getLabStatusLabel,
@@ -49,7 +49,7 @@ function ResultCardShell({
   role: Role
   surface?: 'labs' | 'requests'
   badgeLabel?: string
-  /** Queue PA awaiting: outline with no status tint */
+  /** Queue Assistant awaiting: outline with no status tint */
   plainBadge?: boolean
   showTimer?: boolean
   children?: ReactNode
@@ -90,13 +90,13 @@ function ResultCardShell({
   )
 }
 
-function LabsPaGallery() {
+function LabsAssistantGallery() {
   const duration = formatGrantDurationLabel('10m' satisfies GrantDuration)
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Case title="pending" description="Locked. First request.">
-        <ResultCardShell status="pending" role="pa">
+        <ResultCardShell status="pending" role="assistant">
           <Button variant="outline">
             <Lock className="size-3.5" />
             Request access
@@ -105,7 +105,7 @@ function LabsPaGallery() {
       </Case>
 
       <Case title="requested" description="Waiting on physician. Button disabled.">
-        <ResultCardShell status="requested" role="pa">
+        <ResultCardShell status="requested" role="assistant">
           <Button variant="outline" disabled>
             <Lock className="size-3.5" />
             Request access
@@ -117,7 +117,7 @@ function LabsPaGallery() {
         title="granted_unstarted"
         description="Temporary access (green). Confirm before countdown."
       >
-        <ResultCardShell status="granted_unstarted" role="pa">
+        <ResultCardShell status="granted_unstarted" role="assistant">
           <Button variant="outline">
             <Unlock className="size-3.5" />
             View for {duration}
@@ -126,7 +126,7 @@ function LabsPaGallery() {
       </Case>
 
       <Case title="active" description="Mono timer top-right. View opens document.">
-        <ResultCardShell status="active" role="pa" showTimer>
+        <ResultCardShell status="active" role="assistant" showTimer>
           <Button variant="outline">
             View
           </Button>
@@ -134,7 +134,7 @@ function LabsPaGallery() {
       </Case>
 
       <Case title="expired" description="Window ended. Re-request.">
-        <ResultCardShell status="expired" role="pa">
+        <ResultCardShell status="expired" role="assistant">
           <Button variant="outline">
             <Lock className="size-3.5" />
             Request access again
@@ -143,13 +143,13 @@ function LabsPaGallery() {
       </Case>
 
       <Case title="denied" description="Denial block with dismiss X (Labs only).">
-        <ResultCardShell status="denied" role="pa">
+        <ResultCardShell status="denied" role="assistant">
           <div className="space-y-3">
             <Button variant="outline">
               <Lock className="size-3.5" />
               Request access again
             </Button>
-            <div className="relative rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
+            <div className="relative rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
               <button
                 type="button"
                 className="absolute top-2 right-2 rounded-md p-0.5 text-destructive/70"
@@ -158,7 +158,7 @@ function LabsPaGallery() {
                 <X className="size-3.5" />
               </button>
               <p className="text-sm"><strong>Request was denied.</strong></p>
-              <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
+              <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
               <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
             </div>
           </div>
@@ -169,7 +169,7 @@ function LabsPaGallery() {
         title="denied · dismissed"
         description="Badge back to Locked; denial block gone. everDenied → Request access again."
       >
-        <ResultCardShell status="pending" role="pa">
+        <ResultCardShell status="pending" role="assistant">
           <Button variant="outline">
             <Lock className="size-3.5" />
             Request access again
@@ -178,7 +178,7 @@ function LabsPaGallery() {
       </Case>
 
       <Case title="released" description="Permanent access.">
-        <ResultCardShell status="released" role="pa">
+        <ResultCardShell status="released" role="assistant">
           <Button variant="outline">
             View
           </Button>
@@ -218,9 +218,9 @@ function LabsPhysicianGallery() {
                 Release permanently
               </Button>
             </div>
-            <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
+            <div className="space-y-2 rounded-md border bg-muted/40 px-3 py-2.5">
               <p className="text-sm text-foreground">
-                Pending request from {DEMO_PA_NAME}
+                Pending request from {DEMO_ASSISTANT_NAME}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="success">
@@ -329,9 +329,9 @@ function QueuePhysicianGallery() {
                 Release permanently
               </Button>
             </div>
-            <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
+            <div className="space-y-2 rounded-md border bg-muted/40 px-3 py-2.5">
               <p className="text-sm text-foreground">
-                Pending request from {DEMO_PA_NAME}
+                Pending request from {DEMO_ASSISTANT_NAME}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="success">
@@ -404,7 +404,7 @@ function QueuePhysicianGallery() {
   )
 }
 
-function QueuePaGallery() {
+function QueueAssistantGallery() {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Case
@@ -413,7 +413,7 @@ function QueuePaGallery() {
       >
         <ResultCardShell
           status="requested"
-          role="pa"
+          role="assistant"
           surface="requests"
           badgeLabel="Access pending"
           plainBadge
@@ -424,7 +424,7 @@ function QueuePaGallery() {
         title="Resolved · granted_unstarted"
         description="View in chart only (navigate, no start)."
       >
-        <ResultCardShell status="granted_unstarted" role="pa" surface="requests">
+        <ResultCardShell status="granted_unstarted" role="assistant" surface="requests">
           <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
@@ -433,7 +433,7 @@ function QueuePaGallery() {
       </Case>
 
       <Case title="Resolved · active" description="Temporary access badge + View in chart.">
-        <ResultCardShell status="active" role="pa" surface="requests">
+        <ResultCardShell status="active" role="assistant" surface="requests">
           <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
@@ -442,24 +442,24 @@ function QueuePaGallery() {
       </Case>
 
       <Case title="Resolved · expired" description="No View in chart.">
-        <ResultCardShell status="expired" role="pa" surface="requests" />
+        <ResultCardShell status="expired" role="assistant" surface="requests" />
       </Case>
 
       <Case
         title="Resolved · denied"
         description="Denial block, no dismiss X, no buttons."
       >
-        <ResultCardShell status="denied" role="pa" surface="requests">
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
+        <ResultCardShell status="denied" role="assistant" surface="requests">
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
             <p className="text-sm"><strong>Request was denied.</strong></p>
-            <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
+            <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
             <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
           </div>
         </ResultCardShell>
       </Case>
 
       <Case title="Resolved · released" description="View in chart.">
-        <ResultCardShell status="released" role="pa" surface="requests">
+        <ResultCardShell status="released" role="assistant" surface="requests">
           <Button size="sm" variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
@@ -473,15 +473,15 @@ function QueuePaGallery() {
 
 export function LabResultCardsGallery() {
   return (
-    <Tabs defaultValue="labs-pa">
+    <Tabs defaultValue="labs-assistant">
       <TabsList>
-        <TabsTrigger value="labs-pa">Labs · PA</TabsTrigger>
+        <TabsTrigger value="labs-assistant">Labs · Assistant</TabsTrigger>
         <TabsTrigger value="labs-physician">Labs · Physician</TabsTrigger>
         <TabsTrigger value="queue-physician">Queue · Physician</TabsTrigger>
-        <TabsTrigger value="queue-pa">Queue · PA</TabsTrigger>
+        <TabsTrigger value="queue-assistant">Queue · Assistant</TabsTrigger>
       </TabsList>
-      <TabsContent value="labs-pa" className="mt-4">
-        <LabsPaGallery />
+      <TabsContent value="labs-assistant" className="mt-4">
+        <LabsAssistantGallery />
       </TabsContent>
       <TabsContent value="labs-physician" className="mt-4">
         <LabsPhysicianGallery />
@@ -489,8 +489,8 @@ export function LabResultCardsGallery() {
       <TabsContent value="queue-physician" className="mt-4">
         <QueuePhysicianGallery />
       </TabsContent>
-      <TabsContent value="queue-pa" className="mt-4">
-        <QueuePaGallery />
+      <TabsContent value="queue-assistant" className="mt-4">
+        <QueueAssistantGallery />
       </TabsContent>
     </Tabs>
   )

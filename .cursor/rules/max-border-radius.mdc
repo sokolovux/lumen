@@ -1,0 +1,28 @@
+---
+description: Border radius max is md
+alwaysApply: true
+---
+
+# Border radius — max `md`
+
+No UI element may use a border radius larger than **`md`**.
+
+Allowed: `rounded-none`, `rounded-xs`, `rounded-sm`, `rounded-md` (and matching side variants like `rounded-t-md`).
+
+`rounded-xs` is half of `rounded-sm` (`--radius-xs` in `src/index.css`). Badges use `rounded-xs`.
+
+Banned: `rounded-lg`, `rounded-xl`, `rounded-2xl`, `rounded-3xl`, `rounded-4xl`, and any arbitrary radius larger than the `md` token.
+
+```tsx
+// ✅
+<div className="rounded-md border">…</div>
+<Card>…</Card> {/* card chrome uses rounded-md */}
+
+// ❌
+<div className="rounded-lg border">…</div>
+<div className="rounded-xl">…</div>
+```
+
+**Exception:** `rounded-full` only for geometrically circular controls (avatar, radio indicator, switch thumb/track, progress dots). Do not use `rounded-full` for cards, panels, menus, inputs, or buttons.
+
+See `design.md` → Border radius.

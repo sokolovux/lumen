@@ -14,7 +14,7 @@ import {
   getLabStatusTint,
 } from '@/lib/statusDerivation'
 import { AccessTimer } from '@/components/patient/AccessTimer'
-import { DEMO_PA_NAME } from '@/lib/scheduleData'
+import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
@@ -41,7 +41,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
   const [releaseOpen, setReleaseOpen] = useState(false)
   const [startWindowOpen, setStartWindowOpen] = useState(false)
   const [documentOpen, setDocumentOpen] = useState(false)
-  const isPa = state.role === 'pa'
+  const isAssistant = state.role === 'assistant'
   const isPhysician = state.role === 'physician'
   const now = Date.now()
   const durationLabel = formatGrantDurationLabel(lab.grantDuration ?? '10m')
@@ -75,7 +75,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
   const handleGrant = (duration: GrantDuration) => {
     dispatch({ type: 'GRANT_LAB_ACCESS', labId: lab.id, duration })
     setGrantOpen(false)
-    toast.success('Access granted — awaiting PA confirmation')
+    toast.success('Access granted — awaiting assistant confirmation')
   }
 
   const handleDeny = (feedback: string) => {
@@ -90,15 +90,15 @@ export function LabResultCard({ lab }: LabResultCardProps) {
     setReleaseOpen(false)
     toast.success(
       asResponse
-        ? 'Result permanently released — PA notified'
+        ? 'Result permanently released — assistant notified'
         : 'Result permanently released',
     )
   }
 
   const showTimer = lab.status === 'active' && Boolean(lab.grantExpiresAt)
-  // Labs PA only: dismissed denial reads as Locked; My Requests keeps denied
+  // Labs assistant only: dismissed denial reads as Locked; My Requests keeps denied
   const badgeStatus =
-    isPa && lab.status === 'denied' && lab.denialDismissed
+    isAssistant && lab.status === 'denied' && lab.denialDismissed
       ? 'pending'
       : lab.status
 
@@ -129,7 +129,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
                   </p>
                 </div>
               </div>
-              {isPa && (
+              {isAssistant && (
                 <PaActions
                   lab={lab}
                   durationLabel={durationLabel}
@@ -272,7 +272,7 @@ function PaActions({
             <Lock className="size-3.5" />
             {requestLabel}
           </Button>
-          <div className="relative rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
+          <div className="relative rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
             <button
               type="button"
               onClick={onDismissDenial}
@@ -285,7 +285,7 @@ function PaActions({
               <X className="size-3.5" />
             </button>
             <p className="text-sm"><strong>Request was denied.</strong></p>
-            <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
+            <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
             <p className="mt-0.5 text-sm">{lab.denialReason}</p>
           </div>
         </div>
@@ -325,9 +325,9 @@ function PhysicianActions({
       </div>
 
       {lab.status === 'requested' && (
-        <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
+        <div className="space-y-2 rounded-md border bg-muted/40 px-3 py-2.5">
           <p className="text-sm text-foreground">
-            Pending request from {DEMO_PA_NAME}
+            Pending request from {DEMO_ASSISTANT_NAME}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="success" onClick={onGrant}>

@@ -1,4 +1,4 @@
-export type Role = 'pa' | 'physician'
+export type Role = 'assistant' | 'physician'
 
 export type NoteStatus =
   | 'not_started'
@@ -20,12 +20,10 @@ export type GrantDuration = '10s' | '10m' | '1h' | '4h' | '24h'
 
 export type ScheduleStatus =
   | 'scheduled'
-  | 'with_pa'
+  | 'with_assistant'
   | 'with_physician'
   | 'finished'
   | 'late'
-
-export type BreadcrumbOrigin = 'schedule' | 'queue' | 'requests' | 'patients'
 
 export type ScheduleView = 'today' | 'fullWeek'
 
@@ -44,17 +42,17 @@ export interface LabResult {
   type: 'lab' | 'imaging'
   orderDate: string
   status: LabStatus
-  /** True the moment PA requests access; never reset */
+  /** True the moment the assistant requests access; never reset */
   everRequested: boolean
   /** True the first time a physician denies; never reset (drives "Request access again") */
   everDenied?: boolean
   requestId?: string
   grantDuration?: GrantDuration
-  /** Set when PA confirms/starts the countdown, not at grant time */
+  /** Set when the assistant confirms/starts the countdown, not at grant time */
   grantExpiresAt?: number
   grantConfirmedAt?: number
   denialReason?: string
-  /** PA display-only: denial block dismissed on Labs tab; audit / My Requests unchanged */
+  /** Assistant display-only: denial block dismissed on Labs tab; audit / My Requests unchanged */
   denialDismissed?: boolean
 }
 
@@ -89,6 +87,7 @@ export interface Appointment {
   patientName: string
   time: string
   date: string
+  kind: string
   status: ScheduleStatus
   isInteractive?: boolean
 }
@@ -119,13 +118,12 @@ export interface AppState {
   meds: Medication[]
   /** Physician: unread submitted notes awaiting cosign */
   cosignUnread: number
-  /** PA: unread returned notes awaiting resubmit */
+  /** Assistant: unread returned notes awaiting resubmit */
   notesReviewUnread: number
   /** Physician: lab ids of incoming requests that have been opened/viewed */
   viewedRequests: string[]
-  /** PA: lab ids of outcomes not yet seen via Resolved-tab viewport entry */
-  paUnseenResolution: string[]
-  breadcrumbOrigin: BreadcrumbOrigin
+  /** Assistant: lab ids of outcomes not yet seen via Resolved-tab viewport entry */
+  assistantUnseenResolution: string[]
   scheduleView: ScheduleView
   expiryModalLabId: string | null
   pendingGrantLabId: string | null
@@ -136,7 +134,6 @@ export type AppAction =
   | { type: 'RESET_DEMO' }
   | { type: 'SET_ROLE'; role: Role }
   | { type: 'SET_SCHEDULE_VIEW'; view: ScheduleView }
-  | { type: 'SET_BREADCRUMB_ORIGIN'; origin: BreadcrumbOrigin }
   | { type: 'OPEN_VISIT'; visitId: 'today' | string }
   | { type: 'CLOSE_VISIT' }
   | { type: 'START_VISIT' }
@@ -160,6 +157,6 @@ export type AppAction =
   | { type: 'DISCONTINUE_MED'; medId: string }
   | { type: 'ADD_MEDICATION'; name: string; dose: string; frequency: string }
   | { type: 'MARK_PHYSICIAN_COSIGN_VIEWED' }
-  | { type: 'MARK_PA_NOTES_REVIEW_VIEWED' }
+  | { type: 'MARK_ASSISTANT_NOTES_REVIEW_VIEWED' }
   | { type: 'MARK_REQUEST_READ'; labId: string }
-  | { type: 'MARK_PA_RESOLUTION_SEEN'; labId: string }
+  | { type: 'MARK_ASSISTANT_RESOLUTION_SEEN'; labId: string }

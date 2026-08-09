@@ -20,8 +20,8 @@ interface LabDocumentViewProps {
 export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewProps) {
   const { state } = useAppState()
   const lab = state.labs.find((l) => l.id === labId)
-  const isPa = state.role === 'pa'
-  const showExpiredOverlay = isPa && lab?.status === 'expired'
+  const isAssistant = state.role === 'assistant'
+  const showExpiredOverlay = isAssistant && lab?.status === 'expired'
 
   if (!lab) return null
 
@@ -35,7 +35,7 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative min-h-56 overflow-hidden rounded-lg border">
+        <div className="relative min-h-56 overflow-hidden rounded-md border">
           <div
             className={cn(
               'space-y-3 p-4 transition-[filter] duration-300',

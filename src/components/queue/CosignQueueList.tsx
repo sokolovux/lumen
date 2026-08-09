@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
 import { Card, CardAction, CardHeader } from '@/components/ui/card'
 import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
@@ -8,19 +8,21 @@ import { getNoteStatusLabel } from '@/lib/statusDerivation'
 export function CosignQueueList() {
   const { state, dispatch } = useAppState()
   const navigate = useNavigate()
+  const location = useLocation()
   const isPhysician = state.role === 'physician'
 
   const hasNoteInReview = state.hasSubmittedOnce
 
   const handleItemClick = () => {
-    dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'queue' })
     if (isPhysician) {
       dispatch({ type: 'MARK_PHYSICIAN_COSIGN_VIEWED' })
     } else {
-      dispatch({ type: 'MARK_PA_NOTES_REVIEW_VIEWED' })
+      dispatch({ type: 'MARK_ASSISTANT_NOTES_REVIEW_VIEWED' })
     }
-    dispatch({ type: 'OPEN_VISIT', visitId: 'today' })
-    navigate(`/patients/${JORDAN_REYES_ID}`)
+    dispatch({ type: 'CLOSE_VISIT' })
+    navigate(`/patients/${JORDAN_REYES_ID}`, {
+      state: { from: `${location.pathname}${location.search}` },
+    })
   }
 
   const showUnread =
@@ -30,7 +32,7 @@ export function CosignQueueList() {
 
   if (!hasNoteInReview) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+      <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-16 text-center">
         <p className="text-sm">
           <strong>
             {isPhysician ? 'No notes awaiting cosign' : 'No notes in review'}

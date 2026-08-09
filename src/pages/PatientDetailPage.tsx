@@ -1,34 +1,26 @@
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import type { BreadcrumbOrigin } from '@/state/types'
+import { Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { PatientDetailTabs, PAST_VISITS } from '@/components/patient/PatientDetailTabs'
 import { VisitPanel } from '@/components/patient/VisitPanel'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 
-const breadcrumbOriginConfig: Record<BreadcrumbOrigin, { label: string; path: string }> = {
-  schedule: { label: 'Schedule', path: '/schedule' },
-  queue: { label: 'Cosign queue', path: '/queue' },
-  requests: { label: 'Access requests', path: '/requests' },
-  patients: { label: 'Patients', path: '/patients' },
+type PatientDetailLocationState = {
+  from?: string
 }
 
 export function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
   const { state, dispatch } = useAppState()
+  const backTo =
+    (location.state as PatientDetailLocationState | null)?.from ?? '/patients'
 
   const tabParam = searchParams.get('tab')
-  const defaultTab = ['visits', 'demographics', 'problems', 'labs', 'audit'].includes(tabParam ?? '')
+  const defaultTab = ['demographics', 'problems', 'labs', 'visits', 'audit'].includes(tabParam ?? '')
     ? tabParam!
-    : 'visits'
+    : 'demographics'
 
   const patient = PATIENTS.find((p) => p.id === patientId)
 
@@ -50,27 +42,11 @@ export function PatientDetailPage() {
 
   const pastVisit = PAST_VISITS.find((v) => v.id === state.selectedVisitId)
   const showVisitPanel = state.selectedVisitId !== null
-  const origin = breadcrumbOriginConfig[state.breadcrumbOrigin]
 
   return (
     <div className="flex h-full overflow-hidden">
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-b px-6 py-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to={origin.path}>{origin.label}</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{patient.name}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h4 className="mt-2">{patient.name}</h4>
-        </div>
+        <PageHeader title={patient.name} backTo={backTo} />
         <div className="flex-1 overflow-y-auto p-6">
           <PatientDetailTabs
             defaultTab={defaultTab}

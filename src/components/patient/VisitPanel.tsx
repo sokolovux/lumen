@@ -77,7 +77,7 @@ export function VisitPanel({
           visible ? 'translate-x-0' : 'translate-x-full',
         )}
       >
-        <div className="flex items-center justify-between border-b px-4 py-3">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
           <div>
             <h6>{displayLabel}</h6>
             <p className="text-xs text-muted-foreground">
@@ -100,7 +100,7 @@ export function VisitPanel({
                   dispatch({ type: 'START_VISIT' })
                   toast.success('Visit started')
                 }}
-                disabled={state.role !== 'pa' && state.role !== 'physician'}
+                disabled={state.role !== 'assistant' && state.role !== 'physician'}
               >
                 Start visit
               </Button>
@@ -129,7 +129,7 @@ export function VisitPanel({
                           </div>
                         ))}
                       </div>
-                      {state.role === 'pa' && state.visitStarted && (
+                      {state.role === 'assistant' && state.visitStarted && (
                         <Button
                           size="sm"
                           onClick={() => {
@@ -154,7 +154,7 @@ export function VisitPanel({
                 <section>
                   <h6 className="mb-1">Confidential note</h6>
                   <p className="mb-2 text-xs text-muted-foreground">
-                    Physician-only. Hidden from PA — no request path.
+                    Physician-only. Hidden from Assistant — no request path.
                   </p>
                   <Textarea
                     placeholder="Confidential physician note..."

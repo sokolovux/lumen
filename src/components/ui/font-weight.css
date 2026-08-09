@@ -29,21 +29,20 @@
   [data-slot="sheet-title"],
   [data-slot="table-footer"],
   [data-slot="table-head"],
-  [data-slot="tabs-trigger"],
   [data-slot="toggle"] {
-    @apply font-semibold;
+    @apply font-medium;
   }
 
   [data-slot="input"]::file-selector-button {
-    @apply font-semibold;
+    @apply font-medium;
   }
 
   [cmdk-group-heading] {
-    @apply font-semibold;
+    @apply font-medium;
   }
 
   [data-slot="calendar"] .rdp-dropdowns,
   [data-slot="calendar"] .rdp-caption_label {
-    @apply font-semibold;
+    @apply font-medium;
   }
 }

@@ -1,0 +1,25 @@
+# Role denominations — Assistant and Physician only
+
+The product has exactly two user roles. Use these denominations everywhere (UI copy, labels, comments, identifiers):
+
+| Role | Code value | Display |
+| --- | --- | --- |
+| Assistant | `'assistant'` | Assistant |
+| Physician | `'physician'` | Physician |
+
+Do **not** use PA, physician assistant, doctor, MD, or other synonyms for these roles in product UI or new code.
+
+```tsx
+// ✅
+{role === 'assistant' ? 'Assistant' : 'Physician'}
+getScheduleStatusLabel('with_assistant') // "With Assistant"
+getRoleLabel(role)
+
+// ❌
+{role === 'pa' ? 'PA' : 'Doctor'}
+'With PA'
+```
+
+Schedule status key: `with_assistant` (label **With Assistant**). Prefer `getRoleLabel(role)` from `@/lib/statusDerivation` for actor strings.
+
+See `design.md` → Roles.

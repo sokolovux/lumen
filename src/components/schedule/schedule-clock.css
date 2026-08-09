@@ -1,0 +1,16 @@
+@keyframes schedule-clock-dot {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@layer components {
+  [data-slot="schedule-clock-dot"] {
+    @apply inline-block size-[3px] shrink-0 rounded-full bg-black;
+    animation: schedule-clock-dot 1.2s ease-in-out infinite;
+  }
+}

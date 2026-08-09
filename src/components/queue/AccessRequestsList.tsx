@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { GrantDuration, LabResult } from '@/state/types'
 import { cn } from '@/lib/utils'
@@ -7,7 +7,7 @@ import { useAppState } from '@/state/AppStateContext'
 import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
-import { isPaResolvedLabStatus } from '@/lib/statusDerivation'
+import { isAssistantResolvedLabStatus } from '@/lib/statusDerivation'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
@@ -23,13 +23,14 @@ export function AccessRequestsList() {
 function PhysicianAccessRequestsList() {
   const { state, dispatch } = useAppState()
   const navigate = useNavigate()
+  const location = useLocation()
   const [grantLabId, setGrantLabId] = useState<string | null>(null)
   const [denyLabId, setDenyLabId] = useState<string | null>(null)
   const [releaseLabId, setReleaseLabId] = useState<string | null>(null)
 
   const unresolvedLabs = state.labs.filter((lab) => lab.status === 'requested')
   const historyLabs = state.labs.filter(
-    (lab) => lab.everRequested && isPaResolvedLabStatus(lab.status),
+    (lab) => lab.everRequested && isAssistantResolvedLabStatus(lab.status),
   )
   const unreadCount = unresolvedLabs.filter(
     (lab) => !state.viewedRequests.includes(lab.id),
@@ -62,7 +63,7 @@ function PhysicianAccessRequestsList() {
     if (!grantLabId) return
     dispatch({ type: 'GRANT_LAB_ACCESS', labId: grantLabId, duration })
     setGrantLabId(null)
-    toast.success('Access granted — awaiting PA confirmation')
+    toast.success('Access granted — awaiting assistant confirmation')
   }
 
   const handleDeny = (feedback: string) => {
@@ -76,12 +77,14 @@ function PhysicianAccessRequestsList() {
     if (!releaseLabId) return
     dispatch({ type: 'RELEASE_LAB', labId: releaseLabId })
     setReleaseLabId(null)
-    toast.success('Result permanently released — PA notified')
+    toast.success('Result permanently released — assistant notified')
   }
 
   const handleViewInChart = () => {
-    dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
-    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`)
+    dispatch({ type: 'CLOSE_VISIT' })
+    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`, {
+      state: { from: `${location.pathname}${location.search}` },
+    })
   }
 
   return (
@@ -113,20 +116,20 @@ function PhysicianAccessRequestsList() {
           {unresolvedLabs.length === 0 ? (
             <EmptyState
               title="No unresolved requests"
-              description="Lab and imaging access requests from PAs will appear here."
+              description="Lab and imaging access requests from assistants will appear here."
             />
           ) : (
             <div className="space-y-3">
               {unresolvedLabs.map((lab) => (
-                  <RequestQueueCard
-                    key={lab.id}
-                    lab={lab}
-                    mode="physician-inbox"
-                    onGrant={() => handleOpenGrant(lab.id)}
-                    onDeny={() => handleOpenDeny(lab.id)}
-                    onRelease={() => handleOpenRelease(lab.id)}
-                    onViewInChart={handleViewInChart}
-                  />
+                <RequestQueueCard
+                  key={lab.id}
+                  lab={lab}
+                  mode="physician-inbox"
+                  onGrant={() => handleOpenGrant(lab.id)}
+                  onDeny={() => handleOpenDeny(lab.id)}
+                  onRelease={() => handleOpenRelease(lab.id)}
+                  onViewInChart={handleViewInChart}
+                />
               ))}
             </div>
           )}
@@ -190,7 +193,7 @@ function PaMyRequestsList() {
     (lab) => lab.everRequested && lab.status === 'requested',
   )
   const resolvedLabs = state.labs.filter(
-    (lab) => lab.everRequested && isPaResolvedLabStatus(lab.status),
+    (lab) => lab.everRequested && isAssistantResolvedLabStatus(lab.status),
   )
 
   return (
@@ -198,12 +201,12 @@ function PaMyRequestsList() {
       <TabsList>
         <TabsTrigger value="resolved">
           Resolved
-          {state.paUnseenResolution.length > 0 && (
+          {state.assistantUnseenResolution.length > 0 && (
             <Badge
               variant="outline"
               className={cn('ml-1.5', countBadgeClassName, notificationBadgeClassName)}
             >
-              {state.paUnseenResolution.length}
+              {state.assistantUnseenResolution.length}
             </Badge>
           )}
         </TabsTrigger>
@@ -229,7 +232,7 @@ function PaMyRequestsList() {
               <PaResolvedRow
                 key={lab.id}
                 lab={lab}
-                isUnseen={state.paUnseenResolution.includes(lab.id)}
+                isUnseen={state.assistantUnseenResolution.includes(lab.id)}
               />
             ))}
           </div>
@@ -248,7 +251,7 @@ function PaMyRequestsList() {
               <RequestQueueCard
                 key={lab.id}
                 lab={lab}
-                mode="pa-awaiting"
+                mode="assistant-awaiting"
               />
             ))}
           </div>
@@ -267,6 +270,7 @@ function PaResolvedRow({
 }) {
   const { dispatch } = useAppState()
   const navigate = useNavigate()
+  const location = useLocation()
   const rowRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -277,7 +281,7 @@ function PaResolvedRow({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          dispatch({ type: 'MARK_PA_RESOLUTION_SEEN', labId: lab.id })
+          dispatch({ type: 'MARK_ASSISTANT_RESOLUTION_SEEN', labId: lab.id })
         }
       },
       { threshold: 0.5 },
@@ -288,14 +292,16 @@ function PaResolvedRow({
   }, [dispatch, isUnseen, lab.id])
 
   const handleViewInChart = () => {
-    dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
-    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`)
+    dispatch({ type: 'CLOSE_VISIT' })
+    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`, {
+      state: { from: `${location.pathname}${location.search}` },
+    })
   }
 
   return (
     <RequestQueueCard
       lab={lab}
-      mode="pa-resolved"
+      mode="assistant-resolved"
       cardRef={rowRef}
       onViewInChart={handleViewInChart}
     />
@@ -304,7 +310,7 @@ function PaResolvedRow({
 
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+    <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-16 text-center">
       <p className="text-sm"><strong>{title}</strong></p>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
     </div>

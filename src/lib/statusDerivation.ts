@@ -1,5 +1,9 @@
-import type { AppState, LabResult, LabStatus, ScheduleStatus } from '@/state/types'
+import type { AppState, LabResult, LabStatus, Role, ScheduleStatus } from '@/state/types'
 import { isLateAppointment } from '@/lib/scheduleData'
+
+export function getRoleLabel(role: Role): string {
+  return role === 'assistant' ? 'Assistant' : 'Physician'
+}
 
 export function jordanStatus(state: Pick<
   AppState,
@@ -9,7 +13,7 @@ export function jordanStatus(state: Pick<
   if (state.noteStatus === 'submitted' || state.noteStatus === 'cosigned') {
     return 'with_physician'
   }
-  if (state.visitStarted) return 'with_pa'
+  if (state.visitStarted) return 'with_assistant'
   return 'scheduled'
 }
 
@@ -26,7 +30,7 @@ export function jordanDisplayStatus(
 /** Labs chart: physician sees pending/denied as neutral "Unreleased". Requests queue uses true outcome labels. */
 export function getLabStatusLabel(
   status: LabStatus,
-  role?: 'pa' | 'physician',
+  role?: Role,
   surface: 'labs' | 'requests' = 'labs',
 ): string {
   const physicianChartLocked =
@@ -48,7 +52,7 @@ export function getLabStatusLabel(
 /** Outline Badge tints for lab statuses. Physician labs surface treats denied as neutral. */
 export function getLabStatusTint(
   status: LabStatus,
-  role?: 'pa' | 'physician',
+  role?: Role,
   surface: 'labs' | 'requests' = 'labs',
 ): string {
   const physicianChartLocked =
@@ -75,8 +79,8 @@ export function getLabStatusTint(
 export function getScheduleStatusLabel(status: ScheduleStatus): string {
   switch (status) {
     case 'scheduled': return 'Scheduled'
-    case 'with_pa': return 'With PA'
-    case 'with_physician': return 'With physician'
+    case 'with_assistant': return 'With Assistant'
+    case 'with_physician': return 'With Physician'
     case 'finished': return 'Finished'
     case 'late': return 'Late'
   }
@@ -84,25 +88,25 @@ export function getScheduleStatusLabel(status: ScheduleStatus): string {
 
 /** Outline Badge tints for schedule statuses. `scheduled` has no pill. */
 export const scheduleStatusTint: Partial<Record<ScheduleStatus, string>> = {
-  with_pa: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+  with_assistant: 'border-emerald-200 bg-emerald-50 text-emerald-600',
   with_physician: 'border-blue-200 bg-blue-50 text-blue-600',
   finished: 'border-green-200 bg-green-50 text-green-600',
   late: 'border-amber-200 bg-amber-50 text-amber-600',
 }
 
-export function canPaViewLab(lab: LabResult): boolean {
+export function canAssistantViewLab(lab: LabResult): boolean {
   return lab.status === 'active' || lab.status === 'released'
 }
 
-export function isPaApprovedLabStatus(status: LabStatus): boolean {
+export function isAssistantApprovedLabStatus(status: LabStatus): boolean {
   return status === 'granted_unstarted' || status === 'active' || status === 'released'
 }
 
-export function hasPaRequestedLab(lab: LabResult): boolean {
+export function hasAssistantRequestedLab(lab: LabResult): boolean {
   return lab.everRequested
 }
 
-export function isPaResolvedLabStatus(status: LabStatus): boolean {
+export function isAssistantResolvedLabStatus(status: LabStatus): boolean {
   return (
     status === 'granted_unstarted'
     || status === 'active'

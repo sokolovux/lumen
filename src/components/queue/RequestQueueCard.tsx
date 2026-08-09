@@ -5,7 +5,7 @@ import { useAppState } from '@/state/AppStateContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { DEMO_PA_NAME } from '@/lib/scheduleData'
+import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
 import {
   getLabStatusLabel,
   getLabStatusTint,
@@ -15,8 +15,8 @@ import { AccessTimer } from '@/components/patient/AccessTimer'
 export type RequestQueueCardMode =
   | 'physician-inbox'
   | 'physician-history'
-  | 'pa-awaiting'
-  | 'pa-resolved'
+  | 'assistant-awaiting'
+  | 'assistant-resolved'
 
 interface RequestQueueCardProps {
   lab: LabResult
@@ -42,7 +42,7 @@ export function RequestQueueCard({
   const isPhysician = state.role === 'physician'
 
   const statusBadgeLabel = (() => {
-    if (mode === 'pa-awaiting') return 'Access pending'
+    if (mode === 'assistant-awaiting') return 'Access pending'
     if (lab.status === 'granted_unstarted' && isPhysician) {
       return 'Granted — not yet started'
     }
@@ -55,7 +55,7 @@ export function RequestQueueCard({
     && Boolean(lab.grantExpiresAt)
 
   const statusBadge =
-    mode === 'pa-awaiting' ? (
+    mode === 'assistant-awaiting' ? (
       <Badge variant="outline">{statusBadgeLabel}</Badge>
     ) : (
       <Badge
@@ -72,7 +72,7 @@ export function RequestQueueCard({
       mode === 'physician-inbox'
       || mode === 'physician-history'
       || (
-        mode === 'pa-resolved'
+        mode === 'assistant-resolved'
         && (
           lab.status === 'granted_unstarted'
           || lab.status === 'active'
@@ -89,10 +89,10 @@ export function RequestQueueCard({
   ) : null
 
   const denialBlock =
-    mode === 'pa-resolved' && lab.status === 'denied' && lab.denialReason ? (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
+    mode === 'assistant-resolved' && lab.status === 'denied' && lab.denialReason ? (
+      <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
         <p className="text-sm"><strong>Request was denied.</strong></p>
-        <p className="mt-1 text-xs opacity-90">Comment from the doctor:</p>
+        <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
         <p className="mt-0.5 text-sm">{lab.denialReason}</p>
       </div>
     ) : null
@@ -110,9 +110,9 @@ export function RequestQueueCard({
             Release permanently
           </Button>
         </div>
-        <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2.5">
+        <div className="space-y-2 rounded-md border bg-muted/40 px-3 py-2.5">
           <p className="text-sm text-foreground">
-            Pending request from {DEMO_PA_NAME}
+            Pending request from {DEMO_ASSISTANT_NAME}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="success" onClick={onGrant}>
@@ -130,7 +130,7 @@ export function RequestQueueCard({
       <div className="flex flex-wrap gap-2">
         {viewInChartButton}
       </div>
-    ) : mode === 'pa-resolved' && (denialBlock || viewInChartButton) ? (
+    ) : mode === 'assistant-resolved' && (denialBlock || viewInChartButton) ? (
       <div className="space-y-3">
         {denialBlock}
         {viewInChartButton && (

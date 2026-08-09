@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAppState } from '@/state/AppStateContext'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { KanbanColumn } from '@/components/schedule/KanbanColumn'
 import { DayColumn } from '@/components/schedule/DayColumn'
@@ -10,6 +11,42 @@ import {
 } from '@/lib/scheduleData'
 
 const DAY_LABELS = ['Mon Aug 10', 'Tue Aug 11', 'Wed Aug 12', 'Thu Aug 13', 'Fri Aug 14']
+const EST_TIME_ZONE = 'America/New_York'
+
+function EstClock() {
+  const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  const dateLabel = now.toLocaleDateString('en-US', {
+    timeZone: EST_TIME_ZONE,
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
+
+  const timeLabel = now
+    .toLocaleTimeString('en-US', {
+      timeZone: EST_TIME_ZONE,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+    .replace(/\s+(AM|PM)/i, '$1')
+
+  return (
+    <div className="flex items-center gap-6">
+      <p>{dateLabel}</p>
+      <div className="flex items-center gap-2">
+        <p>{timeLabel}</p>
+        <span data-slot="schedule-clock-dot" aria-hidden />
+      </div>
+    </div>
+  )
+}
 
 export function SchedulePage() {
   const { state, dispatch } = useAppState()
@@ -27,9 +64,15 @@ export function SchedulePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b px-6 py-4">
-        <h4>Schedule</h4>
-        <div className="flex rounded-lg border bg-background p-0.5">
+      <PageHeader
+        title={(
+          <div className="flex items-center gap-6">
+            <h3>Schedule</h3>
+            <EstClock />
+          </div>
+        )}
+      >
+        <div className="flex rounded-md border bg-background p-0.5">
           {([
             { key: 'today' as const, label: 'Today' },
             { key: 'fullWeek' as const, label: 'Full week' },
@@ -44,10 +87,10 @@ export function SchedulePage() {
             </Button>
           ))}
         </div>
-      </div>
-      <div className="flex-1 overflow-x-auto p-4">
+      </PageHeader>
+      <div className="flex-1 overflow-x-auto">
         {state.scheduleView === 'today' ? (
-          <div className="flex min-h-full gap-3">
+          <div className="flex min-h-full">
             {TODAY_KANBAN_COLUMNS.map((col) => (
               <KanbanColumn
                 key={col.key}
@@ -59,7 +102,7 @@ export function SchedulePage() {
             ))}
           </div>
         ) : (
-          <div className="flex min-h-full gap-3">
+          <div className="flex min-h-full">
             {WEEK_DATES.map((date, i) => (
               <DayColumn
                 key={date}

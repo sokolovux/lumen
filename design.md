@@ -88,10 +88,10 @@ Do **not** use font-weight Tailwind utilities (`font-normal`, `font-medium`, `fo
 
 Adjust weight only with:
 
-- **Naked headings** (`h1`–`h6`) — semibold from `@layer base`
-- **`<strong>`** — `@apply font-semibold text-foreground` in `@layer base`
+- **Naked headings** (`h1`–`h6`) — medium from `@layer base`
+- **`<strong>`** — `@apply font-medium text-foreground` in `@layer base`
 
-Default body and most UI stay regular by inheritance (Button and Badge included). Primitive chrome may set weight only via `@apply` inside the component (see `src/components/ui/font-weight.css` and `card.css`), not via call-site utilities.
+Default body and most UI stay regular by inheritance (Button and Badge included). Primitive chrome may set weight only via `@apply` inside the component (see `src/components/ui/font-weight.css` and `card.css`), not via call-site utilities. Applied emphasis weight is **medium**.
 
 ### Headings
 
@@ -99,12 +99,12 @@ Default body and most UI stay regular by inheritance (Button and Badge included)
 
 | Element | Style |
 | --- | --- |
-| `h1` | `text-4xl font-semibold tracking-tight` |
-| `h2` | `text-3xl font-semibold tracking-tight` |
-| `h3` | `text-2xl font-semibold tracking-tight` |
-| `h4` | `text-xl font-semibold` |
-| `h5` | `text-lg font-semibold` |
-| `h6` | `text-base font-semibold` |
+| `h1` | `text-4xl font-medium tracking-tight` |
+| `h2` | `text-3xl font-medium tracking-tight` |
+| `h3` | `text-2xl font-medium tracking-tight` |
+| `h4` | `text-xl font-medium` |
+| `h5` | `text-lg font-medium` |
+| `h6` | `text-base font-medium` |
 
 Pick the level that matches the intended scale instead of overriding a larger level with utilities.
 
@@ -114,7 +114,7 @@ Body text, copy inside content components, and common text applications inherit 
 
 Unstyled `<p>` also defaults to **`text-muted-foreground`** via `@apply` in `@layer base`. Add `text-foreground` (or a semantic color) only when the paragraph should be primary emphasis.
 
-Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Add a size utility only when you intentionally want denser or larger type (e.g. `text-xs` meta lines). Control chrome may define its own size: **Button → `text-base`**, **Badge → `text-sm`** (regular weight by inheritance; no weight utilities).
+Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Add a size utility only when you intentionally want denser or larger type (e.g. `text-xs` meta lines). Control chrome may define its own size: **Button / TabsTrigger → `text-base`** (same as a regular `<p>`), **Badge → `text-sm`** (regular weight by inheritance; no weight utilities).
 
 Examples:
 
@@ -122,7 +122,7 @@ Examples:
 - ✅ `<p className="text-foreground">Pending request from Alex Chen</p>` — intentional primary copy
 - ✅ `<h4>Schedule</h4>` (naked; level matches scale)
 - ❌ `Card` / `DialogContent` / `SheetContent` with root `text-sm` so children shrink by default
-- ❌ `<h1 className="text-xl font-semibold">Schedule</h1>`
+- ❌ `<h1 className="text-xl font-medium">Schedule</h1>`
 - ❌ `<p className="text-muted-foreground">…</p>` when muted is already the default (redundant)
 
 ## UI copy
@@ -204,6 +204,15 @@ Examples:
 - Neutral/muted — Access expired (not red; expiry is not a rejection)
 - Red — Deny control and denial-reason block only
 
+## Border radius
+
+Maximum corner radius is **`md`** (`rounded-md`). Do not use `rounded-lg`, `rounded-xl`, `rounded-2xl`, or larger.
+
+- Cards and most chrome use `rounded-md` (Card in `src/components/ui/card.css`)
+- Smaller radii (`rounded-xs`, `rounded-sm`, `rounded-none`) are fine where denser
+- `rounded-xs` is half of `rounded-sm` (`--radius-xs: calc(var(--radius-sm) * 0.5)`); Badges use it
+- `rounded-full` is reserved for circular controls only (avatar, radio, switch) — not for cards, menus, or panels
+
 ## Theme
 
 The product UI is **light by default and light-only**. Do not follow the OS dark preference for the app shell, pages, or toasts.
@@ -221,11 +230,22 @@ Today’s schedule uses exactly these columns:
 | Column | Meaning |
 |--------|---------|
 | Scheduled | Appointment is scheduled but has not been started yet |
-| With PA | Visit started; PA is entering vitals and the first note |
-| With physician | PA has transferred the patient to the physician (first note submitted for cosign) |
+| With Assistant | Visit started; Assistant is entering vitals and the first note |
+| With Physician | Assistant has transferred the patient to the physician (first note submitted for cosign) |
 | Finished | Physician clicked Finish visit |
 
 Do not use a separate Checked in status.
+
+## Roles
+
+The product has exactly two user denominations:
+
+| Display | Code (`Role`) |
+|---------|----------------|
+| Assistant | `'assistant'` |
+| Physician | `'physician'` |
+
+Do not use PA, physician assistant, doctor, or other synonyms in UI copy or new code. Schedule column/status labels use **With Assistant** and **With Physician**.
 
 ## Pointer cursor
 

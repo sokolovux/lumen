@@ -46,7 +46,7 @@ export function GrantAccessDialog({
           <DialogTitle>Grant temporary access</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Grant temporary access to <strong>{labName}</strong>. Timer starts when the PA confirms.
+          Grant temporary access to <strong>{labName}</strong>. Timer starts when the assistant confirms.
         </p>
         <Select value={duration} onValueChange={(v: string) => setDuration(v as GrantDuration)}>
           <SelectTrigger>

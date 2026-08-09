@@ -40,12 +40,12 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
   const finished = dayAppointments.filter((apt) => columnStatus(apt, visitState) === 'finished')
 
   return (
-    <div className="flex min-w-[200px] flex-1 flex-col rounded-lg border bg-muted/20">
-      <div className="border-b px-3 py-2">
+    <div className="flex min-w-[200px] flex-1 flex-col gap-3 border-r bg-sidebar p-6 last:border-r-0">
+      <div>
         <h6>{label}</h6>
-        <p className="text-xs text-muted-foreground">{dayAppointments.length} appointments</p>
+        <p className="text-sm">{dayAppointments.length} appointments</p>
       </div>
-      <div className="flex flex-col gap-2 p-2">
+      <div className="flex flex-col gap-2">
         {active.length === 0 && finished.length === 0 ? (
           <p className="px-2 py-4 text-center text-xs text-muted-foreground">No appointments</p>
         ) : (

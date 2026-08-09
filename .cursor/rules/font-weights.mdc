@@ -9,8 +9,8 @@ Do **not** use font-weight Tailwind utilities (`font-normal`, `font-medium`, `fo
 
 Adjust weight only by:
 
-1. **Semantic text tags** — naked `h1`–`h6` (semibold from `@layer base`)
-2. **`<strong>`** — semibold + `text-foreground` from `@layer base`
+1. **Semantic text tags** — naked `h1`–`h6` (medium from `@layer base`)
+2. **`<strong>`** — medium + `text-foreground` from `@layer base`
 
 ```tsx
 // ✅
@@ -24,6 +24,6 @@ Adjust weight only by:
 <span className="font-bold">…</span>
 ```
 
-Primitive chrome may set weight only via `@apply` inside the component (co-located CSS / `@layer components`), never via call-site `className` weight utilities. Button and Badge stay regular by inheritance — do not add weight utilities on them.
+Primitive chrome may set weight only via `@apply` inside the component (co-located CSS / `@layer components`), never via call-site `className` weight utilities. Applied emphasis weight is **medium** (`font-medium` via `@apply`). Button and Badge stay regular by inheritance — do not add weight utilities on them.
 
 See `design.md` → Typography → Font weights.

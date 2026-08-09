@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { CheckIcon, PlusIcon } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { AppointmentCard } from '@/components/schedule/AppointmentCard'
+import type { Appointment, LabStatus, NoteStatus, ScheduleStatus } from '@/state/types'
 import { Button } from '@/components/ui/button'
 import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -76,7 +79,6 @@ import {
   getScheduleStatusLabel,
   scheduleStatusTint,
 } from '@/lib/statusDerivation'
-import type { LabStatus, NoteStatus, ScheduleStatus } from '@/state/types'
 import { LabResultCardsGallery } from '@/pages/LabResultCardsGallery'
 
 const COLOR_TOKENS = [
@@ -98,7 +100,7 @@ const CHART_TOKENS = ['bg-chart-1', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4', 'b
 
 const SCHEDULE_STATUSES: ScheduleStatus[] = [
   'scheduled',
-  'with_pa',
+  'with_assistant',
   'with_physician',
   'finished',
   'late',
@@ -132,7 +134,7 @@ function BadgeRow({
   return (
     <div className="space-y-2">
       <h6>{label}</h6>
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-4">
+      <div className="flex flex-wrap items-center gap-2 rounded-md border bg-card p-4">
         {children}
       </div>
     </div>
@@ -151,6 +153,72 @@ const UI_COMPONENTS = [
   'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'sonner',
   'spinner', 'switch', 'table', 'tabs', 'textarea', 'toggle', 'toggle-group',
   'tooltip',
+]
+
+const APPOINTMENT_CARD_FIXTURES: {
+  appointment: Appointment
+  displayStatus: ScheduleStatus
+}[] = [
+  {
+    appointment: {
+      id: 'ds-apt-scheduled',
+      patientId: 'sarah-patel',
+      patientName: 'Sarah Patel',
+      time: '11:30 AM',
+      date: '2026-08-10',
+      kind: 'Follow-up',
+      status: 'scheduled',
+    },
+    displayStatus: 'scheduled',
+  },
+  {
+    appointment: {
+      id: 'ds-apt-with-assistant',
+      patientId: 'david-kim',
+      patientName: 'David Kim',
+      time: '9:30 AM',
+      date: '2026-08-10',
+      kind: 'Sick visit',
+      status: 'with_assistant',
+    },
+    displayStatus: 'with_assistant',
+  },
+  {
+    appointment: {
+      id: 'ds-apt-with-physician',
+      patientId: 'david-kim',
+      patientName: 'David Kim',
+      time: '2:00 PM',
+      date: '2026-08-11',
+      kind: 'Lab review',
+      status: 'with_physician',
+    },
+    displayStatus: 'with_physician',
+  },
+  {
+    appointment: {
+      id: 'ds-apt-finished',
+      patientId: 'maria-chen',
+      patientName: 'Maria Chen',
+      time: '9:00 AM',
+      date: '2026-08-10',
+      kind: 'Annual physical',
+      status: 'finished',
+    },
+    displayStatus: 'finished',
+  },
+  {
+    appointment: {
+      id: 'ds-apt-late',
+      patientId: 'james-wilson',
+      patientName: 'James Wilson',
+      time: '1:00 PM',
+      date: '2026-08-10',
+      kind: 'New patient',
+      status: 'late',
+    },
+    displayStatus: 'late',
+  },
 ]
 
 function Section({
@@ -190,7 +258,7 @@ function Swatch({
 }) {
   return (
     <div
-      className={`flex h-20 flex-col justify-end rounded-lg p-2 ${swatch} ${fg} ${
+      className={`flex h-20 flex-col justify-end rounded-md p-2 ${swatch} ${fg} ${
         border ? 'ring-1 ring-border' : ''
       }`}
     >
@@ -206,9 +274,7 @@ export function DesignSystemPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b px-6 py-4">
-        <h4>Design system</h4>
-      </div>
+      <PageHeader title="Design system" />
 
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-8">
@@ -304,11 +370,10 @@ export function DesignSystemPage() {
                 <h6 className="mb-2">Radius</h6>
                 <div className="flex flex-wrap items-end gap-3">
                   {[
+                    ['rounded-none', 'none'],
+                    ['rounded-xs', 'xs'],
                     ['rounded-sm', 'sm'],
                     ['rounded-md', 'md'],
-                    ['rounded-lg', 'lg'],
-                    ['rounded-xl', 'xl'],
-                    ['rounded-2xl', '2xl'],
                   ].map(([cls, label]) => (
                     <div key={label} className="flex flex-col items-center gap-1">
                       <div className={`size-14 bg-primary ${cls}`} />
@@ -357,8 +422,8 @@ export function DesignSystemPage() {
                 <CardContent>
                   <div className="space-y-2">
                     <p><strong>Scheduled</strong> — not started</p>
-                    <p><strong>With PA</strong> — vitals + first note</p>
-                    <p><strong>With physician</strong> — transferred</p>
+                    <p><strong>With Assistant</strong> — vitals + first note</p>
+                    <p><strong>With Physician</strong> — transferred</p>
                     <p><strong>Finished</strong> — finish visit clicked</p>
                   </div>
                 </CardContent>
@@ -722,7 +787,7 @@ export function DesignSystemPage() {
                 <CheckIcon />
                 <AlertTitle>Access granted</AlertTitle>
                 <AlertDescription>
-                  Temporary access is ready — awaiting PA confirmation.
+                  Temporary access is ready — awaiting assistant confirmation.
                 </AlertDescription>
               </Alert>
               <div className="grid gap-4 md:grid-cols-2">
@@ -754,7 +819,7 @@ export function DesignSystemPage() {
 
           <Separator />
 
-          <Section id="surfaces" title="Surfaces" description="Cards, line tabs, tables, and avatars.">
+          <Section id="surfaces" title="Surfaces" description="Cards, appointment cards, line tabs, tables, and avatars.">
             <div className="space-y-4">
               <Card>
                 <CardHeader>
@@ -782,19 +847,36 @@ export function DesignSystemPage() {
                 </CardHeader>
               </Card>
 
+              <div className="space-y-2">
+                <h6>Appointment card</h6>
+                <p>
+                  Schedule board card — size=&quot;sm&quot;, interactive, outline status badge.
+                  Scheduled has no badge.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {APPOINTMENT_CARD_FIXTURES.map(({ appointment, displayStatus }) => (
+                    <AppointmentCard
+                      key={appointment.id}
+                      appointment={appointment}
+                      displayStatus={displayStatus}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <Tabs defaultValue="visits">
                 <TabsList>
                   <TabsTrigger value="visits">Visits</TabsTrigger>
                   <TabsTrigger value="labs">Labs & results</TabsTrigger>
                   <TabsTrigger value="audit">Audit trail</TabsTrigger>
                 </TabsList>
-                <TabsContent value="visits" className="rounded-lg border p-4 text-sm">
+                <TabsContent value="visits" className="rounded-md border p-4 text-sm">
                   Visit panel content
                 </TabsContent>
-                <TabsContent value="labs" className="rounded-lg border p-4 text-sm">
+                <TabsContent value="labs" className="rounded-md border p-4 text-sm">
                   Labs & results content
                 </TabsContent>
-                <TabsContent value="audit" className="rounded-lg border p-4 text-sm">
+                <TabsContent value="audit" className="rounded-md border p-4 text-sm">
                   Audit trail content
                 </TabsContent>
               </Tabs>
@@ -804,14 +886,14 @@ export function DesignSystemPage() {
                   <AvatarFallback>JR</AvatarFallback>
                 </Avatar>
                 <Avatar>
-                  <AvatarFallback>PA</AvatarFallback>
+                  <AvatarFallback>A</AvatarFallback>
                 </Avatar>
                 <Avatar>
-                  <AvatarFallback>MD</AvatarFallback>
+                  <AvatarFallback>P</AvatarFallback>
                 </Avatar>
               </div>
 
-              <div className="rounded-lg border">
+              <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -822,7 +904,7 @@ export function DesignSystemPage() {
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>PA</TableCell>
+                      <TableCell>Assistant</TableCell>
                       <TableCell>Start visit</TableCell>
                       <TableCell className="text-muted-foreground">Visit started</TableCell>
                     </TableRow>
@@ -849,7 +931,7 @@ export function DesignSystemPage() {
                   <DialogHeader>
                     <DialogTitle>Grant temporary access</DialogTitle>
                     <DialogDescription>
-                      Timer starts when the PA confirms.
+                      Timer starts when the assistant confirms.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -867,7 +949,7 @@ export function DesignSystemPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Release permanently?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. The PA will be notified.
+                      This action cannot be undone. The assistant will be notified.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -923,7 +1005,7 @@ export function DesignSystemPage() {
                       Document view expired state (blur + overlay)
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="relative min-h-40 overflow-hidden rounded-lg border">
+                  <div className="relative min-h-40 overflow-hidden rounded-md border">
                     <div className="space-y-2 p-4 blur-sm">
                       <Skeleton className="h-4 w-2/3" />
                       <Skeleton className="h-4 w-full" />
@@ -946,7 +1028,7 @@ export function DesignSystemPage() {
           <Section
             id="result-cards"
             title="Result cards"
-            description="Every Labs & Results and Access / My Requests card state for PA and physician. Presentational fixtures — switch tabs to review edge cases."
+            description="Every Labs & Results and Access / My Requests card state for Assistant and Physician. Presentational fixtures — switch tabs to review edge cases."
           >
             <LabResultCardsGallery />
           </Section>

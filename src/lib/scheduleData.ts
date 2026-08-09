@@ -1,16 +1,70 @@
-import type { Appointment, LabResult, Medication, Patient } from '@/state/types'
+import type { Appointment, LabResult, Medication, Patient, ScheduleStatus } from '@/state/types'
 import { formatTimestamp } from '@/lib/fixedClock'
 
 export const JORDAN_REYES_ID = 'jordan-reyes'
-/** Display name for the demo PA in physician-facing request copy */
-export const DEMO_PA_NAME = 'Sam Whitfield'
+/** Display name for the demo assistant in physician-facing request copy */
+export const DEMO_ASSISTANT_NAME = 'Sam Whitfield'
 
-export const PATIENTS: Patient[] = [
+const FIRST_NAMES = [
+  'Ava', 'Liam', 'Emma', 'Noah', 'Olivia', 'Ethan', 'Sophia', 'Mason', 'Isabella', 'Lucas',
+  'Mia', 'Alexander', 'Charlotte', 'Benjamin', 'Amelia', 'Henry', 'Harper', 'Sebastian', 'Evelyn', 'Jack',
+  'Abigail', 'Aiden', 'Emily', 'Owen', 'Elizabeth', 'Samuel', 'Sofia', 'Matthew', 'Avery', 'Joseph',
+  'Ella', 'Levi', 'Scarlett', 'Mateo', 'Grace', 'David', 'Chloe', 'John', 'Victoria', 'Wyatt',
+  'Riley', 'Carter', 'Aria', 'Julian', 'Lily', 'Luke', 'Aurora', 'Grayson', 'Zoey', 'Isaac',
+  'Nora', 'Jayden', 'Camila', 'Gabriel', 'Hannah', 'Anthony', 'Layla', 'Dylan', 'Penelope', 'Leo',
+  'Maya', 'Thomas', 'Natalie', 'Charles', 'Zoe', 'Christopher', 'Stella', 'Jaxon', 'Eleanor', 'Maverick',
+  'Addison', 'Josiah', 'Lucy', 'Isaiah', 'Paisley', 'Andrew', 'Violet', 'Elias', 'Savannah', 'Joshua',
+  'Brooklyn', 'Nathan', 'Bella', 'Caleb', 'Claire', 'Ryan', 'Skylar', 'Nolan', 'Lucy', 'Adrian',
+  'Anna', 'Aaron', 'Caroline', 'Eli', 'Genesis', 'Colton', 'Aaliyah', 'Hunter', 'Kennedy', 'Jonathan',
+]
+
+const LAST_NAMES = [
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+  'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+  'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+  'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
+  'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts',
+]
+
+function padMrn(n: number): string {
+  return `MRN-${String(n).padStart(5, '0')}`
+}
+
+function dobFromIndex(i: number): string {
+  const month = String((i % 12) + 1).padStart(2, '0')
+  const day = String((i % 28) + 1).padStart(2, '0')
+  const year = 1955 + (i % 50)
+  return `${month}/${day}/${year}`
+}
+
+function generatePatients(count: number, mrnStart: number): Patient[] {
+  const patients: Patient[] = []
+  for (let i = 0; i < count; i++) {
+    const first = FIRST_NAMES[i % FIRST_NAMES.length]!
+    const last = LAST_NAMES[Math.floor(i / FIRST_NAMES.length) % LAST_NAMES.length]!
+    const suffix = Math.floor(i / (FIRST_NAMES.length * LAST_NAMES.length))
+    const name = suffix > 0 ? `${first} ${last} ${suffix + 1}` : `${first} ${last}`
+    patients.push({
+      id: `patient-${String(i + 1).padStart(4, '0')}`,
+      name,
+      mrn: padMrn(mrnStart + i),
+      dob: dobFromIndex(i),
+    })
+  }
+  return patients
+}
+
+const CORE_PATIENTS: Patient[] = [
   { id: JORDAN_REYES_ID, name: 'Jordan Reyes', mrn: 'MRN-48291', dob: '03/14/1988', isInteractive: true },
   { id: 'maria-chen', name: 'Maria Chen', mrn: 'MRN-33102', dob: '07/22/1975' },
   { id: 'david-kim', name: 'David Kim', mrn: 'MRN-55847', dob: '11/05/1992' },
   { id: 'sarah-patel', name: 'Sarah Patel', mrn: 'MRN-22419', dob: '01/30/1980' },
   { id: 'james-wilson', name: 'James Wilson', mrn: 'MRN-66703', dob: '09/18/1965' },
+]
+
+export const PATIENTS: Patient[] = [
+  ...CORE_PATIENTS,
+  ...generatePatients(500, 70001),
 ]
 
 export const WEEK_DATES = [
@@ -21,19 +75,96 @@ export const WEEK_DATES = [
   '2026-08-14',
 ]
 
-/** Seeded placeholder appointments — Jordan's status is derived, not from this list */
-export const SEEDED_APPOINTMENTS: Appointment[] = [
-  { id: 'apt-1', patientId: JORDAN_REYES_ID, patientName: 'Jordan Reyes', time: '10:30 AM', date: '2026-08-10', status: 'scheduled', isInteractive: true },
-  { id: 'apt-2', patientId: 'maria-chen', patientName: 'Maria Chen', time: '9:00 AM', date: '2026-08-10', status: 'finished' },
-  { id: 'apt-3', patientId: 'david-kim', patientName: 'David Kim', time: '9:30 AM', date: '2026-08-10', status: 'with_pa' },
-  { id: 'apt-4', patientId: 'sarah-patel', patientName: 'Sarah Patel', time: '11:30 AM', date: '2026-08-10', status: 'scheduled' },
-  { id: 'apt-5', patientId: 'james-wilson', patientName: 'James Wilson', time: '1:00 PM', date: '2026-08-10', status: 'scheduled' },
-  { id: 'apt-6', patientId: 'maria-chen', patientName: 'Maria Chen', time: '10:00 AM', date: '2026-08-11', status: 'scheduled' },
-  { id: 'apt-7', patientId: 'david-kim', patientName: 'David Kim', time: '2:00 PM', date: '2026-08-11', status: 'with_physician' },
-  { id: 'apt-8', patientId: 'sarah-patel', patientName: 'Sarah Patel', time: '9:00 AM', date: '2026-08-12', status: 'scheduled' },
-  { id: 'apt-9', patientId: 'james-wilson', patientName: 'James Wilson', time: '11:00 AM', date: '2026-08-13', status: 'scheduled' },
-  { id: 'apt-10', patientId: 'maria-chen', patientName: 'Maria Chen', time: '3:00 PM', date: '2026-08-14', status: 'finished' },
+const APPOINTMENT_KINDS = [
+  'Follow-up',
+  'Annual physical',
+  'New patient',
+  'Sick visit',
+  'Lab review',
+  'Medication check',
 ]
+
+const APPOINTMENT_STATUSES: ScheduleStatus[] = [
+  'scheduled',
+  'scheduled',
+  'scheduled',
+  'with_assistant',
+  'with_physician',
+  'finished',
+  'late',
+]
+
+const TIME_SLOTS: string[] = (() => {
+  const slots: string[] = []
+  for (let minutes = 8 * 60; minutes <= 17 * 60; minutes += 15) {
+    const h24 = Math.floor(minutes / 60)
+    const m = minutes % 60
+    const period = h24 >= 12 ? 'PM' : 'AM'
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12
+    slots.push(`${h12}:${String(m).padStart(2, '0')} ${period}`)
+  }
+  return slots
+})()
+
+function distributeCounts(total: number, buckets: number): number[] {
+  const base = Math.floor(total / buckets)
+  const remainder = total % buckets
+  return Array.from({ length: buckets }, (_, i) => base + (i < remainder ? 1 : 0))
+}
+
+function timeSlotForIndex(index: number, count: number): string {
+  if (count <= 1) return TIME_SLOTS[Math.floor(TIME_SLOTS.length / 3)]!
+  const position = index / (count - 1)
+  const slot = Math.round(position * (TIME_SLOTS.length - 1))
+  return TIME_SLOTS[slot]!
+}
+
+function generateWeekAppointments(count: number): Appointment[] {
+  const pool = PATIENTS.filter((p) => p.id !== JORDAN_REYES_ID)
+  const perDay = distributeCounts(count, WEEK_DATES.length)
+  const appointments: Appointment[] = []
+  let patientIndex = 0
+  let aptNumber = 1
+
+  WEEK_DATES.forEach((date, dayIndex) => {
+    const dayCount = perDay[dayIndex]!
+    for (let slot = 0; slot < dayCount; slot++) {
+      const isJordan = dayIndex === 0 && slot === 0
+      if (isJordan) {
+        appointments.push({
+          id: 'apt-1',
+          patientId: JORDAN_REYES_ID,
+          patientName: 'Jordan Reyes',
+          time: '10:30 AM',
+          date,
+          kind: 'Follow-up',
+          status: 'scheduled',
+          isInteractive: true,
+        })
+        aptNumber += 1
+        continue
+      }
+
+      const patient = pool[patientIndex % pool.length]!
+      patientIndex += 1
+      appointments.push({
+        id: `apt-${aptNumber}`,
+        patientId: patient.id,
+        patientName: patient.name,
+        time: timeSlotForIndex(slot, dayCount),
+        date,
+        kind: APPOINTMENT_KINDS[(aptNumber - 1) % APPOINTMENT_KINDS.length]!,
+        status: APPOINTMENT_STATUSES[(aptNumber - 1) % APPOINTMENT_STATUSES.length]!,
+      })
+      aptNumber += 1
+    }
+  })
+
+  return appointments
+}
+
+/** Seeded placeholder appointments — Jordan's status is derived, not from this list */
+export const SEEDED_APPOINTMENTS: Appointment[] = generateWeekAppointments(100)
 
 export function createInitialLabs(): LabResult[] {
   return [
@@ -67,8 +198,8 @@ export function createInitialMeds(): Medication[] {
 
 export const TODAY_KANBAN_COLUMNS: { key: string; label: string }[] = [
   { key: 'scheduled', label: 'Scheduled' },
-  { key: 'with_pa', label: 'With PA' },
-  { key: 'with_physician', label: 'With physician' },
+  { key: 'with_assistant', label: 'With Assistant' },
+  { key: 'with_physician', label: 'With Physician' },
   { key: 'finished', label: 'Finished' },
 ]
 

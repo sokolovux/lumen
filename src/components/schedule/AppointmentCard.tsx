@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Appointment } from '@/state/types'
-import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardAction, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import {
@@ -17,13 +17,15 @@ interface AppointmentCardProps {
 
 export function AppointmentCard({ appointment, displayStatus }: AppointmentCardProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { dispatch } = useAppState()
 
   const handleClick = () => {
     if (appointment.isInteractive || appointment.patientId === JORDAN_REYES_ID) {
-      dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'schedule' })
-      dispatch({ type: 'OPEN_VISIT', visitId: 'today' })
-      navigate(`/patients/${appointment.patientId}`)
+      dispatch({ type: 'CLOSE_VISIT' })
+      navigate(`/patients/${appointment.patientId}`, {
+        state: { from: `${location.pathname}${location.search}` },
+      })
       return
     }
     toast.info('This patient is scoped out of the demo', {
@@ -37,8 +39,8 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
     <Card size="sm" interactive onClick={handleClick}>
       <CardHeader>
         <div>
-          <p className="text-sm"><strong>{appointment.patientName}</strong></p>
-          <p className="text-xs text-muted-foreground">{appointment.time}</p>
+          <p><strong>{appointment.patientName}</strong></p>
+          <p>{appointment.time}, {appointment.kind}</p>
         </div>
         {statusTint && (
           <CardAction>
@@ -48,9 +50,6 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
           </CardAction>
         )}
       </CardHeader>
-      <CardContent>
-        <p className="text-xs text-muted-foreground">MRN placeholder</p>
-      </CardContent>
     </Card>
   )
 }

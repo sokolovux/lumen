@@ -12,6 +12,6 @@ When two or more buttons sit together in a group, order by priority. “Primary 
 
 Destructive actions follow the same priority ladder (usually after the primary affirmative, before weaker tertiary actions—or last when they are the least emphasized).
 
-Segmented controls / mutually exclusive toggles (e.g. PA | Physician, Today | Full week) are not action-priority groups; keep a stable logical order.
+Segmented controls / mutually exclusive toggles (e.g. Assistant | Physician, Today | Full week) are not action-priority groups; keep a stable logical order.
 
 See `design.md` → UI copy → Button groups.

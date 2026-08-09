@@ -17,7 +17,7 @@ Only add utilities when the user explicitly asks for an exception (e.g. layout m
 <h4>Patients</h4>
 
 // ❌
-<h1 className="text-xl font-semibold tracking-tight">Schedule</h1>
+<h1 className="text-xl font-medium tracking-tight">Schedule</h1>
 ```
 
 See `design.md` → Typography → Headings.

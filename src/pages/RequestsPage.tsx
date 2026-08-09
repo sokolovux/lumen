@@ -1,4 +1,5 @@
 import { useAppState } from '@/state/AppStateContext'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { AccessRequestsList } from '@/components/queue/AccessRequestsList'
 
 export function RequestsPage() {
@@ -7,11 +8,7 @@ export function RequestsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b px-6 py-4">
-        <h4>
-          {isPhysician ? 'Access requests' : 'My requests'}
-        </h4>
-      </div>
+      <PageHeader title={isPhysician ? 'Access requests' : 'My requests'} />
       <div className="flex-1 overflow-y-auto p-6">
         <AccessRequestsList />
       </div>

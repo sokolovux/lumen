@@ -1,7 +1,7 @@
 @layer components {
   [data-slot="card"] {
     --card-spacing: --spacing(4);
-    @apply flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card p-(--card-spacing) text-card-foreground ring-1 ring-foreground/10;
+    @apply flex flex-col gap-(--card-spacing) overflow-hidden rounded-md bg-card p-(--card-spacing) text-card-foreground ring-1 ring-foreground/10;
   }
 
   [data-slot="card"][data-size="sm"] {
@@ -21,15 +21,15 @@
   }
 
   [data-slot="card"] > img:first-child {
-    @apply rounded-t-xl;
+    @apply rounded-t-md;
   }
 
   [data-slot="card"] > img:last-child {
-    @apply rounded-b-xl;
+    @apply rounded-b-md;
   }
 
   [data-slot="card-header"] {
-    @apply grid auto-rows-min items-start gap-2 rounded-t-xl;
+    @apply grid auto-rows-min items-start gap-2 rounded-t-md;
   }
 
   [data-slot="card-header"]:has([data-slot="card-action"]) {
@@ -45,7 +45,7 @@
   }
 
   [data-slot="card-title"] {
-    @apply font-heading text-base leading-snug font-semibold;
+    @apply font-heading text-base leading-snug font-medium;
   }
 
   [data-slot="card"][data-size="sm"] [data-slot="card-title"] {
@@ -65,6 +65,6 @@
   }
 
   [data-slot="card-footer"] {
-    @apply -mx-(--card-spacing) flex items-center gap-2 rounded-b-xl border-t bg-muted/50 p-(--card-spacing);
+    @apply -mx-(--card-spacing) flex items-center gap-2 rounded-b-md border-t bg-muted/50 p-(--card-spacing);
   }
 }

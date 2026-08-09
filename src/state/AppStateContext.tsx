@@ -46,7 +46,7 @@ function logAudit(
 }
 
 export const initialState: AppState = {
-  role: 'pa',
+  role: 'assistant',
   selectedVisitId: null,
   visitStarted: false,
   vitalsSubmitted: false,
@@ -64,8 +64,7 @@ export const initialState: AppState = {
   cosignUnread: 0,
   notesReviewUnread: 0,
   viewedRequests: [],
-  paUnseenResolution: [],
-  breadcrumbOrigin: 'schedule',
+  assistantUnseenResolution: [],
   scheduleView: 'today',
   expiryModalLabId: null,
   pendingGrantLabId: null,
@@ -80,14 +79,14 @@ function createFreshInitialState(): AppState {
     noteHistory: [],
     auditLog: [],
     viewedRequests: [],
-    paUnseenResolution: [],
+    assistantUnseenResolution: [],
   }
 }
 
-function withPaUnseenResolution(state: AppState, labId: string): string[] {
-  return state.paUnseenResolution.includes(labId)
-    ? state.paUnseenResolution
-    : [...state.paUnseenResolution, labId]
+function withAssistantUnseenResolution(state: AppState, labId: string): string[] {
+  return state.assistantUnseenResolution.includes(labId)
+    ? state.assistantUnseenResolution
+    : [...state.assistantUnseenResolution, labId]
 }
 
 function withViewedRequest(state: AppState, labId: string): string[] {
@@ -109,9 +108,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SET_SCHEDULE_VIEW':
       return { ...state, scheduleView: action.view }
-
-    case 'SET_BREADCRUMB_ORIGIN':
-      return { ...state, breadcrumbOrigin: action.origin }
 
     case 'OPEN_VISIT':
       return {
@@ -263,7 +259,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'pa', 'Request lab access', `Requested access to ${action.labId}`),
+          logAudit(state, 'assistant', 'Request lab access', `Requested access to ${action.labId}`),
         ],
       }
     }
@@ -274,7 +270,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         pendingGrantLabId: action.labId,
         pendingGrantDuration: action.duration,
         viewedRequests: withViewedRequest(state, action.labId),
-        paUnseenResolution: withPaUnseenResolution(state, action.labId),
+        assistantUnseenResolution: withAssistantUnseenResolution(state, action.labId),
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? {
@@ -316,7 +312,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'pa', 'Confirm lab grant', `Temporary access confirmed for ${action.labId}`),
+          logAudit(state, 'assistant', 'Confirm lab grant', `Temporary access confirmed for ${action.labId}`),
         ],
       }
     }
@@ -325,7 +321,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         viewedRequests: withViewedRequest(state, action.labId),
-        paUnseenResolution: withPaUnseenResolution(state, action.labId),
+        assistantUnseenResolution: withAssistantUnseenResolution(state, action.labId),
         labs: state.labs.map((lab) =>
           lab.id === action.labId
             ? {
@@ -359,9 +355,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
         viewedRequests: isResponseToRequest
           ? withViewedRequest(state, action.labId)
           : state.viewedRequests,
-        paUnseenResolution: isResponseToRequest
-          ? withPaUnseenResolution(state, action.labId)
-          : state.paUnseenResolution,
+        assistantUnseenResolution: isResponseToRequest
+          ? withAssistantUnseenResolution(state, action.labId)
+          : state.assistantUnseenResolution,
         labs: state.labs.map((item) =>
           item.id === action.labId
             ? {
@@ -536,7 +532,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'MARK_PHYSICIAN_COSIGN_VIEWED':
       return { ...state, cosignUnread: 0 }
 
-    case 'MARK_PA_NOTES_REVIEW_VIEWED':
+    case 'MARK_ASSISTANT_NOTES_REVIEW_VIEWED':
       return { ...state, notesReviewUnread: 0 }
 
     case 'MARK_REQUEST_READ':
@@ -545,10 +541,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
         viewedRequests: withViewedRequest(state, action.labId),
       }
 
-    case 'MARK_PA_RESOLUTION_SEEN':
+    case 'MARK_ASSISTANT_RESOLUTION_SEEN':
       return {
         ...state,
-        paUnseenResolution: state.paUnseenResolution.filter((id) => id !== action.labId),
+        assistantUnseenResolution: state.assistantUnseenResolution.filter((id) => id !== action.labId),
       }
 
     default:

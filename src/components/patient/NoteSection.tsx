@@ -4,7 +4,7 @@ import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { getNoteStatusLabel } from '@/lib/statusDerivation'
+import { getNoteStatusLabel, getRoleLabel } from '@/lib/statusDerivation'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
 
   const canEdit =
     !readOnly &&
-    state.role === 'pa' &&
+    state.role === 'assistant' &&
     (state.noteStatus === 'not_started' ||
       state.noteStatus === 'draft' ||
       state.noteStatus === 'returned')
@@ -50,7 +50,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
     dispatch({ type: 'RETURN_NOTE', feedback: returnFeedback })
     setReturnDialogOpen(false)
     setReturnFeedback('')
-    toast.success('Note returned to PA')
+    toast.success('Note returned to assistant')
   }
 
   const statusVariant = (() => {
@@ -129,7 +129,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
           <ul className="space-y-1">
             {state.noteHistory.map((v) => (
               <li key={v.id} className="text-xs text-muted-foreground">
-                v{v.version} — {v.status} by {v.actor === 'pa' ? 'PA' : 'Physician'} at {v.timestamp}
+                v{v.version} — {v.status} by {getRoleLabel(v.actor)} at {v.timestamp}
                 {v.feedback && ` — "${v.feedback}"`}
               </li>
             ))}
@@ -143,7 +143,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
             <DialogTitle>Return note for revision</DialogTitle>
           </DialogHeader>
           <Textarea
-            placeholder="Provide feedback for the PA..."
+            placeholder="Provide feedback for the assistant..."
             value={returnFeedback}
             onChange={(e) => setReturnFeedback(e.target.value)}
             rows={4}

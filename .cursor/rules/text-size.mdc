@@ -16,7 +16,7 @@ Only add a size utility when deliberately denser or larger:
 - ✅ `<p>Supporting copy</p>` — muted + base by default
 - ✅ `<p className="text-xs">Ordered Aug 5</p>` — intentional denser meta (still muted)
 - ✅ `<p className="text-foreground">Pending request from Alex Chen</p>` — intentional primary
-- ✅ Button uses `text-base`; Badge uses `text-sm` (on the primitives; regular weight by inheritance)
+- ✅ Button and TabsTrigger use `text-base` (same as a regular `<p>`); Badge uses `text-sm` (on the primitives; regular weight by inheritance)
 - ✅ Input and other control chrome may define their own size tokens
 - ❌ `<Card className="text-sm">` or Dialog/Sheet roots forcing `text-sm` for all children
 - ❌ `<p className="text-muted-foreground">…</p>` when muted is already the default

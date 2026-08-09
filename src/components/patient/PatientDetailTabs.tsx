@@ -8,6 +8,7 @@ import { LabResultCard } from '@/components/patient/LabResultCard'
 import { AddMedicationDialog } from '@/components/patient/AddMedicationDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { getRoleLabel } from '@/lib/statusDerivation'
 
 const PAST_VISITS = [
   { id: 'visit-2026-08-03', label: 'Aug 3, 2026 — Follow-up' },
@@ -23,7 +24,7 @@ interface PatientDetailTabsProps {
 export function PatientDetailTabs({
   onOpenTodayVisit,
   onOpenPastVisit,
-  defaultTab = 'visits',
+  defaultTab = 'demographics',
 }: PatientDetailTabsProps) {
   const { state, dispatch } = useAppState()
 
@@ -40,17 +41,17 @@ export function PatientDetailTabs({
   return (
     <Tabs defaultValue={defaultTab} key={defaultTab} className="flex-1">
       <TabsList>
-        <TabsTrigger value="visits">Visits</TabsTrigger>
         <TabsTrigger value="demographics">Demographics</TabsTrigger>
-        <TabsTrigger value="problems">Problems & meds</TabsTrigger>
+        <TabsTrigger value="problems">Problems & medications</TabsTrigger>
         <TabsTrigger value="labs">Labs & results</TabsTrigger>
+        <TabsTrigger value="visits">Visits</TabsTrigger>
         {state.role === 'physician' && (
           <TabsTrigger value="audit">Audit trail</TabsTrigger>
         )}
       </TabsList>
 
       <TabsContent value="visits" className="mt-4 space-y-3">
-        <div className="rounded-lg border p-4">
+        <div className="rounded-md border p-4">
           <div className="flex items-center justify-between">
             <div>
               <p><strong>Today&apos;s visit</strong></p>
@@ -67,7 +68,7 @@ export function PatientDetailTabs({
         </div>
         <p className="text-xs"><strong>Past visits</strong></p>
         {PAST_VISITS.map((visit) => (
-          <div key={visit.id} className="rounded-lg border p-4">
+          <div key={visit.id} className="rounded-md border p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm">{visit.label}</p>
               <Button
@@ -110,7 +111,7 @@ export function PatientDetailTabs({
           </div>
           <div className="space-y-2">
             {state.meds.map((med) => (
-              <div key={med.id} className="rounded-lg border p-3">
+              <div key={med.id} className="rounded-md border p-3">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm"><strong>{med.name}</strong></p>
@@ -142,7 +143,7 @@ export function PatientDetailTabs({
                     {med.history.map((event) => (
                       <li key={event.id} className="text-xs text-muted-foreground">
                         {event.timestamp} — {event.action} by{' '}
-                        {event.actor === 'pa' ? 'PA' : 'Physician'}
+                        {getRoleLabel(event.actor)}
                         {event.detail && ` (${event.detail})`}
                       </li>
                     ))}
@@ -179,8 +180,8 @@ export function PatientDetailTabs({
                   {[...state.auditLog].reverse().map((event) => (
                     <tr key={event.id} className="border-b">
                       <td className="py-2 pr-4 text-xs text-muted-foreground">{event.timestamp}</td>
-                      <td className="py-2 pr-4 capitalize">
-                        {event.actor === 'pa' ? 'PA' : 'Physician'}
+                      <td className="py-2 pr-4">
+                        {getRoleLabel(event.actor)}
                       </td>
                       <td className="py-2 pr-4">{event.action}</td>
                       <td className="py-2 text-muted-foreground">{event.detail}</td>

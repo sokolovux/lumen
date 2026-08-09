@@ -1,19 +1,23 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
-import { useAppState } from '@/state/AppStateContext'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAppState } from '@/state/AppStateContext'
 
 export function PatientsPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { dispatch } = useAppState()
 
   const handlePatientClick = (patientId: string, isInteractive?: boolean) => {
     if (isInteractive || patientId === JORDAN_REYES_ID) {
-      dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'patients' })
-      navigate(`/patients/${patientId}`)
+      dispatch({ type: 'CLOSE_VISIT' })
+      navigate(`/patients/${patientId}`, {
+        state: { from: `${location.pathname}${location.search}` },
+      })
       return
     }
     toast.info('This patient is scoped out of the demo', {
@@ -23,9 +27,7 @@ export function PatientsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b px-6 py-4">
-        <h4>Patients</h4>
-      </div>
+      <PageHeader title="Patients" />
       <div className="flex-1 overflow-y-auto p-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {PATIENTS.map((patient) => {
