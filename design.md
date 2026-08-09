@@ -12,7 +12,7 @@ Do **not** invent a new component by default. If you believe a new component is 
 
 Once a component exists (shared UI under `src/components/ui/`, or any product component), call sites must use it **naked** — no Tailwind utilities on that component unless you **ask and get permission**.
 
-Documented exceptions (props, helpers, or semantic tints already in this file) do not require re-asking — e.g. Badge `notificationBadgeClassName` / status tints, Card `interactive` / `highlighted` / `size`, Button `variant` / `size`.
+Documented exceptions (props, helpers, or semantic tints already in this file) do not require re-asking — e.g. Badge `notificationBadgeClassName` / status tints, Card `interactive` / `size`, Button `variant` / `size`.
 
 ### Repeated styles → `@apply` in the component
 
@@ -60,7 +60,7 @@ Card styles live in `src/components/ui/card.css` (`@apply` on `data-slot`). Use 
 
 - Equal padding on all sides (`p-(--card-spacing)`); do not override with `p-*` / `px-*` / `py-*` / section `gap-*`
 - Put stacks, grids, and button rows on **inner** elements
-- Allowed props: `size="sm" | "default"`, `interactive` (pointer + hover shadow), `highlighted` (emphasis ring)
+- Allowed props: `size="sm" | "default"`, `interactive` (pointer + hover shadow)
 - Ask before any other call-site `className` on Card slots
 
 ```tsx

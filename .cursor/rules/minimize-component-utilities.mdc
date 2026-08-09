@@ -19,7 +19,7 @@ If you believe a **new** component is necessary, **ask the user first** and wait
 
 Once a component exists, do **not** put Tailwind utilities on it at the call site unless you ask and get permission.
 
-Allowed without re-asking only when already documented (e.g. Button `variant`/`size`, Card `interactive`/`highlighted`/`size`, Badge outline helpers / status tints).
+Allowed without re-asking only when already documented (e.g. Button `variant`/`size`, Card `interactive`/`size`, Badge outline helpers / status tints).
 
 Specializations: naked cards (`.cursor/rules/naked-cards.mdc`), naked headings (`.cursor/rules/naked-headings.mdc`).
 

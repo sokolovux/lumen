@@ -6,7 +6,6 @@ function Card({
   className,
   size = "default",
   interactive = false,
-  highlighted = false,
   ...props
 }) {
   return (
@@ -14,7 +13,6 @@ function Card({
       data-slot="card"
       data-size={size}
       data-interactive={interactive ? "" : undefined}
-      data-highlighted={highlighted ? "" : undefined}
       className={cn(className)}
       {...props} />
   );

@@ -26,11 +26,9 @@ export function PatientDetailPage() {
   const { state, dispatch } = useAppState()
 
   const tabParam = searchParams.get('tab')
-  const labParam = searchParams.get('lab')
   const defaultTab = ['visits', 'demographics', 'problems', 'labs', 'audit'].includes(tabParam ?? '')
     ? tabParam!
     : 'visits'
-  const highlightLabId = labParam ?? undefined
 
   const patient = PATIENTS.find((p) => p.id === patientId)
 
@@ -76,7 +74,6 @@ export function PatientDetailPage() {
         <div className="flex-1 overflow-y-auto p-6">
           <PatientDetailTabs
             defaultTab={defaultTab}
-            highlightLabId={highlightLabId}
             onOpenTodayVisit={handleOpenTodayVisit}
             onOpenPastVisit={handleOpenPastVisit}
           />

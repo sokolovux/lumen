@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { ArrowRight, Check, Lock, Unlock, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -11,6 +11,7 @@ import {
   formatCountdown,
   formatGrantDurationLabel,
   formatGrantDurationPhrase,
+  getActiveGrantBadgeLabel,
   getLabStatusLabel,
   getLabStatusTint,
 } from '@/lib/statusDerivation'
@@ -32,12 +33,10 @@ import {
 
 interface LabResultCardProps {
   lab: LabResult
-  highlighted?: boolean
 }
 
-export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) {
+export function LabResultCard({ lab }: LabResultCardProps) {
   const { state, dispatch } = useAppState()
-  const cardRef = useRef<HTMLDivElement>(null)
   const [grantOpen, setGrantOpen] = useState(false)
   const [denyOpen, setDenyOpen] = useState(false)
   const [releaseOpen, setReleaseOpen] = useState(false)
@@ -47,12 +46,6 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
   const isPhysician = state.role === 'physician'
   const now = Date.now()
   const durationLabel = formatGrantDurationLabel(lab.grantDuration ?? '10m')
-
-  useEffect(() => {
-    if (highlighted && cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }, [highlighted])
 
   const openDocument = () => {
     if (isPa && lab.status === 'released' && lab.justReleased) {
@@ -69,6 +62,7 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
   const handleStartWindow = () => {
     dispatch({ type: 'CONFIRM_LAB_GRANT', labId: lab.id })
     setStartWindowOpen(false)
+    setDocumentOpen(true)
     toast.success('Access window started')
   }
 
@@ -107,9 +101,14 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
 
   const justReleased = isPa && lab.status === 'released' && lab.justReleased
 
+  const statusBadgeLabel =
+    lab.status === 'active' && lab.grantExpiresAt && isPhysician
+      ? getActiveGrantBadgeLabel('physician', lab.grantExpiresAt, now)
+      : getLabStatusLabel(lab.status, state.role)
+
   return (
     <>
-      <div ref={cardRef} id={`lab-${lab.id}`}>
+      <div>
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -117,7 +116,7 @@ export function LabResultCard({ lab, highlighted = false }: LabResultCardProps) 
                 variant="outline"
                 className={getLabStatusTint(lab.status, state.role)}
               >
-                {getLabStatusLabel(lab.status, state.role)}
+                {statusBadgeLabel}
               </Badge>
               {justReleased && (
                 <Badge

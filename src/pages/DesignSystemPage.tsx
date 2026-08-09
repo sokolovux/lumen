@@ -77,6 +77,7 @@ import {
   scheduleStatusTint,
 } from '@/lib/statusDerivation'
 import type { LabStatus, NoteStatus, ScheduleStatus } from '@/state/types'
+import { LabResultCardsGallery } from '@/pages/LabResultCardsGallery'
 
 const COLOR_TOKENS = [
   { name: 'Background', swatch: 'bg-background', fg: 'text-foreground', border: true },
@@ -220,6 +221,7 @@ export function DesignSystemPage() {
               ['forms', 'Forms'],
               ['feedback', 'Feedback'],
               ['surfaces', 'Surfaces'],
+              ['result-cards', 'Result cards'],
               ['overlays', 'Overlays'],
               ['inventory', 'Inventory'],
             ].map(([href, label]) => (
@@ -449,7 +451,7 @@ export function DesignSystemPage() {
                 <CardContent>
                   <div className="space-y-2">
                     <p className="text-emerald-700">✓ Equal padding from the primitive</p>
-                    <p className="text-emerald-700">✓ interactive · highlighted · size props</p>
+                    <p className="text-emerald-700">✓ interactive · size props</p>
                     <p className="text-destructive">✗ className on Card / Header / Content</p>
                   </div>
                 </CardContent>
@@ -770,24 +772,14 @@ export function DesignSystemPage() {
                   <Button size="sm" variant="outline">Cancel</Button>
                 </CardFooter>
               </Card>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card size="sm" interactive>
-                  <CardHeader>
-                    <CardTitle>Interactive · sm</CardTitle>
-                    <CardDescription>
-                      size=&quot;sm&quot; and interactive for clickable cards.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-                <Card highlighted>
-                  <CardHeader>
-                    <CardTitle>Highlighted</CardTitle>
-                    <CardDescription>
-                      highlighted for unseen / emphasis rings.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </div>
+              <Card size="sm" interactive>
+                <CardHeader>
+                  <CardTitle>Interactive · sm</CardTitle>
+                  <CardDescription>
+                    size=&quot;sm&quot; and interactive for clickable cards.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
 
               <Tabs defaultValue="visits">
                 <TabsList>
@@ -946,6 +938,16 @@ export function DesignSystemPage() {
                 </DialogContent>
               </Dialog>
             </div>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="result-cards"
+            title="Result cards"
+            description="Every Labs & Results and Access / My Requests card state for PA and physician. Presentational fixtures — switch tabs to review edge cases."
+          >
+            <LabResultCardsGallery />
           </Section>
 
           <Separator />

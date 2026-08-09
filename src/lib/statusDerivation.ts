@@ -34,12 +34,28 @@ export function getLabStatusLabel(
   switch (status) {
     case 'pending': return physicianChartLocked ? 'Unreleased' : 'Locked'
     case 'requested': return 'Access requested'
-    case 'granted_unstarted': return 'Grant pending confirmation'
+    case 'granted_unstarted':
+      return physicianChartLocked
+        ? 'Granted — not yet started'
+        : 'Grant pending confirmation'
     case 'active': return 'Temporary access'
     case 'expired': return 'Access expired'
     case 'denied': return physicianChartLocked ? 'Unreleased' : 'Access denied'
     case 'released': return 'Released'
   }
+}
+
+/** Live badge copy for Labs & Results when a grant is counting down (shared expiresAt). */
+export function getActiveGrantBadgeLabel(
+  role: 'pa' | 'physician',
+  expiresAt: number,
+  now: number,
+): string {
+  const remaining = formatCountdownHms(expiresAt, now)
+  if (role === 'physician') {
+    return `Access active — ${remaining} remaining`
+  }
+  return `Available for ${remaining}`
 }
 
 /** Outline Badge tints for lab statuses. Physician labs surface treats denied as neutral. */
@@ -55,15 +71,16 @@ export function getLabStatusTint(
     case 'granted_unstarted':
     case 'active':
       return 'border-blue-200 bg-blue-50 text-blue-700'
-    case 'expired':
-      return 'text-muted-foreground'
     case 'denied':
       return physicianChartLocked
         ? ''
         : 'border-destructive/30 bg-destructive/10 text-destructive'
     case 'released':
       return 'border-green-200 bg-green-50 text-green-700'
+    case 'pending':
+    case 'expired':
     default:
+      // Neutral outline — Locked / Access expired / Unreleased
       return ''
   }
 }

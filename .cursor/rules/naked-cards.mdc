@@ -13,7 +13,7 @@ Put content layout (stacks, grids, button rows) on **inner** elements, not on Ca
 
 Allowed without asking:
 
-- Props: `size="sm" | "default"`, `interactive`, `highlighted`
+- Props: `size="sm" | "default"`, `interactive`
 - Runtime state only when a documented Card prop cannot express it — ask first
 
 ```tsx
@@ -28,7 +28,7 @@ Allowed without asking:
 </Card>
 
 <Card interactive onClick={…}>…</Card>
-<Card size="sm" highlighted={isUnseen}>…</Card>
+<Card size="sm">…</Card>
 
 // ❌
 <Card className="gap-2 py-0">

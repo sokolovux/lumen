@@ -12,10 +12,6 @@
     @apply cursor-pointer transition-shadow hover:shadow-md;
   }
 
-  [data-slot="card"][data-highlighted] {
-    @apply ring-2 ring-blue-400/50;
-  }
-
   [data-slot="card"]:has([data-slot="card-footer"]) {
     @apply pb-0;
   }

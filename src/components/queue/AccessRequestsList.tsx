@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, Unlock, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { GrantDuration, LabResult } from '@/state/types'
 import { cn } from '@/lib/utils'
 import { useAppState } from '@/state/AppStateContext'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
-import {
-  formatCountdown,
-  getLabStatusLabel,
-  getLabStatusTint,
-  isPaResolvedLabStatus,
-} from '@/lib/statusDerivation'
+import { isPaResolvedLabStatus } from '@/lib/statusDerivation'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
+import { RequestQueueCard } from '@/components/queue/RequestQueueCard'
 
 export function AccessRequestsList() {
   const { state } = useAppState()
@@ -29,6 +22,7 @@ export function AccessRequestsList() {
 
 function PhysicianAccessRequestsList() {
   const { state, dispatch } = useAppState()
+  const navigate = useNavigate()
   const [grantLabId, setGrantLabId] = useState<string | null>(null)
   const [denyLabId, setDenyLabId] = useState<string | null>(null)
   const [releaseLabId, setReleaseLabId] = useState<string | null>(null)
@@ -85,6 +79,12 @@ function PhysicianAccessRequestsList() {
     toast.success('Result permanently released — PA notified')
   }
 
+  const handleViewInChart = (labId: string) => {
+    markViewed(labId)
+    dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
+    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`)
+  }
+
   return (
     <>
       <Tabs defaultValue="unresolved">
@@ -121,60 +121,16 @@ function PhysicianAccessRequestsList() {
               {unresolvedLabs.map((lab) => {
                 const isUnread = !state.viewedRequests.includes(lab.id)
                 return (
-                  <Card key={lab.id}>
-                    <CardHeader>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge
-                          variant="outline"
-                          className={getLabStatusTint(lab.status, state.role, 'requests')}
-                        >
-                          {getLabStatusLabel(lab.status, state.role, 'requests')}
-                        </Badge>
-                        {isUnread && (
-                          <Badge
-                            variant="outline"
-                            className={notificationBadgeClassName}
-                          >
-                            New
-                          </Badge>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{lab.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
-                        </p>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          size="sm"
-                          variant="success"
-                          onClick={() => handleOpenGrant(lab.id)}
-                        >
-                          <Check className="size-3.5" />
-                          Grant
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleOpenDeny(lab.id)}
-                        >
-                          <X className="size-3.5" />
-                          Deny
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleOpenRelease(lab.id)}
-                        >
-                          <Unlock className="size-3.5" />
-                          Release permanently
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <RequestQueueCard
+                    key={lab.id}
+                    lab={lab}
+                    mode="physician-inbox"
+                    isUnread={isUnread}
+                    onGrant={() => handleOpenGrant(lab.id)}
+                    onDeny={() => handleOpenDeny(lab.id)}
+                    onRelease={() => handleOpenRelease(lab.id)}
+                    onViewInChart={() => handleViewInChart(lab.id)}
+                  />
                 )
               })}
             </div>
@@ -190,7 +146,12 @@ function PhysicianAccessRequestsList() {
           ) : (
             <div className="space-y-3">
               {historyLabs.map((lab) => (
-                <PhysicianHistoryRow key={lab.id} lab={lab} />
+                <RequestQueueCard
+                  key={lab.id}
+                  lab={lab}
+                  mode="physician-history"
+                  onViewInChart={() => handleViewInChart(lab.id)}
+                />
               ))}
             </div>
           )}
@@ -225,71 +186,6 @@ function PhysicianAccessRequestsList() {
       )}
     </>
   )
-}
-
-function PhysicianHistoryRow({ lab }: { lab: LabResult }) {
-  const { state, dispatch } = useAppState()
-  const navigate = useNavigate()
-  const now = Date.now()
-
-  const handleViewResult = () => {
-    dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
-    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs&lab=${lab.id}`)
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <Badge
-          variant="outline"
-          className={getLabStatusTint(lab.status, state.role, 'requests')}
-        >
-          {getLabStatusLabel(lab.status, state.role, 'requests')}
-        </Badge>
-        <div className="min-w-0">
-          <p className="font-medium">{lab.name}</p>
-          <p className="text-sm text-muted-foreground">
-            Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
-          </p>
-          <p className="mt-1 text-xs font-medium">
-            {physicianHistoryOutcomeLabel(lab)}
-          </p>
-          {lab.status === 'active' && lab.grantExpiresAt && (
-            <p className="mt-1 text-xs font-medium text-blue-700">
-              Available for {formatCountdown(lab.grantExpiresAt, now)}
-            </p>
-          )}
-          {lab.status === 'denied' && lab.denialReason && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              Feedback: {lab.denialReason}
-            </p>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Button size="sm" variant="secondary" onClick={handleViewResult}>
-          View result
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-function physicianHistoryOutcomeLabel(lab: LabResult): string {
-  switch (lab.status) {
-    case 'granted_unstarted':
-      return 'Granted — awaiting PA confirmation'
-    case 'active':
-      return 'Granted — temporary access active'
-    case 'expired':
-      return 'Temporary access expired'
-    case 'denied':
-      return 'Denied'
-    case 'released':
-      return 'Permanently released'
-    default:
-      return getLabStatusLabel(lab.status, 'physician', 'requests')
-  }
 }
 
 function PaMyRequestsList() {
@@ -335,7 +231,7 @@ function PaMyRequestsList() {
         ) : (
           <div className="space-y-3">
             {resolvedLabs.map((lab) => (
-              <ResolvedRequestRow
+              <PaResolvedRow
                 key={lab.id}
                 lab={lab}
                 isUnseen={state.paUnseenResolution.includes(lab.id)}
@@ -354,25 +250,11 @@ function PaMyRequestsList() {
         ) : (
           <div className="space-y-3">
             {awaitingLabs.map((lab) => (
-              <Card key={lab.id}>
-                <CardHeader>
-                  <Badge
-                    variant="outline"
-                    className={getLabStatusTint(lab.status, state.role, 'requests')}
-                  >
-                    {getLabStatusLabel(lab.status, state.role, 'requests')}
-                  </Badge>
-                  <div>
-                    <p className="font-medium">{lab.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Waiting for physician response
-                    </p>
-                  </div>
-                </CardHeader>
-              </Card>
+              <RequestQueueCard
+                key={lab.id}
+                lab={lab}
+                mode="pa-awaiting"
+              />
             ))}
           </div>
         )}
@@ -381,17 +263,16 @@ function PaMyRequestsList() {
   )
 }
 
-function ResolvedRequestRow({
+function PaResolvedRow({
   lab,
   isUnseen,
 }: {
   lab: LabResult
   isUnseen: boolean
 }) {
-  const { state, dispatch } = useAppState()
+  const { dispatch } = useAppState()
   const navigate = useNavigate()
   const rowRef = useRef<HTMLDivElement>(null)
-  const now = Date.now()
 
   useEffect(() => {
     if (!isUnseen) return
@@ -411,84 +292,20 @@ function ResolvedRequestRow({
     return () => observer.disconnect()
   }, [dispatch, isUnseen, lab.id])
 
-  const canViewResult =
-    lab.status === 'granted_unstarted'
-    || lab.status === 'active'
-    || lab.status === 'released'
-  const isDenied = lab.status === 'denied'
-
-  const handleViewResult = () => {
+  const handleViewInChart = () => {
     dispatch({ type: 'SET_BREADCRUMB_ORIGIN', origin: 'requests' })
-    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs&lab=${lab.id}`)
+    navigate(`/patients/${JORDAN_REYES_ID}?tab=labs`)
   }
 
   return (
-    <div ref={rowRef}>
-      <Card highlighted={isUnseen}>
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge
-              variant="outline"
-              className={getLabStatusTint(lab.status, state.role, 'requests')}
-            >
-              {getLabStatusLabel(lab.status, state.role, 'requests')}
-            </Badge>
-            {isUnseen && (
-              <Badge
-                variant="outline"
-                className={notificationBadgeClassName}
-              >
-                New
-              </Badge>
-            )}
-          </div>
-          <div className="min-w-0">
-            <p className="font-medium">{lab.name}</p>
-            <p className="text-sm text-muted-foreground">
-              Jordan Reyes · {lab.type} · Ordered {lab.orderDate}
-            </p>
-            <p className="mt-1 text-xs font-medium">
-              {resolvedOutcomeLabel(lab)}
-            </p>
-            {lab.status === 'active' && lab.grantExpiresAt && (
-              <p className="mt-1 text-xs font-medium text-blue-700">
-                Available for {formatCountdown(lab.grantExpiresAt, now)}
-              </p>
-            )}
-            {isDenied && lab.denialReason && (
-              <p className="mt-1 text-xs text-destructive">
-                Denied: {lab.denialReason}
-              </p>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {canViewResult && (
-            <Button size="sm" variant="secondary" onClick={handleViewResult}>
-              View result
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <RequestQueueCard
+      lab={lab}
+      mode="pa-resolved"
+      isUnread={isUnseen}
+      cardRef={rowRef}
+      onViewInChart={handleViewInChart}
+    />
   )
-}
-
-function resolvedOutcomeLabel(lab: LabResult): string {
-  switch (lab.status) {
-    case 'granted_unstarted':
-      return 'Granted — confirm to start timer'
-    case 'active':
-      return 'Granted — temporary access active'
-    case 'expired':
-      return 'Expired'
-    case 'denied':
-      return 'Denied'
-    case 'released':
-      return 'Permanently released'
-    default:
-      return getLabStatusLabel(lab.status)
-  }
 }
 
 function EmptyState({ title, description }: { title: string; description: string }) {

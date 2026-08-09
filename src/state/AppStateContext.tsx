@@ -352,6 +352,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'RELEASE_LAB': {
       const lab = state.labs.find((l) => l.id === action.labId)
       const isResponseToRequest = lab?.status === 'requested'
+      const wasActiveGrant =
+        lab?.status === 'active' || lab?.status === 'granted_unstarted'
       return {
         ...state,
         viewedRequests: isResponseToRequest
@@ -364,8 +366,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
           item.id === action.labId
             ? {
                 ...item,
+                // Mid-countdown release converts temporary → permanent (never expired)
                 status: 'released' as const,
                 grantExpiresAt: undefined,
+                grantConfirmedAt: undefined,
                 justReleased: true,
                 denialReason: undefined,
               }
@@ -379,7 +383,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
             'Released result',
             isResponseToRequest
               ? 'Released result in response to request'
-              : 'Released result (direct release)',
+              : wasActiveGrant
+                ? 'Released result (converted active temporary grant to permanent)'
+                : 'Released result (direct release)',
           ),
         ],
       }
