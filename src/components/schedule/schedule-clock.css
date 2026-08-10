@@ -9,8 +9,12 @@
 }
 
 @layer components {
+  [data-slot="schedule-clock-time"] {
+    @apply flex items-center gap-1;
+  }
+
   [data-slot="schedule-clock-dot"] {
-    @apply inline-block size-[3px] shrink-0 rounded-full bg-black;
+    @apply inline-block size-[4px] shrink-0 rounded-full bg-black;
     animation: schedule-clock-dot 1.2s ease-in-out infinite;
   }
 }

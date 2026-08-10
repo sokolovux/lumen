@@ -3,7 +3,7 @@ import type { Medication } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { LabResultCard } from '@/components/patient/LabResultCard'
 import { AddMedicationDialog } from '@/components/patient/AddMedicationDialog'
 import { Button } from '@/components/ui/button'
@@ -166,7 +166,7 @@ export function PatientDetailTabs({
           {state.auditLog.length === 0 ? (
             <p className="text-sm text-muted-foreground">No audit events recorded yet.</p>
           ) : (
-            <ScrollArea className="h-[400px]">
+            <LightScrollbar className="h-[400px]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs text-muted-foreground">
@@ -189,7 +189,7 @@ export function PatientDetailTabs({
                   ))}
                 </tbody>
               </table>
-            </ScrollArea>
+            </LightScrollbar>
           )}
         </TabsContent>
       )}

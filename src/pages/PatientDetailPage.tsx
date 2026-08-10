@@ -1,6 +1,7 @@
 import { Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { PatientDetailTabs, PAST_VISITS } from '@/components/patient/PatientDetailTabs'
 import { VisitPanel } from '@/components/patient/VisitPanel'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
@@ -47,13 +48,15 @@ export function PatientDetailPage() {
     <div className="flex h-full overflow-hidden">
       <div className="flex flex-1 flex-col overflow-hidden">
         <PageHeader title={patient.name} backTo={backTo} />
-        <div className="flex-1 overflow-y-auto p-6">
-          <PatientDetailTabs
-            defaultTab={defaultTab}
-            onOpenTodayVisit={handleOpenTodayVisit}
-            onOpenPastVisit={handleOpenPastVisit}
-          />
-        </div>
+        <LightScrollbar className="min-h-0 flex-1">
+          <div className="p-6">
+            <PatientDetailTabs
+              defaultTab={defaultTab}
+              onOpenTodayVisit={handleOpenTodayVisit}
+              onOpenPastVisit={handleOpenPastVisit}
+            />
+          </div>
+        </LightScrollbar>
       </div>
       <VisitPanel
         open={showVisitPanel}

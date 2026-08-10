@@ -1,0 +1,33 @@
+---
+description: Use LightScrollbar for vertical scroll regions in product UI
+alwaysApply: true
+---
+
+# Light scrollbar
+
+Use **`LightScrollbar`** (`@/components/ui/light-scrollbar`) for every **vertical scroll region in product UI**: page main panes, sidebars, panels, columns, and nested scroll sections.
+
+Do **not** put `overflow-y-auto` / `overflow-auto` on layout shells. Do **not** use `ScrollArea` in pages or feature components.
+
+## Layout pattern
+
+Parent flex column: `overflow-hidden` (or `min-h-0` in flex children). Scrollport: naked `LightScrollbar` with `className="min-h-0 flex-1"` (or a fixed height when needed). Padding and content layout go on an **inner** wrapper.
+
+```tsx
+// ✅
+<div className="flex h-full flex-col overflow-hidden">
+  <PageHeader title="Patients" />
+  <LightScrollbar className="min-h-0 flex-1">
+    <div className="p-6">{children}</div>
+  </LightScrollbar>
+</div>
+
+// ❌
+<div className="flex-1 overflow-y-auto p-6">{children}</div>
+```
+
+## Exceptions
+
+Keep native overflow on **UI primitives** only (select/dropdown/combobox/command menus, dialog internals) and **horizontal** scroll (tables, attachment carousels). Do not wrap those in `LightScrollbar`.
+
+See `src/components/ui/light-scrollbar.css`.

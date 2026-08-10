@@ -4,6 +4,14 @@ import { formatTimestamp } from '@/lib/fixedClock'
 export const JORDAN_REYES_ID = 'jordan-reyes'
 /** Display name for the demo assistant in physician-facing request copy */
 export const DEMO_ASSISTANT_NAME = 'Sam Whitfield'
+/** Display name for the demo physician in the product shell */
+export const DEMO_PHYSICIAN_NAME = 'Dr. Amara Osei'
+
+export function getDemoUserProfile(role: 'assistant' | 'physician') {
+  return role === 'assistant'
+    ? { name: DEMO_ASSISTANT_NAME, initials: 'SW' }
+    : { name: DEMO_PHYSICIAN_NAME, initials: 'AO' }
+}
 
 const FIRST_NAMES = [
   'Ava', 'Liam', 'Emma', 'Noah', 'Olivia', 'Ethan', 'Sophia', 'Mason', 'Isabella', 'Lucas',

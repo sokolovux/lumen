@@ -46,7 +46,7 @@ function EstClock() {
   return (
     <div className="flex items-center gap-6">
       <p>{dateLabel}</p>
-      <div className="flex items-center gap-2">
+      <div data-slot="schedule-clock-time">
         <p>{timeLabel}</p>
         <span data-slot="schedule-clock-dot" aria-hidden />
       </div>

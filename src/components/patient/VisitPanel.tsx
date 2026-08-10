@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
@@ -92,7 +92,7 @@ export function VisitPanel({
             <X className="size-4" />
           </Button>
         </div>
-        <ScrollArea className="flex-1">
+        <LightScrollbar className="min-h-0 flex-1">
           <div className="flex flex-col gap-4 p-4">
             {isToday && !state.visitStarted && !displayPast && (
               <Button
@@ -204,7 +204,7 @@ export function VisitPanel({
               </p>
             )}
           </div>
-        </ScrollArea>
+        </LightScrollbar>
       </div>
     </div>
   )

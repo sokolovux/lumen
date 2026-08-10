@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { CheckIcon, PlusIcon } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { AppointmentCard } from '@/components/schedule/AppointmentCard'
 import type { Appointment, LabStatus, NoteStatus, ScheduleStatus } from '@/state/types'
 import { Button } from '@/components/ui/button'
@@ -260,10 +261,10 @@ export function DesignSystemPage() {
   const [enabled, setEnabled] = useState(false)
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       <PageHeader title="Design system" />
 
-      <div className="flex-1 overflow-y-auto">
+      <LightScrollbar className="min-h-0 flex-1">
         <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-8">
           <nav className="flex flex-wrap gap-2">
             {[
@@ -1029,7 +1030,7 @@ export function DesignSystemPage() {
             </div>
           </Section>
         </div>
-      </div>
+      </LightScrollbar>
     </div>
   )
 }
