@@ -47,7 +47,7 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-full w-56 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
-      <div className="flex h-14 shrink-0 items-center border-b px-4">
+      <div className="flex h-16 shrink-0 items-center border-b px-4">
         <h3>Lumen</h3>
       </div>
       <ScrollArea className="flex-1 px-2 py-3">

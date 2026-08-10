@@ -1,6 +1,6 @@
 @layer components {
   [data-slot="page-header"] {
-    @apply flex h-14 shrink-0 items-center justify-between gap-4 border-b px-6;
+    @apply flex h-16 shrink-0 items-center justify-between gap-4 border-b px-6;
   }
 
   [data-slot="page-header-start"] {

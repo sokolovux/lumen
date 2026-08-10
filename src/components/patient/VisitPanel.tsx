@@ -77,7 +77,7 @@ export function VisitPanel({
           visible ? 'translate-x-0' : 'translate-x-full',
         )}
       >
-        <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b px-4">
           <div>
             <h6>{displayLabel}</h6>
             <p className="text-xs text-muted-foreground">
