@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
+import { SearchIcon } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { KanbanColumn } from '@/components/schedule/KanbanColumn'
 import { DayColumn } from '@/components/schedule/DayColumn'
 import {
@@ -63,7 +69,7 @@ export function SchedulePage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       <PageHeader
         title={(
           <div className="flex items-center gap-6">
@@ -72,25 +78,39 @@ export function SchedulePage() {
           </div>
         )}
       >
-        <div className="flex rounded-md border bg-background p-0.5">
-          {([
-            { key: 'today' as const, label: 'Today' },
-            { key: 'fullWeek' as const, label: 'Full week' },
-          ]).map(({ key, label }) => (
-            <Button
-              key={key}
-              variant={state.scheduleView === key ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => dispatch({ type: 'SET_SCHEDULE_VIEW', view: key })}
-            >
-              {label}
-            </Button>
-          ))}
+        <div className="flex items-center gap-2">
+          <InputGroup className="h-10 w-64">
+            <InputGroupAddon>
+              <SearchIcon className="opacity-50" />
+            </InputGroupAddon>
+            <InputGroupInput placeholder="Search appointments" readOnly />
+          </InputGroup>
+          <div
+            data-slot="schedule-view-switch"
+            className="flex h-10 rounded-sm border bg-background p-0.5"
+          >
+            {([
+              { key: 'today' as const, label: 'Today' },
+              { key: 'fullWeek' as const, label: 'Full week' },
+            ]).map(({ key, label }) => (
+              <Button
+                key={key}
+                variant="ghost"
+                size="sm"
+                className="h-full"
+                aria-pressed={state.scheduleView === key}
+                onClick={() => dispatch({ type: 'SET_SCHEDULE_VIEW', view: key })}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+          <Button type="button">Create visit</Button>
         </div>
       </PageHeader>
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {state.scheduleView === 'today' ? (
-          <div className="flex min-h-full">
+          <div className="flex min-h-0 flex-1">
             {TODAY_KANBAN_COLUMNS.map((col) => (
               <KanbanColumn
                 key={col.key}
@@ -102,7 +122,7 @@ export function SchedulePage() {
             ))}
           </div>
         ) : (
-          <div className="flex min-h-full">
+          <div className="flex min-h-0 flex-1">
             {WEEK_DATES.map((date, i) => (
               <DayColumn
                 key={date}

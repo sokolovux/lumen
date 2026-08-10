@@ -103,7 +103,6 @@ const SCHEDULE_STATUSES: ScheduleStatus[] = [
   'with_assistant',
   'with_physician',
   'finished',
-  'late',
 ]
 
 const LAB_STATUSES: LabStatus[] = [
@@ -164,7 +163,7 @@ const APPOINTMENT_CARD_FIXTURES: {
       id: 'ds-apt-scheduled',
       patientId: 'sarah-patel',
       patientName: 'Sarah Patel',
-      time: '11:30 AM',
+      time: '11:30AM',
       date: '2026-08-10',
       kind: 'Follow-up',
       status: 'scheduled',
@@ -176,7 +175,7 @@ const APPOINTMENT_CARD_FIXTURES: {
       id: 'ds-apt-with-assistant',
       patientId: 'david-kim',
       patientName: 'David Kim',
-      time: '9:30 AM',
+      time: '9:30AM',
       date: '2026-08-10',
       kind: 'Sick visit',
       status: 'with_assistant',
@@ -188,7 +187,7 @@ const APPOINTMENT_CARD_FIXTURES: {
       id: 'ds-apt-with-physician',
       patientId: 'david-kim',
       patientName: 'David Kim',
-      time: '2:00 PM',
+      time: '2:00PM',
       date: '2026-08-11',
       kind: 'Lab review',
       status: 'with_physician',
@@ -200,24 +199,12 @@ const APPOINTMENT_CARD_FIXTURES: {
       id: 'ds-apt-finished',
       patientId: 'maria-chen',
       patientName: 'Maria Chen',
-      time: '9:00 AM',
+      time: '9:00AM',
       date: '2026-08-10',
       kind: 'Annual physical',
       status: 'finished',
     },
     displayStatus: 'finished',
-  },
-  {
-    appointment: {
-      id: 'ds-apt-late',
-      patientId: 'james-wilson',
-      patientName: 'James Wilson',
-      time: '1:00 PM',
-      date: '2026-08-10',
-      kind: 'New patient',
-      status: 'late',
-    },
-    displayStatus: 'late',
   },
 ]
 
@@ -597,22 +584,15 @@ export function DesignSystemPage() {
               </BadgeRow>
 
               <BadgeRow label="Schedule status pills">
-                {SCHEDULE_STATUSES.map((status) => {
-                  const tint = scheduleStatusTint[status]
-                  return (
-                    <div key={status} className="flex items-center gap-2">
-                      {tint ? (
-                        <Badge variant="outline" className={tint}>
-                          {getScheduleStatusLabel(status)}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">
-                          Scheduled (hidden)
-                        </span>
-                      )}
-                    </div>
-                  )
-                })}
+                {SCHEDULE_STATUSES.map((status) => (
+                  <Badge
+                    key={status}
+                    variant="outline"
+                    className={scheduleStatusTint[status]}
+                  >
+                    {getScheduleStatusLabel(status)}
+                  </Badge>
+                ))}
               </BadgeRow>
 
               <BadgeRow label="Lab & imaging status">

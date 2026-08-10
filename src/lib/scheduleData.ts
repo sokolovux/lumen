@@ -91,7 +91,6 @@ const APPOINTMENT_STATUSES: ScheduleStatus[] = [
   'with_assistant',
   'with_physician',
   'finished',
-  'late',
 ]
 
 const TIME_SLOTS: string[] = (() => {
@@ -101,7 +100,7 @@ const TIME_SLOTS: string[] = (() => {
     const m = minutes % 60
     const period = h24 >= 12 ? 'PM' : 'AM'
     const h12 = h24 % 12 === 0 ? 12 : h24 % 12
-    slots.push(`${h12}:${String(m).padStart(2, '0')} ${period}`)
+    slots.push(`${h12}:${String(m).padStart(2, '0')}${period}`)
   }
   return slots
 })()
@@ -135,7 +134,7 @@ function generateWeekAppointments(count: number): Appointment[] {
           id: 'apt-1',
           patientId: JORDAN_REYES_ID,
           patientName: 'Jordan Reyes',
-          time: '10:30 AM',
+          time: '10:30AM',
           date,
           kind: 'Follow-up',
           status: 'scheduled',
@@ -196,7 +195,7 @@ export function createInitialMeds(): Medication[] {
   ]
 }
 
-export const TODAY_KANBAN_COLUMNS: { key: string; label: string }[] = [
+export const TODAY_KANBAN_COLUMNS: { key: ScheduleStatus; label: string }[] = [
   { key: 'scheduled', label: 'Scheduled' },
   { key: 'with_assistant', label: 'With Assistant' },
   { key: 'with_physician', label: 'With Physician' },
@@ -214,9 +213,3 @@ export function parseAppointmentTime(time: string): number {
   return hours * 60 + minutes
 }
 
-export function isLateAppointment(time: string, status: string): boolean {
-  if (status === 'finished') return false
-  const aptMinutes = parseAppointmentTime(time)
-  const fixedMinutes = 11 * 60
-  return aptMinutes < fixedMinutes
-}

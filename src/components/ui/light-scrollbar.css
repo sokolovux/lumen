@@ -1,0 +1,19 @@
+@layer components {
+  [data-slot="light-scrollbar-viewport"] {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  [data-slot="light-scrollbar-viewport"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-slot="light-scrollbar-thumb"] {
+    @apply pointer-events-none absolute top-0 right-0 z-10 w-1 rounded-md opacity-0 transition-opacity duration-150;
+    background-color: color-mix(in oklch, var(--color-gray-400) 65%, transparent);
+  }
+
+  [data-slot="light-scrollbar"]:hover [data-slot="light-scrollbar-thumb"] {
+    @apply opacity-100;
+  }
+}

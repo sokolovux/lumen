@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Appointment } from '@/state/types'
-import { Card, CardAction, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import {
@@ -13,9 +13,14 @@ import { useAppState } from '@/state/AppStateContext'
 interface AppointmentCardProps {
   appointment: Appointment
   displayStatus: Appointment['status']
+  showStatusBadge?: boolean
 }
 
-export function AppointmentCard({ appointment, displayStatus }: AppointmentCardProps) {
+export function AppointmentCard({
+  appointment,
+  displayStatus,
+  showStatusBadge = true,
+}: AppointmentCardProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { dispatch } = useAppState()
@@ -34,22 +39,37 @@ export function AppointmentCard({ appointment, displayStatus }: AppointmentCardP
   }
 
   const statusTint = scheduleStatusTint[displayStatus]
+  const showStatusDot =
+    displayStatus === 'with_assistant' || displayStatus === 'with_physician'
 
   return (
-    <Card size="sm" interactive onClick={handleClick}>
-      <CardHeader>
-        <div>
-          <p><strong>{appointment.patientName}</strong></p>
-          <p>{appointment.time}, {appointment.kind}</p>
-        </div>
-        {statusTint && (
-          <CardAction>
-            <Badge variant="outline" className={statusTint}>
+    <Card
+      size="sm"
+      interactive
+      data-schedule-status={displayStatus}
+      onClick={handleClick}
+    >
+      <CardContent className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          {showStatusBadge && (
+            <Badge variant="outline" className={`order-1 sm:order-2 ${statusTint}`}>
               {getScheduleStatusLabel(displayStatus)}
+              {showStatusDot && (
+                <span
+                  data-slot="appointment-status-dot"
+                  data-status={displayStatus}
+                  aria-hidden
+                />
+              )}
             </Badge>
-          </CardAction>
-        )}
-      </CardHeader>
+          )}
+          <p className="order-2 sm:order-1">
+            <strong className="font-mono tabular-nums">{appointment.time}</strong>
+          </p>
+        </div>
+        <p className="text-sm text-foreground">{appointment.patientName}</p>
+        <p className="text-sm">{appointment.kind}</p>
+      </CardContent>
     </Card>
   )
 }

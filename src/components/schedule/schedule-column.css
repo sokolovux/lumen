@@ -1,0 +1,11 @@
+@layer components {
+  [data-schedule-column] [data-slot="light-scrollbar-viewport"] {
+    @apply bg-background;
+  }
+
+  [data-schedule-column-content] {
+    @apply flex min-h-full w-full flex-col bg-background bg-repeat;
+    background-image: url('/pattern.png');
+    background-size: 15% auto;
+  }
+}

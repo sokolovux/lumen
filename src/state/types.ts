@@ -23,7 +23,6 @@ export type ScheduleStatus =
   | 'with_assistant'
   | 'with_physician'
   | 'finished'
-  | 'late'
 
 export type ScheduleView = 'today' | 'fullWeek'
 

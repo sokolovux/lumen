@@ -1,0 +1,38 @@
+@layer components {
+  [data-slot="card"][data-schedule-status] {
+    scale: 1;
+    @apply duration-150 ease-out hover:scale-[1.02] hover:shadow-none;
+    transition-property: background-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  [data-slot="card"][data-schedule-status="scheduled"] {
+    @apply bg-gray-50 ring-gray-200 hover:bg-gray-100;
+  }
+
+  [data-slot="card"][data-schedule-status="with_assistant"] {
+    @apply bg-purple-50 ring-purple-200 hover:bg-purple-100;
+  }
+
+  [data-slot="card"][data-schedule-status="with_physician"] {
+    @apply bg-blue-50 ring-blue-200 hover:bg-blue-100;
+  }
+
+  [data-slot="card"][data-schedule-status="finished"] {
+    @apply bg-green-50 ring-green-200 hover:bg-green-100;
+  }
+
+  [data-slot="appointment-status-dot"] {
+    @apply inline-block size-[4px] shrink-0 rounded-full;
+    animation: schedule-clock-dot 1.2s ease-in-out infinite;
+  }
+
+  [data-slot="appointment-status-dot"][data-status="with_assistant"] {
+    @apply bg-purple-600;
+  }
+
+  [data-slot="appointment-status-dot"][data-status="with_physician"] {
+    @apply bg-blue-600;
+  }
+}

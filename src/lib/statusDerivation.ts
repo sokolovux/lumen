@@ -1,5 +1,4 @@
 import type { AppState, LabResult, LabStatus, Role, ScheduleStatus } from '@/state/types'
-import { isLateAppointment } from '@/lib/scheduleData'
 
 export function getRoleLabel(role: Role): string {
   return role === 'assistant' ? 'Assistant' : 'Physician'
@@ -15,16 +14,6 @@ export function jordanStatus(state: Pick<
   }
   if (state.visitStarted) return 'with_assistant'
   return 'scheduled'
-}
-
-export function jordanDisplayStatus(
-  state: Pick<AppState, 'visitStarted' | 'visitFinished' | 'noteStatus'>,
-  appointmentTime = '10:30 AM',
-): ScheduleStatus {
-  const base = jordanStatus(state)
-  if (base === 'finished') return 'finished'
-  if (isLateAppointment(appointmentTime, base)) return 'late'
-  return base
 }
 
 /** Labs chart: physician sees pending/denied as neutral "Unreleased". Requests queue uses true outcome labels. */
@@ -82,16 +71,31 @@ export function getScheduleStatusLabel(status: ScheduleStatus): string {
     case 'with_assistant': return 'With Assistant'
     case 'with_physician': return 'With Physician'
     case 'finished': return 'Finished'
-    case 'late': return 'Late'
   }
 }
 
-/** Outline Badge tints for schedule statuses. `scheduled` has no pill. */
-export const scheduleStatusTint: Partial<Record<ScheduleStatus, string>> = {
-  with_assistant: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+/** Background tints for Today kanban columns. */
+export const scheduleStatusColumnBackground: Record<ScheduleStatus, string> = {
+  scheduled: 'bg-gray-50',
+  with_assistant: 'bg-purple-50',
+  with_physician: 'bg-blue-50',
+  finished: 'bg-green-50',
+}
+
+/** Text color for schedule status labels. */
+export const scheduleStatusTextColor: Record<ScheduleStatus, string> = {
+  scheduled: 'text-gray-600',
+  with_assistant: 'text-purple-600',
+  with_physician: 'text-blue-600',
+  finished: 'text-green-600',
+}
+
+/** Outline Badge tints for schedule statuses. */
+export const scheduleStatusTint: Record<ScheduleStatus, string> = {
+  scheduled: 'border-gray-200 bg-gray-50 text-gray-600',
+  with_assistant: 'border-purple-200 bg-purple-50 text-purple-600',
   with_physician: 'border-blue-200 bg-blue-50 text-blue-600',
   finished: 'border-green-200 bg-green-50 text-green-600',
-  late: 'border-amber-200 bg-amber-50 text-amber-600',
 }
 
 export function canAssistantViewLab(lab: LabResult): boolean {

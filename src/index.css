@@ -2,10 +2,14 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "./components/ui/card.css";
+@import "./components/ui/light-scrollbar.css";
 @import "./components/ui/font-weight.css";
 @import "./components/patient/access-timer.css";
 @import "./components/layout/page-header.css";
 @import "./components/schedule/schedule-clock.css";
+@import "./components/schedule/schedule-header.css";
+@import "./components/schedule/schedule-column.css";
+@import "./components/schedule/appointment-card.css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -72,6 +72,10 @@ declare module '@/components/ui/scroll-area' {
   export const ScrollBar: FC<UIProps>
 }
 
+declare module '@/components/ui/light-scrollbar' {
+  export const LightScrollbar: FC<UIProps>
+}
+
 declare module '@/components/ui/avatar' {
   export const Avatar: FC<UIProps>
   export const AvatarImage: FC<UIProps>
