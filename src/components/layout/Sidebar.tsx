@@ -4,7 +4,7 @@ import {
   Calendar,
   CreditCard,
   FileBarChart,
-  MessageSquare,
+  MessageCircle,
   Users,
   ClipboardList,
   Inbox,
@@ -54,7 +54,7 @@ const requestsItem = {
 const inboxItems: SidebarNavItem[] = [
   queueItem,
   requestsItem,
-  { label: 'Messages', icon: MessageSquare, placeholder: true },
+  { label: 'Messages', icon: MessageCircle, placeholder: true },
 ]
 
 const careItems: SidebarNavItem[] = [
@@ -70,9 +70,9 @@ const practiceItems: SidebarNavItem[] = [
   { label: 'Settings', icon: Settings, placeholder: true },
 ]
 
-const sidebarSections: { key: string; title: string; items: SidebarNavItem[]; inbox?: true }[] = [
+const sidebarSections: { key: string; title: string; items: SidebarNavItem[] }[] = [
   { key: 'care', title: 'Care', items: careItems },
-  { key: 'inbox', title: 'Inbox', items: inboxItems, inbox: true },
+  { key: 'inbox', title: 'Inbox', items: inboxItems },
   { key: 'practice', title: 'Practice', items: practiceItems },
 ]
 
@@ -97,10 +97,6 @@ export function Sidebar() {
         return state.assistantUnseenResolution.length
     }
   }
-
-  const inboxHasBadges =
-    badgeCount(queueItem.badgeForRole[state.role]) > 0 ||
-    badgeCount(requestsItem.badgeForRole[state.role]) > 0
 
   const demoUser = getDemoUserProfile(state.role)
 
@@ -158,12 +154,8 @@ export function Sidebar() {
       </div>
       <LightScrollbar className="min-h-0 flex-1">
         <nav data-slot="sidebar-nav" className="px-2 py-3">
-          {sidebarSections.map(({ key, title, items, inbox }) => (
-            <div
-              key={key}
-              data-slot="sidebar-section"
-              data-inbox-active={inbox && inboxHasBadges ? 'true' : undefined}
-            >
+          {sidebarSections.map(({ key, title, items }) => (
+            <div key={key} data-slot="sidebar-section">
               <p data-slot="sidebar-section-title">{title}</p>
               {items
                 .filter((item) => isVisibleForRole(item, state.role))

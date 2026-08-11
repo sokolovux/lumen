@@ -5,7 +5,7 @@
 
   [data-schedule-column-content] {
     @apply flex min-h-full w-full flex-col bg-background bg-repeat;
-    background-image: url('/pattern.png');
-    background-size: 15% auto;
+    background-image: url('../../assets/pattern.png');
+    background-size: 60px 60px;
   }
 }

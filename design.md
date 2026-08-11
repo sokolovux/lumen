@@ -230,8 +230,8 @@ Today’s schedule uses exactly these columns:
 | Column | Meaning |
 |--------|---------|
 | Scheduled | Appointment is scheduled but has not been started yet |
-| With Assistant | Visit started; Assistant is entering vitals and the first note |
-| With Physician | Assistant has transferred the patient to the physician (first note submitted for cosign) |
+| Intake | Visit started; Assistant is entering vitals and the first note |
+| Review | Assistant has transferred the patient to the physician (first note submitted for cosign) |
 | Finished | Physician clicked Finish visit |
 
 Do not use a separate Checked in status.
@@ -245,7 +245,7 @@ The product has exactly two user denominations:
 | Assistant | `'assistant'` |
 | Physician | `'physician'` |
 
-Do not use PA, physician assistant, doctor, or other synonyms in UI copy or new code. Schedule column/status labels use **With Assistant** and **With Physician**.
+Do not use PA, physician assistant, doctor, or other synonyms in UI copy or new code. Schedule column/status labels use **Intake** and **Review**.
 
 ## Pointer cursor
 

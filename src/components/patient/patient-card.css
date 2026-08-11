@@ -1,0 +1,67 @@
+@layer components {
+  [data-slot="patients-page-content"] {
+    container-type: inline-size;
+  }
+
+  [data-slot="patients-grid"] {
+    display: grid;
+    gap: --spacing(3);
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  @container (min-width: 32rem) {
+    [data-slot="patients-grid"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container (min-width: 48rem) {
+    [data-slot="patients-grid"] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @container (min-width: 64rem) {
+    [data-slot="patients-grid"] {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  [data-slot="patients-grid"] [data-slot="avatar"] {
+    @apply !size-12;
+  }
+
+  [data-slot="patients-grid"] [data-slot="avatar-fallback"] {
+    @apply text-base;
+  }
+
+  [data-slot="patients-list"] {
+    display: grid;
+    align-items: center;
+    column-gap: --spacing(3);
+    row-gap: --spacing(2);
+    grid-template-columns: auto repeat(5, minmax(0, 1fr));
+    justify-items: start;
+  }
+
+  [data-slot="patients-list"] > [data-slot="card"][data-patient-card] {
+    display: grid;
+    align-items: center;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    justify-items: start;
+  }
+
+  [data-slot="patients-list"] > [data-slot="card"][data-patient-card] > :not([data-slot="avatar"]) {
+    min-width: 0;
+    width: 100%;
+  }
+
+  [data-slot="card"][data-interactive][data-patient-card] {
+    scale: 1;
+    @apply bg-card ring-gray-200 duration-150 ease-out hover:scale-[1.02] hover:bg-gray-100 hover:shadow-none;
+    transition-property: background-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}

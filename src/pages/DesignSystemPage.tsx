@@ -101,8 +101,8 @@ const CHART_TOKENS = ['bg-chart-1', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4', 'b
 
 const SCHEDULE_STATUSES: ScheduleStatus[] = [
   'scheduled',
-  'with_assistant',
-  'with_physician',
+  'intake',
+  'review',
   'finished',
 ]
 
@@ -179,9 +179,9 @@ const APPOINTMENT_CARD_FIXTURES: {
       time: '9:30AM',
       date: '2026-08-10',
       kind: 'Sick visit',
-      status: 'with_assistant',
+      status: 'intake',
     },
-    displayStatus: 'with_assistant',
+    displayStatus: 'intake',
   },
   {
     appointment: {
@@ -191,9 +191,9 @@ const APPOINTMENT_CARD_FIXTURES: {
       time: '2:00PM',
       date: '2026-08-11',
       kind: 'Lab review',
-      status: 'with_physician',
+      status: 'review',
     },
-    displayStatus: 'with_physician',
+    displayStatus: 'review',
   },
   {
     appointment: {
@@ -410,8 +410,8 @@ export function DesignSystemPage() {
                 <CardContent>
                   <div className="space-y-2">
                     <p><strong>Scheduled</strong> — not started</p>
-                    <p><strong>With Assistant</strong> — vitals + first note</p>
-                    <p><strong>With Physician</strong> — transferred</p>
+                    <p><strong>Intake</strong> — vitals + first note</p>
+                    <p><strong>Review</strong> — transferred</p>
                     <p><strong>Finished</strong> — finish visit clicked</p>
                   </div>
                 </CardContent>

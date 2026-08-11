@@ -12,7 +12,7 @@ Do **not** use PA, physician assistant, doctor, MD, or other synonyms for these 
 ```tsx
 // ✅
 {role === 'assistant' ? 'Assistant' : 'Physician'}
-getScheduleStatusLabel('with_assistant') // "With Assistant"
+getScheduleStatusLabel('intake') // "Intake"
 getRoleLabel(role)
 
 // ❌
@@ -20,6 +20,6 @@ getRoleLabel(role)
 'With PA'
 ```
 
-Schedule status key: `with_assistant` (label **With Assistant**). Prefer `getRoleLabel(role)` from `@/lib/statusDerivation` for actor strings.
+Schedule status keys: `intake` (label **Intake**), `review` (label **Review**). Prefer `getRoleLabel(role)` from `@/lib/statusDerivation` for actor strings.
 
 See `design.md` → Roles.

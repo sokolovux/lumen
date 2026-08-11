@@ -45,6 +45,25 @@ function dobFromIndex(i: number): string {
   return `${month}/${day}/${year}`
 }
 
+const INSURANCE_PLANS = [
+  'Blue Cross Blue Shield',
+  'Aetna',
+  'UnitedHealthcare',
+  'Cigna',
+  'Humana',
+  'Kaiser Permanente',
+  'Medicare',
+  'Medicaid',
+] as const
+
+function insuranceFromIndex(i: number): string {
+  return INSURANCE_PLANS[i % INSURANCE_PLANS.length]!
+}
+
+function policyNumberFromIndex(i: number): string {
+  return `W${String(100000000 + i * 7919).padStart(9, '0').slice(0, 9)}`
+}
+
 function generatePatients(count: number, mrnStart: number): Patient[] {
   const patients: Patient[] = []
   for (let i = 0; i < count; i++) {
@@ -57,17 +76,55 @@ function generatePatients(count: number, mrnStart: number): Patient[] {
       name,
       mrn: padMrn(mrnStart + i),
       dob: dobFromIndex(i),
+      insurance: insuranceFromIndex(i),
+      insurancePolicyNumber: policyNumberFromIndex(i),
     })
   }
   return patients
 }
 
 const CORE_PATIENTS: Patient[] = [
-  { id: JORDAN_REYES_ID, name: 'Jordan Reyes', mrn: 'MRN-48291', dob: '03/14/1988', isInteractive: true },
-  { id: 'maria-chen', name: 'Maria Chen', mrn: 'MRN-33102', dob: '07/22/1975' },
-  { id: 'david-kim', name: 'David Kim', mrn: 'MRN-55847', dob: '11/05/1992' },
-  { id: 'sarah-patel', name: 'Sarah Patel', mrn: 'MRN-22419', dob: '01/30/1980' },
-  { id: 'james-wilson', name: 'James Wilson', mrn: 'MRN-66703', dob: '09/18/1965' },
+  {
+    id: JORDAN_REYES_ID,
+    name: 'Jordan Reyes',
+    mrn: 'MRN-48291',
+    dob: '03/14/1988',
+    insurance: 'Aetna',
+    insurancePolicyNumber: 'W482910003',
+    isInteractive: true,
+  },
+  {
+    id: 'maria-chen',
+    name: 'Maria Chen',
+    mrn: 'MRN-33102',
+    dob: '07/22/1975',
+    insurance: 'Medicare',
+    insurancePolicyNumber: '1EG4-TE5-MK72',
+  },
+  {
+    id: 'david-kim',
+    name: 'David Kim',
+    mrn: 'MRN-55847',
+    dob: '11/05/1992',
+    insurance: 'Blue Cross Blue Shield',
+    insurancePolicyNumber: 'XYZ55847102',
+  },
+  {
+    id: 'sarah-patel',
+    name: 'Sarah Patel',
+    mrn: 'MRN-22419',
+    dob: '01/30/1980',
+    insurance: 'UnitedHealthcare',
+    insurancePolicyNumber: 'UHC22419880',
+  },
+  {
+    id: 'james-wilson',
+    name: 'James Wilson',
+    mrn: 'MRN-66703',
+    dob: '09/18/1965',
+    insurance: 'Humana',
+    insurancePolicyNumber: 'H667031965',
+  },
 ]
 
 export const PATIENTS: Patient[] = [
@@ -96,8 +153,8 @@ const APPOINTMENT_STATUSES: ScheduleStatus[] = [
   'scheduled',
   'scheduled',
   'scheduled',
-  'with_assistant',
-  'with_physician',
+  'intake',
+  'review',
   'finished',
 ]
 
@@ -205,8 +262,8 @@ export function createInitialMeds(): Medication[] {
 
 export const TODAY_KANBAN_COLUMNS: { key: ScheduleStatus; label: string }[] = [
   { key: 'scheduled', label: 'Scheduled' },
-  { key: 'with_assistant', label: 'With Assistant' },
-  { key: 'with_physician', label: 'With Physician' },
+  { key: 'intake', label: 'Intake' },
+  { key: 'review', label: 'Review' },
   { key: 'finished', label: 'Finished' },
 ]
 

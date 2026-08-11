@@ -1,0 +1,11 @@
+@layer components {
+  [data-slot="textarea"],
+  textarea[data-slot="input-group-control"] {
+    box-sizing: border-box;
+    field-sizing: content;
+    min-height: 4lh;
+    max-height: 6lh;
+    overflow-y: auto;
+    resize: vertical;
+  }
+}

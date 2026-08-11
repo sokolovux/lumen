@@ -12,10 +12,6 @@
   }
 
   [data-slot="sidebar-section-title"] {
-    @apply px-3 pb-0.5 text-xs;
-  }
-
-  [data-slot="sidebar-section"][data-inbox-active="true"] {
-    @apply rounded-md bg-gray-100 p-1;
+    @apply px-3 pb-0.5 text-xs uppercase;
   }
 }

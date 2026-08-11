@@ -1,0 +1,5 @@
+@layer components {
+  [data-slot="vitals-section"] [data-slot="input-group-addon"] {
+    @apply font-normal;
+  }
+}

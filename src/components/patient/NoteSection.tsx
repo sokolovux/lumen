@@ -4,7 +4,8 @@ import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { getNoteStatusLabel, getRoleLabel } from '@/lib/statusDerivation'
+import { getNoteStatusLabel } from '@/lib/statusDerivation'
+import { areVitalsComplete } from '@/lib/vitals'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
   const { state, dispatch } = useAppState()
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [returnFeedback, setReturnFeedback] = useState('')
+  const [showNoteError, setShowNoteError] = useState(false)
 
   const canEdit =
     !readOnly &&
@@ -29,9 +31,22 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
       state.noteStatus === 'draft' ||
       state.noteStatus === 'returned')
 
-  const canSubmit = canEdit && state.noteDraft.trim().length > 0
-
   const handleSubmit = () => {
+    if (!canEdit) return
+
+    if (!areVitalsComplete(state.vitals) || !state.vitalsSubmitted) {
+      dispatch({ type: 'SHOW_VITALS_ERRORS' })
+      toast.error('Complete and submit all vitals before handing off')
+      return
+    }
+
+    if (!state.noteDraft.trim()) {
+      setShowNoteError(true)
+      toast.error('Enter a clinical note before submitting')
+      return
+    }
+
+    setShowNoteError(false)
     dispatch({ type: 'SUBMIT_NOTE' })
     toast.success(
       state.noteStatus === 'returned'
@@ -68,11 +83,16 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
 
   return (
     <section>
-      <div className="mb-2 flex items-center justify-between">
-        <h6>Clinical note</h6>
-        <Badge variant="outline" className={statusVariant}>
-          {getNoteStatusLabel(state.noteStatus)}
-        </Badge>
+      <div className="mb-2">
+        <div className="flex items-center justify-between">
+          <h5>Clinical note</h5>
+          <Badge variant="outline" className={statusVariant}>
+            {getNoteStatusLabel(state.noteStatus)}
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Shared visit documentation — physician cosign required.
+        </p>
       </div>
 
       {state.returnFeedback && state.noteStatus === 'returned' && (
@@ -86,56 +106,45 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
         <Textarea
           placeholder="Enter clinical note..."
           value={state.noteDraft}
-          onChange={(e) => dispatch({ type: 'UPDATE_NOTE_DRAFT', content: e.target.value })}
-          rows={6}
-          className="text-sm"
+          aria-invalid={showNoteError && !state.noteDraft.trim() ? true : undefined}
+          onChange={(e) => {
+            dispatch({ type: 'UPDATE_NOTE_DRAFT', content: e.target.value })
+            if (showNoteError && e.target.value.trim()) {
+              setShowNoteError(false)
+            }
+          }}
         />
       ) : (
-        <div className="rounded-md border p-3">
-          {state.noteDraft ? (
-            <p className="whitespace-pre-wrap text-sm">{state.noteDraft}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">No note content</p>
-          )}
-        </div>
+        <Textarea
+          readOnly
+          value={state.noteDraft}
+          placeholder="No note content"
+        />
       )}
 
       <div className="mt-2 flex flex-wrap gap-2">
-        {canSubmit && (state.noteStatus === 'not_started' || state.noteStatus === 'draft') && (
-          <Button size="sm" onClick={handleSubmit}>
-            Submit for cosign
+        {!readOnly && state.role === 'assistant' && (
+          <Button onClick={handleSubmit}>
+            Submit & hand off
           </Button>
         )}
-        {canSubmit && state.noteStatus === 'returned' && (
-          <Button size="sm" onClick={handleSubmit}>
-            Resubmit for cosign
-          </Button>
-        )}
-        {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (
+        {!readOnly && state.role === 'physician' && (
           <>
-            <Button size="sm" onClick={handleCosign}>
+            <Button
+              size="sm"
+              onClick={handleCosign}
+              disabled={state.noteStatus !== 'submitted'}
+            >
               Cosign
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setReturnDialogOpen(true)}>
-              Return for revision
-            </Button>
+            {state.noteStatus === 'submitted' && (
+              <Button size="sm" variant="outline" onClick={() => setReturnDialogOpen(true)}>
+                Return for revision
+              </Button>
+            )}
           </>
         )}
       </div>
-
-      {state.noteHistory.length > 0 && (
-        <div className="mt-3">
-          <p className="mb-1 text-xs"><strong>Version history</strong></p>
-          <ul className="space-y-1">
-            {state.noteHistory.map((v) => (
-              <li key={v.id} className="text-xs text-muted-foreground">
-                v{v.version} — {v.status} by {getRoleLabel(v.actor)} at {v.timestamp}
-                {v.feedback && ` — "${v.feedback}"`}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
         <DialogContent>
@@ -146,7 +155,6 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
             placeholder="Provide feedback for the assistant..."
             value={returnFeedback}
             onChange={(e) => setReturnFeedback(e.target.value)}
-            rows={4}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setReturnDialogOpen(false)}>

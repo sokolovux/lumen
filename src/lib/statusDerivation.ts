@@ -10,9 +10,9 @@ export function jordanStatus(state: Pick<
 >): ScheduleStatus {
   if (state.visitFinished) return 'finished'
   if (state.noteStatus === 'submitted' || state.noteStatus === 'cosigned') {
-    return 'with_physician'
+    return 'review'
   }
-  if (state.visitStarted) return 'with_assistant'
+  if (state.visitStarted) return 'intake'
   return 'scheduled'
 }
 
@@ -68,8 +68,8 @@ export function getLabStatusTint(
 export function getScheduleStatusLabel(status: ScheduleStatus): string {
   switch (status) {
     case 'scheduled': return 'Scheduled'
-    case 'with_assistant': return 'With Assistant'
-    case 'with_physician': return 'With Physician'
+    case 'intake': return 'Intake'
+    case 'review': return 'Review'
     case 'finished': return 'Finished'
   }
 }
@@ -77,24 +77,24 @@ export function getScheduleStatusLabel(status: ScheduleStatus): string {
 /** Background tints for Today kanban columns. */
 export const scheduleStatusColumnBackground: Record<ScheduleStatus, string> = {
   scheduled: 'bg-gray-50',
-  with_assistant: 'bg-purple-50',
-  with_physician: 'bg-blue-50',
+  intake: 'bg-purple-50',
+  review: 'bg-blue-50',
   finished: 'bg-green-50',
 }
 
 /** Text color for schedule status labels. */
 export const scheduleStatusTextColor: Record<ScheduleStatus, string> = {
   scheduled: 'text-gray-600',
-  with_assistant: 'text-purple-600',
-  with_physician: 'text-blue-600',
+  intake: 'text-purple-600',
+  review: 'text-blue-600',
   finished: 'text-green-600',
 }
 
 /** Outline Badge tints for schedule statuses. */
 export const scheduleStatusTint: Record<ScheduleStatus, string> = {
   scheduled: 'border-gray-200 bg-gray-50 text-gray-600',
-  with_assistant: 'border-purple-200 bg-purple-50 text-purple-600',
-  with_physician: 'border-blue-200 bg-blue-50 text-blue-600',
+  intake: 'border-purple-200 bg-purple-50 text-purple-600',
+  review: 'border-blue-200 bg-blue-50 text-blue-600',
   finished: 'border-green-200 bg-green-50 text-green-600',
 }
 

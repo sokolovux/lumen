@@ -11,11 +11,11 @@
     @apply bg-gray-50 ring-gray-200 hover:bg-gray-100;
   }
 
-  [data-slot="card"][data-schedule-status="with_assistant"] {
+  [data-slot="card"][data-schedule-status="intake"] {
     @apply bg-purple-50 ring-purple-200 hover:bg-purple-100;
   }
 
-  [data-slot="card"][data-schedule-status="with_physician"] {
+  [data-slot="card"][data-schedule-status="review"] {
     @apply bg-blue-50 ring-blue-200 hover:bg-blue-100;
   }
 
@@ -28,11 +28,11 @@
     animation: schedule-clock-dot 1.2s ease-in-out infinite;
   }
 
-  [data-slot="appointment-status-dot"][data-status="with_assistant"] {
+  [data-slot="appointment-status-dot"][data-status="intake"] {
     @apply bg-purple-600;
   }
 
-  [data-slot="appointment-status-dot"][data-status="with_physician"] {
+  [data-slot="appointment-status-dot"][data-status="review"] {
     @apply bg-blue-600;
   }
 }

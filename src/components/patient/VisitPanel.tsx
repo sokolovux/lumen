@@ -4,9 +4,9 @@ import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { NoteSection } from '@/components/patient/NoteSection'
+import { VitalsSection } from '@/components/patient/VitalsSection'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -47,7 +47,10 @@ export function VisitPanel({
   }, [state.confidentialNoteContent])
 
   const handleFinishVisit = () => {
-    if (!state.hasSubmittedOnce) return
+    if (!state.hasSubmittedOnce) {
+      toast.error('Submit the clinical note before finishing the visit')
+      return
+    }
     dispatch({ type: 'FINISH_VISIT' })
     toast.success('Visit finished', {
       description: 'Encounter closed. Documentation review can continue.',
@@ -63,7 +66,7 @@ export function VisitPanel({
     <div
       className={cn(
         'h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
-        visible ? 'w-[380px]' : 'w-0',
+        visible ? 'w-[480px]' : 'w-0',
       )}
       onTransitionEnd={(event) => {
         if (event.target !== event.currentTarget) return
@@ -73,17 +76,12 @@ export function VisitPanel({
     >
       <div
         className={cn(
-          'flex h-full w-[380px] flex-col border-l bg-background transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
+          'flex h-full w-[480px] flex-col border-l bg-background transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
           visible ? 'translate-x-0' : 'translate-x-full',
         )}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b px-4">
-          <div>
-            <h6>{displayLabel}</h6>
-            <p className="text-xs text-muted-foreground">
-              {displayPast ? 'Past visit' : "Today's visit"}
-            </p>
-          </div>
+          <h3>{displayLabel}</h3>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -108,41 +106,9 @@ export function VisitPanel({
 
             {showClinicalSections && (
               <>
-                <section>
-                  <h6 className="mb-2">Vitals</h6>
-                  {state.vitalsSubmitted || displayPast ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      {['BP', 'HR', 'Temp', 'SpO2'].map((label) => (
-                        <div key={label} className="rounded-md border p-2">
-                          <p className="text-xs text-muted-foreground">{label}</p>
-                          <Skeleton className="mt-1 h-4 w-16" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        {['BP', 'HR', 'Temp', 'SpO2'].map((label) => (
-                          <div key={label} className="rounded-md border p-2">
-                            <p className="text-xs text-muted-foreground">{label}</p>
-                            <Skeleton className="mt-1 h-4 w-full" />
-                          </div>
-                        ))}
-                      </div>
-                      {state.role === 'assistant' && state.visitStarted && (
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            dispatch({ type: 'SUBMIT_VITALS' })
-                            toast.success('Vitals submitted')
-                          }}
-                        >
-                          Submit vitals
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </section>
+                <VitalsSection
+                  readOnly={displayPast}
+                />
                 <Separator />
                 <NoteSection readOnly={displayPast} />
               </>
@@ -152,7 +118,7 @@ export function VisitPanel({
               <>
                 <Separator />
                 <section>
-                  <h6 className="mb-1">Confidential note</h6>
+                  <h5 className="mb-1">Confidential note</h5>
                   <p className="mb-2 text-xs text-muted-foreground">
                     Physician-only. Hidden from Assistant — no request path.
                   </p>
@@ -160,9 +126,7 @@ export function VisitPanel({
                     placeholder="Confidential physician note..."
                     value={confidentialDraft}
                     onChange={(e) => setConfidentialDraft(e.target.value)}
-                    rows={4}
                     disabled={displayPast}
-                    className="text-sm"
                   />
                   {!displayPast && (
                     <Button
@@ -185,16 +149,10 @@ export function VisitPanel({
                 <Separator />
                 <Button
                   onClick={handleFinishVisit}
-                  disabled={!state.hasSubmittedOnce}
                   variant="outline"
                 >
                   Finish visit
                 </Button>
-                {!state.hasSubmittedOnce && (
-                  <p className="text-xs text-muted-foreground">
-                    Note must be submitted at least once before finishing the visit.
-                  </p>
-                )}
               </>
             )}
 

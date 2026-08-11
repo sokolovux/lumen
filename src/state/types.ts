@@ -20,8 +20,8 @@ export type GrantDuration = '10s' | '10m' | '1h' | '4h' | '24h'
 
 export type ScheduleStatus =
   | 'scheduled'
-  | 'with_assistant'
-  | 'with_physician'
+  | 'intake'
+  | 'review'
   | 'finished'
 
 export type ScheduleView = 'today' | 'fullWeek'
@@ -96,7 +96,20 @@ export interface Patient {
   name: string
   mrn: string
   dob: string
+  insurance: string
+  insurancePolicyNumber: string
   isInteractive?: boolean
+}
+
+export interface VisitVitals {
+  bloodPressure: string
+  heartRate: string
+  respiratoryRate: string
+  temperature: string
+  spO2: string
+  weight: string
+  painScale: string
+  fingerstickGlucose: string
 }
 
 export interface AppState {
@@ -104,6 +117,8 @@ export interface AppState {
   selectedVisitId: 'today' | string | null
   visitStarted: boolean
   vitalsSubmitted: boolean
+  vitalsShowErrors: boolean
+  vitals: VisitVitals
   noteStatus: NoteStatus
   hasSubmittedOnce: boolean
   visitFinished: boolean
@@ -136,6 +151,8 @@ export type AppAction =
   | { type: 'OPEN_VISIT'; visitId: 'today' | string }
   | { type: 'CLOSE_VISIT' }
   | { type: 'START_VISIT' }
+  | { type: 'UPDATE_VITALS'; vitals: Partial<VisitVitals> }
+  | { type: 'SHOW_VITALS_ERRORS' }
   | { type: 'SUBMIT_VITALS' }
   | { type: 'UPDATE_NOTE_DRAFT'; content: string }
   | { type: 'SUBMIT_NOTE' }

@@ -40,7 +40,7 @@ export function AppointmentCard({
 
   const statusTint = scheduleStatusTint[displayStatus]
   const showStatusDot =
-    displayStatus === 'with_assistant' || displayStatus === 'with_physician'
+    displayStatus === 'intake' || displayStatus === 'review'
 
   return (
     <Card
@@ -50,22 +50,24 @@ export function AppointmentCard({
       onClick={handleClick}
     >
       <CardContent className="flex flex-col gap-1">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-          {showStatusBadge && (
-            <Badge variant="outline" className={`order-1 sm:order-2 ${statusTint}`}>
-              {getScheduleStatusLabel(displayStatus)}
-              {showStatusDot && (
-                <span
-                  data-slot="appointment-status-dot"
-                  data-status={displayStatus}
-                  aria-hidden
-                />
-              )}
-            </Badge>
-          )}
-          <p className="order-2 sm:order-1">
-            <strong className="font-mono tabular-nums">{appointment.time}</strong>
-          </p>
+        <div className="@container">
+          <div className="flex flex-col gap-1 @[13rem]:flex-row @[13rem]:items-center @[13rem]:justify-between">
+            {showStatusBadge && (
+              <Badge variant="outline" className={`order-1 @[13rem]:order-2 ${statusTint}`}>
+                {getScheduleStatusLabel(displayStatus)}
+                {showStatusDot && (
+                  <span
+                    data-slot="appointment-status-dot"
+                    data-status={displayStatus}
+                    aria-hidden
+                  />
+                )}
+              </Badge>
+            )}
+            <p className="order-2 @[13rem]:order-1">
+              <strong className="font-mono tabular-nums">{appointment.time}</strong>
+            </p>
+          </div>
         </div>
         <p className="text-sm text-foreground">{appointment.patientName}</p>
         <p className="text-sm">{appointment.kind}</p>

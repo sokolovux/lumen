@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { SearchIcon } from 'lucide-react'
+import { Plus, SearchIcon } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -29,8 +29,8 @@ function EstClock() {
 
   const dateLabel = now.toLocaleDateString('en-US', {
     timeZone: EST_TIME_ZONE,
-    weekday: 'long',
-    month: 'long',
+    weekday: 'short',
+    month: 'short',
     day: 'numeric',
   })
 
@@ -86,12 +86,12 @@ export function SchedulePage() {
             <InputGroupInput placeholder="Search appointments" readOnly />
           </InputGroup>
           <div
-            data-slot="schedule-view-switch"
+            data-slot="page-view-switch"
             className="flex h-10 rounded-sm border bg-background p-0.5"
           >
             {([
-              { key: 'today' as const, label: 'Today' },
-              { key: 'fullWeek' as const, label: 'Full week' },
+              { key: 'today' as const, label: 'Day' },
+              { key: 'fullWeek' as const, label: 'Week' },
             ]).map(({ key, label }) => (
               <Button
                 key={key}
@@ -105,7 +105,10 @@ export function SchedulePage() {
               </Button>
             ))}
           </div>
-          <Button type="button">Create visit</Button>
+          <Button type="button">
+            <Plus />
+            Create visit
+          </Button>
         </div>
       </PageHeader>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

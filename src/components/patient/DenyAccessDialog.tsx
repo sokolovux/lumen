@@ -43,7 +43,6 @@ export function DenyAccessDialog({
           placeholder="Explain why access is denied..."
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          rows={4}
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

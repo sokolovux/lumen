@@ -8,6 +8,7 @@ import {
 } from 'react'
 import type { AppAction, AppState, AuditEvent } from '@/state/types'
 import { createInitialLabs, createInitialMeds } from '@/lib/scheduleData'
+import { createEmptyVitals, areVitalsComplete } from '@/lib/vitals'
 import { formatTimestamp } from '@/lib/fixedClock'
 import { durationToMs } from '@/lib/statusDerivation'
 
@@ -50,6 +51,8 @@ export const initialState: AppState = {
   selectedVisitId: null,
   visitStarted: false,
   vitalsSubmitted: false,
+  vitalsShowErrors: false,
+  vitals: createEmptyVitals(),
   noteStatus: 'not_started',
   hasSubmittedOnce: false,
   visitFinished: false,
@@ -76,6 +79,7 @@ function createFreshInitialState(): AppState {
     ...initialState,
     labs: createInitialLabs(),
     meds: createInitialMeds(),
+    vitals: createEmptyVitals(),
     noteHistory: [],
     auditLog: [],
     viewedRequests: [],
@@ -128,10 +132,23 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
       }
 
+    case 'UPDATE_VITALS': {
+      const vitals = { ...state.vitals, ...action.vitals }
+      return {
+        ...state,
+        vitals,
+        vitalsShowErrors: state.vitalsShowErrors && !areVitalsComplete(vitals),
+      }
+    }
+
+    case 'SHOW_VITALS_ERRORS':
+      return { ...state, vitalsShowErrors: true }
+
     case 'SUBMIT_VITALS':
       return {
         ...state,
         vitalsSubmitted: true,
+        vitalsShowErrors: false,
         auditLog: [
           ...state.auditLog,
           logAudit(state, state.role, 'Submit vitals', 'Vitals submitted'),

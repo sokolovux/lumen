@@ -1,0 +1,24 @@
+@layer components {
+  [data-sonner-toast] {
+    @apply text-sm;
+  }
+
+  [data-sonner-toast] [data-title],
+  [data-sonner-toast] [data-description] {
+    @apply text-sm;
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    border-color: color-mix(in oklch, var(--destructive) 35%, var(--border));
+    background-color: color-mix(in oklch, var(--destructive) 10%, var(--popover));
+    color: var(--destructive);
+  }
+
+  [data-sonner-toast][data-type="error"] [data-description] {
+    color: color-mix(in oklch, var(--destructive) 75%, var(--muted-foreground));
+  }
+
+  [data-sonner-toast][data-type="error"] [data-icon] {
+    color: var(--destructive);
+  }
+}
