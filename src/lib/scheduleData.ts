@@ -140,6 +140,9 @@ export const WEEK_DATES = [
   '2026-08-14',
 ]
 
+/** Demo "today" — aligned with FIXED_CLOCK and the first day of WEEK_DATES */
+export const DEMO_TODAY = WEEK_DATES[0]!
+
 const APPOINTMENT_KINDS = [
   'Follow-up',
   'Annual physical',
@@ -229,6 +232,15 @@ function generateWeekAppointments(count: number): Appointment[] {
 
 /** Seeded placeholder appointments — Jordan's status is derived, not from this list */
 export const SEEDED_APPOINTMENTS: Appointment[] = generateWeekAppointments(100)
+
+export function getAppointmentForPatientOnDate(
+  patientId: string,
+  date: string,
+): Appointment | undefined {
+  return SEEDED_APPOINTMENTS.find(
+    (appointment) => appointment.patientId === patientId && appointment.date === date,
+  )
+}
 
 export function createInitialLabs(): LabResult[] {
   return [
