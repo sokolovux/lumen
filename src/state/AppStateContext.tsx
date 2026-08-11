@@ -52,7 +52,6 @@ export const initialState: AppState = {
   visitStarted: false,
   encounterStartedAt: null,
   revisionCount: 0,
-  vitalsSubmitted: false,
   vitalsShowErrors: false,
   vitals: createEmptyVitals(),
   noteStatus: 'not_started',
@@ -139,6 +138,17 @@ function appReducer(state: AppState, action: AppAction): AppState {
       }
 
     case 'UPDATE_VITALS': {
+      const vitalsLocked =
+        state.role === 'physician' ||
+        (state.visitFinished && state.noteStatus !== 'returned') ||
+        (state.role === 'assistant' &&
+          state.noteStatus !== 'returned' &&
+          (state.noteStatus === 'submitted' ||
+            state.noteStatus === 'cosigned' ||
+            state.hasSubmittedOnce))
+      if (vitalsLocked) {
+        return state
+      }
       const vitals = { ...state.vitals, ...action.vitals }
       return {
         ...state,
@@ -149,17 +159,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SHOW_VITALS_ERRORS':
       return { ...state, vitalsShowErrors: true }
-
-    case 'SUBMIT_VITALS':
-      return {
-        ...state,
-        vitalsSubmitted: true,
-        vitalsShowErrors: false,
-        auditLog: [
-          ...state.auditLog,
-          logAudit(state, state.role, 'Submit vitals', 'Vitals submitted'),
-        ],
-      }
 
     case 'UPDATE_NOTE_DRAFT': {
       const noteStatus = state.noteStatus === 'not_started' ? 'draft' : state.noteStatus
@@ -172,6 +171,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         noteStatus: 'submitted',
         hasSubmittedOnce: true,
+        vitalsShowErrors: false,
         returnFeedback: null,
         noteHistory: [
           ...state.noteHistory,
@@ -198,6 +198,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         noteStatus: 'cosigned',
         cosignUnread: 0,
+        notesReviewUnread: state.notesReviewUnread + 1,
         noteHistory: [
           ...state.noteHistory,
           {
@@ -221,7 +222,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         noteStatus: 'returned',
         returnFeedback: action.feedback,
-        vitalsSubmitted: false,
         revisionCount: state.revisionCount + 1,
         cosignUnread: 0,
         notesReviewUnread: state.notesReviewUnread + 1,
@@ -248,25 +248,19 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         visitFinished: true,
         selectedVisitId: null,
+        physicianAddendumCommitted:
+          state.physicianAddendum.trim().length > 0 || state.physicianAddendumCommitted,
         auditLog: [
           ...state.auditLog,
           logAudit(state, 'physician', 'Finish visit', 'Visit finished'),
         ],
       }
 
-    case 'SAVE_PHYSICIAN_ADDENDUM':
+    case 'UPDATE_PHYSICIAN_ADDENDUM':
       return {
         ...state,
         physicianAddendum: action.content,
-        auditLog: [
-          ...state.auditLog,
-          logAudit(
-            state,
-            'physician',
-            'Save physician addendum',
-            action.content.trim() ? 'Physician addendum saved' : 'Physician addendum cleared',
-          ),
-        ],
+        physicianAddendumCommitted: false,
       }
 
     case 'SAVE_CONFIDENTIAL_NOTE': {

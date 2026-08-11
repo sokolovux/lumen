@@ -42,12 +42,12 @@ export function isAppointmentLate(
 export function getVisitBannerPhase(
   state: Pick<
     AppState,
-    'visitStarted' | 'visitFinished' | 'hasSubmittedOnce'
+    'visitStarted' | 'visitFinished' | 'hasSubmittedOnce' | 'noteStatus'
   >,
   appointment: Appointment | undefined,
   now: Date = FIXED_CLOCK,
 ): VisitBannerPhase {
-  if (state.visitFinished) {
+  if (state.visitFinished && state.noteStatus !== 'returned') {
     return 'finished'
   }
   if (!appointment) {
@@ -90,11 +90,34 @@ export function formatEncounterElapsed(startedAt: number, now: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`
 }
 
+export function formatEncounterStartTime(startedAt: number): string {
+  return new Date(startedAt).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
+export function getLatestPhysicianReviewOutcome(
+  noteHistory: AppState['noteHistory'],
+): AppState['noteHistory'][number] | null {
+  for (let i = noteHistory.length - 1; i >= 0; i--) {
+    const entry = noteHistory[i]
+    if (entry.status === 'cosigned' || entry.status === 'returned') {
+      return entry
+    }
+  }
+  return null
+}
+
 export function shouldAutoOpenTodayVisit(
   role: Role,
-  state: Pick<AppState, 'visitStarted' | 'visitFinished' | 'hasSubmittedOnce' | 'noteStatus'>,
+  state: Pick<
+    AppState,
+    'visitStarted' | 'visitFinished' | 'hasSubmittedOnce' | 'noteStatus'
+  >,
 ): boolean {
-  if (state.visitFinished) {
+  if (state.visitFinished && state.noteStatus !== 'returned') {
     return false
   }
   if (state.hasSubmittedOnce && role === 'physician') {
@@ -106,13 +129,53 @@ export function shouldAutoOpenTodayVisit(
   if (role === 'assistant' && state.noteStatus === 'returned') {
     return true
   }
+  if (role === 'assistant' && state.hasSubmittedOnce && state.noteStatus !== 'returned') {
+    return true
+  }
   return false
 }
 
 export function canPhysicianOpenTodayVisit(
-  state: Pick<AppState, 'visitFinished' | 'hasSubmittedOnce'>,
+  state: Pick<AppState, 'visitFinished' | 'hasSubmittedOnce' | 'noteStatus'>,
 ): boolean {
-  return !state.visitFinished && state.hasSubmittedOnce
+  if (state.visitFinished) {
+    return true
+  }
+  return state.hasSubmittedOnce
+}
+
+export function canAssistantOpenTodayVisit(
+  state: Pick<
+    AppState,
+    'visitFinished' | 'noteStatus' | 'visitStarted' | 'hasSubmittedOnce'
+  >,
+): boolean {
+  return (
+    state.visitStarted ||
+    state.visitFinished ||
+    state.hasSubmittedOnce ||
+    state.noteStatus === 'returned'
+  )
+}
+
+export function isAssistantVisitViewOnly(
+  state: Pick<AppState, 'role' | 'hasSubmittedOnce' | 'noteStatus'>,
+): boolean {
+  return (
+    state.role === 'assistant' &&
+    state.hasSubmittedOnce &&
+    state.noteStatus !== 'returned'
+  )
+}
+
+export function isAssistantNoteRevision(
+  state: Pick<AppState, 'role' | 'noteStatus'>,
+): boolean {
+  return state.role === 'assistant' && state.noteStatus === 'returned'
+}
+
+export function hasPhysicianReviewedNote(noteStatus: NoteStatus): boolean {
+  return noteStatus === 'cosigned' || noteStatus === 'returned'
 }
 
 /** Single source of truth for clinical note textarea editability. */
@@ -132,7 +195,7 @@ export function isClinicalNoteEditable(
   return state.noteStatus === 'not_started' || state.noteStatus === 'draft'
 }
 
-/** Submit & hand off is disabled after a successful submit until the note is returned. */
+/** Hide Submit & hand off after a successful submit until the note is returned. */
 export function isSubmitHandoffDisabled(
   state: Pick<AppState, 'noteStatus'>,
 ): boolean {

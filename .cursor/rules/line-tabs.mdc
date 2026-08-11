@@ -1,8 +1,3 @@
----
-description: Use line TabsList variant only; no pill/default tabs
-alwaysApply: true
----
-
 # Line tabs only
 
 All app tabs use the **line** `TabsList` variant (underline active state). Do not use the muted pill `default` variant.

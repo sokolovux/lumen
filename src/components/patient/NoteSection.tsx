@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
-import { areVitalsComplete, formatMissingVitalsMessage } from '@/lib/vitals'
+import { formatSubmitHandoffErrors } from '@/lib/vitals'
 import {
   isClinicalNoteEditable,
   isSubmitHandoffDisabled,
 } from '@/lib/visitLifecycle'
+import { VisitFieldLabel } from '@/components/patient/VisitFieldLabel'
 import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
 import {
   Dialog,
@@ -31,6 +32,8 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
 
   const noteEditable = isClinicalNoteEditable(state, readOnly)
   const submitHandoffDisabled = isSubmitHandoffDisabled(state)
+  const submitLabel =
+    state.noteStatus === 'returned' ? 'Submit revision' : 'Submit & hand off'
 
   useEffect(() => {
     if (!import.meta.env.DEV || !inVisitPanel) {
@@ -42,7 +45,6 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
       role: state.role,
       visitFinished: state.visitFinished,
       readOnly,
-      vitalsSubmitted: state.vitalsSubmitted,
     })
   }, [
     inVisitPanel,
@@ -51,7 +53,6 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
     state.noteStatus,
     state.role,
     state.visitFinished,
-    state.vitalsSubmitted,
   ])
 
   const handleSubmit = () => {
@@ -65,21 +66,13 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
       return
     }
 
-    if (!state.vitalsSubmitted) {
+    const validationError = formatSubmitHandoffErrors(state.vitals, state.noteDraft)
+    if (validationError) {
       dispatch({ type: 'SHOW_VITALS_ERRORS' })
-      visitErrorToast('Submit vitals before handing off the note')
-      return
-    }
-
-    if (!areVitalsComplete(state.vitals)) {
-      dispatch({ type: 'SHOW_VITALS_ERRORS' })
-      visitErrorToast(formatMissingVitalsMessage(state.vitals))
-      return
-    }
-
-    if (!state.noteDraft.trim()) {
-      setShowNoteError(true)
-      visitErrorToast('Please fill out: Clinical note.')
+      if (!state.noteDraft.trim()) {
+        setShowNoteError(true)
+      }
+      visitErrorToast(validationError)
       return
     }
 
@@ -134,13 +127,13 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
     }
   })()
 
-  const secondaryButtonVariant = inVisitPanel ? 'outline' : 'default'
-
   return (
     <section>
       <div className="mb-2">
-        <div className="flex items-center justify-between">
-          <h5>Clinical note</h5>
+        <div className="flex items-center justify-between gap-2">
+          <VisitFieldLabel as="h5" required>
+            Clinical note
+          </VisitFieldLabel>
           <Badge variant="outline" className={statusVariant}>
             {getNoteStatusLabel(state.noteStatus)}
           </Badge>
@@ -151,14 +144,13 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
       </div>
 
       {state.returnFeedback && state.noteStatus === 'returned' && (
-        <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+        <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-amber-800">
           <p><strong>Return feedback</strong></p>
           <p>{state.returnFeedback}</p>
         </div>
       )}
 
       <Textarea
-        key={`clinical-note-${state.noteStatus}`}
         placeholder="Enter clinical note..."
         value={state.noteDraft}
         disabled={!noteEditable}
@@ -171,26 +163,26 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
         }}
       />
 
-      <div className="mt-2 flex flex-wrap gap-2">
-        {!readOnly && state.role === 'assistant' && (
-          <Button
-            onClick={handleSubmit}
-            disabled={submitHandoffDisabled}
-          >
-            Submit & hand off
-          </Button>
-        )}
-        {!readOnly && state.role === 'physician' && (
-          <>
-            <Button variant={secondaryButtonVariant} onClick={handleCosign}>
-              Approve
+      {((!readOnly && state.role === 'assistant' && !submitHandoffDisabled) ||
+        (!readOnly && state.role === 'physician' && state.noteStatus === 'submitted')) && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {!readOnly && state.role === 'assistant' && !submitHandoffDisabled && (
+            <Button onClick={handleSubmit}>
+              {submitLabel}
             </Button>
-            <Button variant={secondaryButtonVariant} onClick={handleReturnClick}>
-              Return for revision
-            </Button>
-          </>
-        )}
-      </div>
+          )}
+          {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (
+            <>
+              <Button variant="success" onClick={handleCosign}>
+                Approve
+              </Button>
+              <Button variant="destructive" onClick={handleReturnClick}>
+                Return for revision
+              </Button>
+            </>
+          )}
+        </div>
+      )}
 
       <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
         <DialogContent>

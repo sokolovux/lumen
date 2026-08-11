@@ -1,8 +1,4 @@
 @layer components {
-  [data-slot="patients-page-content"] {
-    container-type: inline-size;
-  }
-
   [data-slot="patients-grid"] {
     display: grid;
     gap: --spacing(3);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAppState } from '@/state/AppStateContext'
 import { visitStageToast } from '@/lib/visitToasts'
+import { AccessTimer } from '@/components/patient/AccessTimer'
 import { Button } from '@/components/ui/button'
 import {
   DEMO_ASSISTANT_NAME,
@@ -11,7 +12,7 @@ import {
 } from '@/lib/scheduleData'
 import {
   formatAppointmentDateTime,
-  formatEncounterElapsed,
+  formatEncounterStartTime,
   getNoteReviewStatus,
   getVisitBannerPhase,
   type VisitBannerPhase,
@@ -26,11 +27,12 @@ function bannerPhaseAttr(phase: VisitBannerPhase): string {
   switch (phase) {
     case 'no_appointment':
     case 'future':
-      return 'neutral'
     case 'scheduled_today':
     case 'late_today':
+      return 'neutral'
     case 'intake':
     case 'review':
+    case 'finished':
       return phase
     default:
       return 'neutral'
@@ -49,23 +51,57 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
     if (phase !== 'intake' && phase !== 'review') {
       return
     }
-    if (!state.encounterStartedAt || state.visitFinished) {
+    if (!state.encounterStartedAt || (state.visitFinished && state.noteStatus !== 'returned')) {
       return
     }
     const interval = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(interval)
-  }, [phase, state.encounterStartedAt, state.visitFinished])
-
-  if (phase === 'finished') {
-    return null
-  }
+  }, [phase, state.encounterStartedAt, state.visitFinished, state.noteStatus])
 
   const isAssistant = state.role === 'assistant'
   const noteReview = getNoteReviewStatus(state.noteStatus)
-  const elapsed =
+  const scheduledTime = todayAppointment?.time ?? appointmentForPhase?.time
+  const startedAtLabel =
     state.encounterStartedAt != null
-      ? formatEncounterElapsed(state.encounterStartedAt, now)
+      ? formatEncounterStartTime(state.encounterStartedAt)
       : null
+
+  const renderFinishedTiming = () => {
+    if (startedAtLabel == null) {
+      return null
+    }
+
+    const parts: string[] = []
+    if (scheduledTime) {
+      parts.push(`Scheduled ${scheduledTime}`)
+    }
+    parts.push(`Started ${startedAtLabel}`)
+
+    return (
+      <p className="text-sm text-muted-foreground">
+        {parts.join(' · ')}
+      </p>
+    )
+  }
+
+  const renderIntakeReviewHeadline = () => {
+    if (startedAtLabel == null || state.encounterStartedAt == null) {
+      return null
+    }
+
+    const parts: string[] = []
+    if (scheduledTime) {
+      parts.push(`Scheduled ${scheduledTime}`)
+    }
+    parts.push(`Started ${startedAtLabel}`)
+
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <h6>{parts.join(' · ')}</h6>
+        <AccessTimer startedAt={state.encounterStartedAt} now={now} />
+      </div>
+    )
+  }
 
   const handleStartVisit = () => {
     dispatch({ type: 'START_VISIT' })
@@ -80,38 +116,38 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
   const renderPrimaryCopy = () => {
     switch (phase) {
       case 'no_appointment':
-        return <p className="text-foreground">No appointment has been scheduled yet.</p>
+        return <h6>No appointment has been scheduled yet.</h6>
       case 'future':
         return (
-          <p className="text-foreground">
+          <h6>
             {appointmentForPhase ? formatAppointmentDateTime(appointmentForPhase) : 'Appointment scheduled'}
-          </p>
+          </h6>
         )
       case 'scheduled_today':
         return (
-          <p className="text-foreground">
+          <h6>
             {todayAppointment
               ? `${todayAppointment.kind} appointment is today at ${todayAppointment.time}`
               : 'Appointment is today'}
-          </p>
+          </h6>
         )
       case 'late_today':
         return (
-          <p className="text-foreground">
+          <h6>
             {todayAppointment
               ? `${todayAppointment.kind} appointment was today at ${todayAppointment.time} — running late`
               : 'Appointment is running late'}
-          </p>
+          </h6>
         )
       case 'intake':
         return (
-          <div className="flex flex-col gap-0.5">
-            {elapsed && (
-              <p className="text-foreground">
-                <strong>{elapsed}</strong>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            {renderIntakeReviewHeadline()}
+            {isAssistant ? (
+              <p className="text-sm text-muted-foreground">
+                You&apos;re currently with the patient.
               </p>
-            )}
-            {!isAssistant && (
+            ) : (
               <p className="text-sm text-muted-foreground">
                 {DEMO_ASSISTANT_NAME} is currently with the patient.
               </p>
@@ -120,35 +156,61 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
         )
       case 'review':
         return (
-          <div className="flex flex-col gap-0.5">
-            {elapsed && (
-              <p className="text-foreground">
-                <strong>{elapsed}</strong>
-              </p>
-            )}
+          <div className="flex min-w-0 flex-col gap-0.5">
+            {renderIntakeReviewHeadline()}
             {isAssistant && noteReview === 'pending' && (
               <p className="text-sm text-muted-foreground">
-                Submitted — awaiting {DEMO_PHYSICIAN_SHORT_NAME}&apos;s review.
+                Awaiting {DEMO_PHYSICIAN_SHORT_NAME}&apos;s review.
               </p>
             )}
             {isAssistant && noteReview === 'returned' && (
               <p className="text-sm text-muted-foreground">
-                {DEMO_PHYSICIAN_SHORT_NAME} returned your note with comments.
+                {DEMO_PHYSICIAN_SHORT_NAME} returned your note — revise and resubmit.
               </p>
             )}
             {isAssistant && noteReview === 'approved' && (
               <p className="text-sm text-muted-foreground">
-                Note approved — awaiting {DEMO_PHYSICIAN_SHORT_NAME} to finish the visit.
+                Awaiting {DEMO_PHYSICIAN_SHORT_NAME} to finish the visit.
               </p>
             )}
             {!isAssistant && noteReview === 'pending' && (
-              <p className="text-sm text-muted-foreground">Ready for your review</p>
+              <p className="text-sm text-muted-foreground">Waiting on your review.</p>
             )}
             {!isAssistant && noteReview === 'returned' && (
-              <p className="text-sm text-muted-foreground">Waiting on Sam&apos;s revision</p>
+              <p className="text-sm text-muted-foreground">
+                Waiting on {DEMO_ASSISTANT_NAME}&apos;s revision.
+              </p>
             )}
             {!isAssistant && noteReview === 'approved' && (
-              <p className="text-sm text-muted-foreground">Note approved</p>
+              <p className="text-sm text-muted-foreground">
+                You approved the note — finish the visit when ready.
+              </p>
+            )}
+          </div>
+        )
+      case 'finished':
+        return (
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h6>Visit finished</h6>
+            {renderFinishedTiming()}
+            {noteReview === 'approved' && (
+              <p className="text-sm text-muted-foreground">
+                {isAssistant
+                  ? `${DEMO_PHYSICIAN_SHORT_NAME} approved the note and finished the visit.`
+                  : 'You approved the note and finished the visit.'}
+              </p>
+            )}
+            {noteReview === 'pending' && (
+              <p className="text-sm text-muted-foreground">
+                {isAssistant
+                  ? 'Note submitted — visit closed before physician review completed.'
+                  : 'Visit closed — note still awaiting your review.'}
+              </p>
+            )}
+            {!noteReview && (
+              <p className="text-sm text-muted-foreground">
+                Today&apos;s visit is complete.
+              </p>
             )}
           </div>
         )
@@ -188,12 +250,25 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
             <Button onClick={handleOpenPanel}>Revise</Button>
           )
         }
+        if (isAssistant) {
+          return (
+            <Button variant="outline" onClick={handleOpenPanel}>
+              View visit
+            </Button>
+          )
+        }
         if (!isAssistant) {
           return (
             <Button onClick={handleOpenPanel}>Review visit</Button>
           )
         }
         return null
+      case 'finished':
+        return (
+          <Button variant="outline" onClick={handleOpenPanel}>
+            View visit
+          </Button>
+        )
       default:
         return null
     }
@@ -205,7 +280,9 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
       data-phase={bannerPhaseAttr(phase)}
       data-panel-open={panelOpen ? 'true' : 'false'}
     >
-      {renderPrimaryCopy()}
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
+        {renderPrimaryCopy()}
+      </div>
       {renderAction()}
     </div>
   )

@@ -32,7 +32,8 @@ export function CosignQueueList() {
   const showUnread =
     isPhysician
       ? state.cosignUnread > 0 && state.noteStatus === 'submitted'
-      : state.notesReviewUnread > 0 && state.noteStatus === 'returned'
+      : state.notesReviewUnread > 0 &&
+        (state.noteStatus === 'returned' || state.noteStatus === 'cosigned')
 
   if (!hasNoteInReview) {
     return (
@@ -70,7 +71,9 @@ export function CosignQueueList() {
           <p className="mt-1 text-xs text-muted-foreground">
             {isPhysician
               ? 'Click to open visit panel and cosign or return'
-              : 'Click to open visit panel and view status'}
+              : state.noteStatus === 'cosigned'
+                ? 'Click to open visit panel and view approval'
+                : 'Click to open visit panel and view status'}
           </p>
         </div>
         <CardAction>

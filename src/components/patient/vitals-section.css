@@ -1,4 +1,8 @@
 @layer components {
+  [data-slot="vitals-section"] [data-slot="input-group"] {
+    @apply !bg-white has-disabled:!bg-white dark:!bg-white dark:has-disabled:!bg-white;
+  }
+
   [data-slot="vitals-section"] [data-slot="input-group-addon"] {
     @apply font-normal;
   }

@@ -1,0 +1,8 @@
+@layer components {
+  [data-slot="page-content"] {
+    @apply flex min-h-full w-full flex-col bg-background bg-repeat p-6;
+    container-type: inline-size;
+    background-image: url('../../assets/pattern.png');
+    background-size: 60px 60px;
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
@@ -8,11 +8,12 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { NoteSection } from '@/components/patient/NoteSection'
 import { VitalsSection } from '@/components/patient/VitalsSection'
+import { VisitFieldLabel } from '@/components/patient/VisitFieldLabel'
+import { AccessTimer } from '@/components/patient/AccessTimer'
 import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
 import { getScheduleStatusLabel, scheduleStatusTint } from '@/lib/statusDerivation'
-import { formatEncounterElapsed } from '@/lib/visitLifecycle'
+import { isAssistantNoteRevision, isAssistantVisitViewOnly, hasPhysicianReviewedNote } from '@/lib/visitLifecycle'
 import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
-import { cn } from '@/lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,8 +40,15 @@ export function VisitPanel({
   const isPhysician = state.role === 'physician'
   const [mounted, setMounted] = useState(open)
   const [visible, setVisible] = useState(false)
+  const visitLabelRef = useRef(visitLabel)
+  const isPastVisitRef = useRef(isPastVisit)
   const [now, setNow] = useState(() => Date.now())
   const [finishDialogOpen, setFinishDialogOpen] = useState(false)
+
+  if (open) {
+    visitLabelRef.current = visitLabel
+    isPastVisitRef.current = isPastVisit
+  }
 
   useEffect(() => {
     if (open) {
@@ -53,14 +61,29 @@ export function VisitPanel({
     setVisible(false)
   }, [open])
 
-  const isToday = !isPastVisit
+  const panelVisitLabel = visitLabelRef.current
+  const panelIsPastVisit = isPastVisitRef.current
+  const isToday = !panelIsPastVisit
+  const revisionActive = isAssistantNoteRevision(state)
+  const assistantViewOnly = isAssistantVisitViewOnly(state)
+  const todayVisitReadOnly =
+    panelIsPastVisit ||
+    (isToday && state.visitFinished && !revisionActive) ||
+    (isToday && assistantViewOnly)
+  const showFinishedMeta =
+    isToday && state.visitFinished && !revisionActive && state.visitStarted
   const showEncounterMeta =
     isToday &&
     state.encounterStartedAt != null &&
-    !state.visitFinished &&
-    state.visitStarted
-  const visitPhase = state.hasSubmittedOnce ? 'review' : 'intake'
-  const fieldsLocked = isPastVisit || state.visitFinished
+    state.visitStarted &&
+    (!state.visitFinished || revisionActive)
+  const showVisitStatusMeta = showEncounterMeta || showFinishedMeta
+  const visitPhase = state.visitFinished && !revisionActive
+    ? 'finished'
+    : state.hasSubmittedOnce
+      ? 'review'
+      : 'intake'
+  const fieldsLocked = todayVisitReadOnly
 
   useEffect(() => {
     if (!showEncounterMeta) {
@@ -75,6 +98,10 @@ export function VisitPanel({
       visitErrorToast('Submit the clinical note before finishing the visit')
       return
     }
+    if (!hasPhysicianReviewedNote(state.noteStatus)) {
+      visitErrorToast('Approve or return the note before finishing the visit')
+      return
+    }
     setFinishDialogOpen(true)
   }
 
@@ -86,24 +113,26 @@ export function VisitPanel({
 
   if (!mounted) return null
 
-  const showClinicalSections = state.visitStarted || isPastVisit
+  const showClinicalSections =
+    state.visitStarted || panelIsPastVisit || (isToday && revisionActive) || (isToday && state.visitFinished)
   const physicianIntakeBlock =
-    isToday && isPhysician && state.visitStarted && !state.hasSubmittedOnce
-  const inReview = isToday && state.hasSubmittedOnce && !state.visitFinished
+    isToday && isPhysician && state.visitStarted && !state.hasSubmittedOnce && !state.visitFinished
+  const inReview =
+    isToday && state.hasSubmittedOnce && (!state.visitFinished || revisionActive)
   const showPhysicianOptionalFields =
-    isPhysician && showClinicalSections && !physicianIntakeBlock && !fieldsLocked
-  const elapsed =
-    state.encounterStartedAt != null
-      ? formatEncounterElapsed(state.encounterStartedAt, now)
-      : null
+    isPhysician && showClinicalSections && !physicianIntakeBlock && !panelIsPastVisit
+  const showSubmittedAddendumToAssistant =
+    !isPhysician &&
+    state.physicianAddendumCommitted &&
+    state.physicianAddendum.trim() &&
+    showClinicalSections &&
+    !panelIsPastVisit
 
   return (
     <>
       <div
-        className={cn(
-          'h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
-          visible ? 'w-[480px]' : 'w-0',
-        )}
+        data-slot="visit-panel-port"
+        data-open={visible ? 'true' : 'false'}
         onTransitionEnd={(event) => {
           if (event.target !== event.currentTarget) return
           if (event.propertyName !== 'width') return
@@ -112,26 +141,28 @@ export function VisitPanel({
       >
         <div
           data-slot="visit-panel"
-          className={cn(
-            'flex h-full w-[480px] flex-col border-l bg-background transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
-            visible ? 'translate-x-0' : 'translate-x-full',
-          )}
+          data-phase={showVisitStatusMeta ? visitPhase : undefined}
         >
           <div
             data-slot="visit-panel-header"
-            data-phase={showEncounterMeta ? visitPhase : undefined}
+            data-phase={showVisitStatusMeta ? visitPhase : undefined}
           >
             <div data-slot="visit-panel-header-start">
-              <h4>{visitLabel}</h4>
-              {showEncounterMeta && elapsed && (
-                <p className="text-sm text-foreground">
-                  <strong>{elapsed}</strong>
-                </p>
-              )}
-              {showEncounterMeta && (
+              <h4>{panelVisitLabel}</h4>
+              {showVisitStatusMeta && (
                 <Badge variant="outline" className={scheduleStatusTint[visitPhase]}>
                   {getScheduleStatusLabel(visitPhase)}
+                  {(visitPhase === 'intake' || visitPhase === 'review') && (
+                    <span
+                      data-slot="appointment-status-dot"
+                      data-status={visitPhase}
+                      aria-hidden
+                    />
+                  )}
                 </Badge>
+              )}
+              {showEncounterMeta && state.encounterStartedAt != null && (
+                <AccessTimer startedAt={state.encounterStartedAt} now={now} />
               )}
             </div>
             <Button
@@ -143,7 +174,7 @@ export function VisitPanel({
             </Button>
           </div>
           <LightScrollbar className="min-h-0 flex-1">
-            <div className="flex flex-col gap-4 p-4">
+            <div data-slot="visit-panel-body" className="flex flex-col gap-4">
               {physicianIntakeBlock && (
                 <p className="text-sm text-muted-foreground">
                   {DEMO_ASSISTANT_NAME} is currently with the patient.
@@ -152,9 +183,9 @@ export function VisitPanel({
 
               {showClinicalSections && !physicianIntakeBlock && (
                 <>
-                  <VitalsSection readOnly={isPastVisit} inVisitPanel />
+                  <VitalsSection readOnly={todayVisitReadOnly} />
                   <Separator />
-                  <NoteSection readOnly={isPastVisit} inVisitPanel />
+                  <NoteSection readOnly={todayVisitReadOnly} inVisitPanel />
                 </>
               )}
 
@@ -162,17 +193,16 @@ export function VisitPanel({
                 <>
                   <Separator />
                   <section>
-                    <h5 className="mb-1">Physician addendum</h5>
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      Optional. Shared with the assistant.
-                    </p>
+                    <VisitFieldLabel as="h5" optional>
+                      Physician addendum
+                    </VisitFieldLabel>
                     <Textarea
                       placeholder="Add physician addendum..."
                       value={state.physicianAddendum}
                       disabled={fieldsLocked}
                       onChange={(e) => {
                         dispatch({
-                          type: 'SAVE_PHYSICIAN_ADDENDUM',
+                          type: 'UPDATE_PHYSICIAN_ADDENDUM',
                           content: e.target.value,
                         })
                       }}
@@ -181,11 +211,13 @@ export function VisitPanel({
                 </>
               )}
 
-              {!isPhysician && state.physicianAddendum.trim() && inReview && !isPastVisit && (
+              {showSubmittedAddendumToAssistant && (
                 <>
                   <Separator />
                   <section>
-                    <h5 className="mb-1">Physician addendum</h5>
+                    <VisitFieldLabel as="h5" optional>
+                      Physician addendum
+                    </VisitFieldLabel>
                     <Textarea disabled value={state.physicianAddendum} />
                   </section>
                 </>
@@ -195,9 +227,11 @@ export function VisitPanel({
                 <>
                   <Separator />
                   <section>
-                    <h5 className="mb-1">Confidential note</h5>
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      Optional. Physician-only. Hidden from Assistant — no request path.
+                    <VisitFieldLabel as="h5" optional>
+                      Confidential note
+                    </VisitFieldLabel>
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      Physician-only. Hidden from Assistant — no request path.
                     </p>
                     <Textarea
                       placeholder="Confidential physician note..."

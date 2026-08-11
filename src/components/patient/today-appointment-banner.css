@@ -9,7 +9,7 @@
 
   [data-slot="banner-slide-port"] {
     @apply overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)];
-    max-height: 6rem;
+    max-height: 9rem;
   }
 
   [data-slot="banner-slide-port"][data-panel-open="true"] {
@@ -17,7 +17,7 @@
   }
 
   [data-slot="today-appointment-banner"] {
-    @apply flex shrink-0 items-center gap-3 border-b px-6 py-4 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)];
+    @apply flex shrink-0 items-center justify-between gap-3 border-b px-6 py-4 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)];
   }
 
   [data-slot="today-appointment-banner"][data-panel-open="true"] {
@@ -28,16 +28,15 @@
     @apply border-gray-200 bg-gray-50;
   }
 
-  [data-slot="today-appointment-banner"][data-phase="late_today"],
-  [data-slot="today-appointment-banner"][data-phase="scheduled_today"] {
-    @apply border-amber-200 bg-amber-50;
-  }
-
   [data-slot="today-appointment-banner"][data-phase="intake"] {
     @apply border-purple-200 bg-purple-50;
   }
 
   [data-slot="today-appointment-banner"][data-phase="review"] {
     @apply border-blue-200 bg-blue-50;
+  }
+
+  [data-slot="today-appointment-banner"][data-phase="finished"] {
+    @apply border-green-200 bg-green-50;
   }
 }

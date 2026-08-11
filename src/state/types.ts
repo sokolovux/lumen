@@ -120,7 +120,6 @@ export interface AppState {
   encounterStartedAt: number | null
   /** Increments each time the physician returns the note for revision */
   revisionCount: number
-  vitalsSubmitted: boolean
   vitalsShowErrors: boolean
   vitals: VisitVitals
   noteStatus: NoteStatus
@@ -132,7 +131,7 @@ export interface AppState {
   confidentialNoteExists: boolean
   confidentialNoteContent: string
   confidentialNoteCommitted: boolean
-  /** Physician addendum — shared with the assistant once saved */
+  /** Physician addendum — last submitted text; assistant sees only after submit */
   physicianAddendum: string
   physicianAddendumCommitted: boolean
   labs: LabResult[]
@@ -140,7 +139,7 @@ export interface AppState {
   meds: Medication[]
   /** Physician: unread submitted notes awaiting cosign */
   cosignUnread: number
-  /** Assistant: unread returned notes awaiting resubmit */
+  /** Assistant: unread note review updates (returned or approved) */
   notesReviewUnread: number
   /** Physician: lab ids of incoming requests that have been opened/viewed */
   viewedRequests: string[]
@@ -161,14 +160,13 @@ export type AppAction =
   | { type: 'START_VISIT' }
   | { type: 'UPDATE_VITALS'; vitals: Partial<VisitVitals> }
   | { type: 'SHOW_VITALS_ERRORS' }
-  | { type: 'SUBMIT_VITALS' }
   | { type: 'UPDATE_NOTE_DRAFT'; content: string }
   | { type: 'SUBMIT_NOTE' }
   | { type: 'COSIGN_NOTE' }
   | { type: 'RETURN_NOTE'; feedback: string }
   | { type: 'FINISH_VISIT' }
   | { type: 'SAVE_CONFIDENTIAL_NOTE'; content: string }
-  | { type: 'SAVE_PHYSICIAN_ADDENDUM'; content: string }
+  | { type: 'UPDATE_PHYSICIAN_ADDENDUM'; content: string }
   | { type: 'REQUEST_LAB_ACCESS'; labId: string }
   | { type: 'GRANT_LAB_ACCESS'; labId: string; duration: GrantDuration }
   | { type: 'CONFIRM_LAB_GRANT'; labId: string }

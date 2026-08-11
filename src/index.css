@@ -9,7 +9,10 @@
 @import "./components/patient/access-timer.css";
 @import "./components/patient/vitals-section.css";
 @import "./components/patient/patient-card.css";
+@import "./components/patient/demographics-tab.css";
+@import "./components/patient/patient-detail-tabs.css";
 @import "./components/layout/page-header.css";
+@import "./components/layout/page-content.css";
 @import "./components/layout/page-view-switch.css";
 @import "./components/layout/sidebar.css";
 @import "./components/schedule/schedule-clock.css";
@@ -45,6 +48,7 @@
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
     --color-muted-foreground: var(--muted-foreground);
+    --color-placeholder-foreground: var(--placeholder-foreground);
     --color-muted: var(--muted);
     --color-secondary-foreground: var(--secondary-foreground);
     --color-secondary: var(--secondary);
@@ -81,6 +85,7 @@
     --secondary-foreground: var(--color-gray-900);
     --muted: var(--color-gray-100);
     --muted-foreground: var(--color-gray-500);
+    --placeholder-foreground: var(--color-gray-400);
     --accent: var(--color-gray-100);
     --accent-foreground: var(--color-gray-900);
     --destructive: oklch(0.577 0.245 27.325);
@@ -117,6 +122,7 @@
     --secondary-foreground: var(--color-gray-50);
     --muted: var(--color-gray-800);
     --muted-foreground: var(--color-gray-400);
+    --placeholder-foreground: var(--color-gray-400);
     --accent: var(--color-gray-800);
     --accent-foreground: var(--color-gray-50);
     --destructive: oklch(0.704 0.191 22.216);

@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContent } from '@/components/layout/PageContent'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 
 export function AuditTrailPage() {
@@ -14,7 +15,7 @@ export function AuditTrailPage() {
     <div className="flex h-full flex-col overflow-hidden">
       <PageHeader title="Audit trail" />
       <LightScrollbar className="min-h-0 flex-1">
-        <div className="p-6" />
+        <PageContent />
       </LightScrollbar>
     </div>
   )

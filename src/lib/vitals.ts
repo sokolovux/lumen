@@ -56,6 +56,17 @@ export function formatMissingVitalsMessage(vitals: VisitVitals): string {
   return `Please fill out: ${labels.join(', ')}.`
 }
 
+export function formatSubmitHandoffErrors(vitals: VisitVitals, noteDraft: string): string | null {
+  const missing: string[] = getMissingVitalFields(vitals).map((key) => VITAL_FIELD_LABELS[key])
+  if (!noteDraft.trim()) {
+    missing.push('Clinical note')
+  }
+  if (missing.length === 0) {
+    return null
+  }
+  return `Please fill out: ${missing.join(', ')}.`
+}
+
 export const PAST_VISIT_VITALS: VisitVitals = {
   bloodPressure: '118/76',
   heartRate: '68',

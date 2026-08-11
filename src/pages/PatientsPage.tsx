@@ -7,6 +7,7 @@ import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
 import { shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 import { FIXED_CLOCK } from '@/lib/fixedClock'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContent } from '@/components/layout/PageContent'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -226,13 +227,13 @@ export function PatientsPage() {
         </div>
       </PageHeader>
       <LightScrollbar className="min-h-0 flex-1">
-        <div className="p-6" data-slot="patients-page-content">
+        <PageContent>
           {view === 'grid' ? (
             <PatientsGridView patients={sortedPatients} onPatientClick={handlePatientClick} />
           ) : (
             <PatientsListView patients={sortedPatients} onPatientClick={handlePatientClick} />
           )}
-        </div>
+        </PageContent>
       </LightScrollbar>
     </div>
   )

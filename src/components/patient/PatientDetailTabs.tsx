@@ -3,6 +3,7 @@ import type { Medication } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DemographicsTab } from '@/components/patient/DemographicsTab'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { LabResultCard } from '@/components/patient/LabResultCard'
 import { AddMedicationDialog } from '@/components/patient/AddMedicationDialog'
@@ -67,15 +68,15 @@ export function PatientDetailTabs({
         <TabsTrigger value="medications">Medications</TabsTrigger>
         <TabsTrigger value="labs">Labs & results</TabsTrigger>
         <TabsTrigger value="referrals">Referrals</TabsTrigger>
-        <TabsTrigger value="visits">Visit History</TabsTrigger>
+        <TabsTrigger value="visits">Visit history</TabsTrigger>
         {state.role === 'physician' && (
           <TabsTrigger value="audit">Audit trail</TabsTrigger>
         )}
       </TabsList>
 
       <TabsContent value="visits" className="mt-4 space-y-3">
-        {!state.visitFinished && (
-          <div className="rounded-md border p-4">
+        {(state.visitStarted || state.visitFinished) && (
+          <div data-slot="patient-tab-card" className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p><strong>Today&apos;s visit</strong></p>
@@ -87,14 +88,23 @@ export function PatientDetailTabs({
                 onClick={onOpenTodayVisit}
                 disabled={!canOpenTodayVisit}
               >
-                {state.selectedVisitId === 'today' ? 'Visit open' : 'Open visit'}
+                {state.selectedVisitId === 'today'
+                  ? 'Visit open'
+                  : state.noteStatus === 'returned'
+                    ? 'Revise visit'
+                    : state.visitFinished ||
+                        (state.role === 'assistant' &&
+                          state.hasSubmittedOnce &&
+                          state.noteStatus !== 'returned')
+                      ? 'View visit'
+                      : 'Open visit'}
               </Button>
             </div>
           </div>
         )}
         <p className="text-xs"><strong>Past visits</strong></p>
         {PAST_VISITS.map((visit) => (
-          <div key={visit.id} className="rounded-md border p-4">
+          <div key={visit.id} data-slot="patient-tab-card" className="p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm">{visit.label}</p>
               <Button
@@ -109,13 +119,8 @@ export function PatientDetailTabs({
         ))}
       </TabsContent>
 
-      <TabsContent value="demographics" className="mt-4 space-y-3">
-        {['Name', 'Date of birth', 'MRN', 'Address', 'Phone', 'Insurance'].map((field) => (
-          <div key={field} className="flex items-center justify-between border-b pb-2">
-            <span className="text-sm text-muted-foreground">{field}</span>
-            <Skeleton className="h-4 w-32" />
-          </div>
-        ))}
+      <TabsContent value="demographics" className="mt-4">
+        <DemographicsTab />
       </TabsContent>
 
       <TabsContent value="problems" className="mt-4 space-y-4">
@@ -123,7 +128,7 @@ export function PatientDetailTabs({
           <h6 className="mb-2">Problem list</h6>
           <div className="space-y-2">
             {['Hypertension', 'Type 2 Diabetes'].map((problem) => (
-              <div key={problem} className="rounded-md border p-2">
+              <div key={problem} data-slot="patient-tab-card" className="p-2">
                 <p className="text-sm">{problem}</p>
                 <Skeleton className="mt-1 h-3 w-24" />
               </div>
@@ -134,7 +139,7 @@ export function PatientDetailTabs({
           <h6 className="mb-2">Allergies</h6>
           <div className="space-y-2">
             {['Penicillin', 'Sulfa drugs'].map((allergy) => (
-              <div key={allergy} className="rounded-md border p-2">
+              <div key={allergy} data-slot="patient-tab-card" className="p-2">
                 <p className="text-sm">{allergy}</p>
                 <Skeleton className="mt-1 h-3 w-24" />
               </div>
@@ -150,7 +155,7 @@ export function PatientDetailTabs({
         </div>
         <div className="space-y-2">
           {state.meds.map((med) => (
-            <div key={med.id} className="rounded-md border p-3">
+            <div key={med.id} data-slot="patient-tab-card" className="p-3">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm"><strong>{med.name}</strong></p>
@@ -201,7 +206,7 @@ export function PatientDetailTabs({
 
       <TabsContent value="referrals" className="mt-4 space-y-3">
         {REFERRALS.map((referral) => (
-          <div key={referral.id} className="rounded-md border p-4">
+          <div key={referral.id} data-slot="patient-tab-card" className="p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm"><strong>{referral.specialty}</strong></p>

@@ -1,13 +1,16 @@
 import { useEffect } from 'react'
 import { Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { CalendarPlus, MessageCircle, Phone, Settings } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContent } from '@/components/layout/PageContent'
+import { Button } from '@/components/ui/button'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { PatientDetailTabs, PAST_VISITS } from '@/components/patient/PatientDetailTabs'
 import { VisitPanel } from '@/components/patient/VisitPanel'
 import { TodayAppointmentBanner } from '@/components/patient/TodayAppointmentBanner'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
-import { canPhysicianOpenTodayVisit, shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
+import { canPhysicianOpenTodayVisit, canAssistantOpenTodayVisit, shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 
 type PatientDetailLocationState = {
   from?: string
@@ -38,11 +41,13 @@ export function PatientDetailPage() {
   }
 
   const todayPanelOpen = state.selectedVisitId === 'today'
-  const showTodayVisitPanel = todayPanelOpen && !state.visitFinished
+  const showTodayVisitPanel = todayPanelOpen
   const showPastVisitPanel =
     state.selectedVisitId !== null && state.selectedVisitId !== 'today'
   const showVisitPanel = showTodayVisitPanel || showPastVisitPanel
-  const showBanner = !state.visitFinished
+  const todayVisitFinished =
+    state.visitFinished && state.noteStatus !== 'returned'
+  const todayVisitLabel = todayVisitFinished ? "Today's visit" : 'Visit in progress'
 
   useEffect(() => {
     if (!locationState?.autoOpenTodayVisit) {
@@ -79,45 +84,85 @@ export function PatientDetailPage() {
     <div className="flex h-full overflow-hidden">
       <div className="flex flex-1 flex-col overflow-hidden">
         <div data-slot="patient-detail-chrome" className="relative shrink-0">
-          <PageHeader title={patient.name} backTo={backTo} />
-          {showBanner && (
-            <div
-              data-slot="banner-slide-port"
-              data-panel-open={todayPanelOpen ? 'true' : 'false'}
-            >
-              <TodayAppointmentBanner
-                patientId={patient.id}
-                panelOpen={todayPanelOpen}
-              />
+          <PageHeader
+            title={(
+              <div className="flex min-w-0 items-center gap-2">
+                <h3>{patient.name}</h3>
+                <p className="text-sm">{patient.mrn}</p>
+              </div>
+            )}
+            backTo={backTo}
+          >
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon-default"
+                type="button"
+                aria-label="Patient settings"
+                onClick={() => console.log('Patient settings')}
+              >
+                <Settings />
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => console.log('Message patient')}
+              >
+                <MessageCircle data-icon="inline-start" />
+                Message
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => console.log('Call patient')}
+              >
+                <Phone data-icon="inline-start" />
+                Call
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => console.log('Schedule visit')}
+              >
+                <CalendarPlus data-icon="inline-start" />
+                Schedule visit
+              </Button>
             </div>
-          )}
+          </PageHeader>
+          <div
+            data-slot="banner-slide-port"
+            data-panel-open={todayPanelOpen ? 'true' : 'false'}
+          >
+            <TodayAppointmentBanner
+              patientId={patient.id}
+              panelOpen={todayPanelOpen}
+            />
+          </div>
         </div>
         <LightScrollbar className="min-h-0 flex-1">
-          <div className="p-6">
+          <PageContent>
             <PatientDetailTabs
               defaultTab={defaultTab}
               onOpenTodayVisit={handleOpenTodayVisit}
               onOpenPastVisit={handleOpenPastVisit}
               canOpenTodayVisit={
                 state.role === 'assistant'
-                  ? !state.visitFinished
+                  ? canAssistantOpenTodayVisit(state)
                   : canPhysicianOpenTodayVisit(state)
               }
             />
-          </div>
+          </PageContent>
         </LightScrollbar>
       </div>
-      {showVisitPanel && (
-        <VisitPanel
-          open={showVisitPanel}
-          visitLabel={
-            state.selectedVisitId === 'today'
-              ? "Today's visit"
-              : pastVisit?.label ?? 'Past visit'
-          }
-          isPastVisit={showPastVisitPanel}
-        />
-      )}
+      <VisitPanel
+        open={showVisitPanel}
+        visitLabel={
+          state.selectedVisitId === 'today'
+            ? todayVisitLabel
+            : pastVisit?.label ?? 'Past visit'
+        }
+        isPastVisit={showPastVisitPanel}
+      />
     </div>
   )
 }

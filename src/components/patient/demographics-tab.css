@@ -1,0 +1,57 @@
+@layer components {
+  [data-slot="demographics-tab"] {
+    container-type: inline-size;
+  }
+
+  [data-slot="demographics-grid"] {
+    display: grid;
+    gap: --spacing(3);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @container (min-width: 32rem) {
+    [data-slot="demographics-grid"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container (min-width: 64rem) {
+    [data-slot="demographics-grid"] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  [data-slot="demographics-fields"] {
+    @apply flex flex-col gap-3;
+  }
+
+  [data-slot="demographics-field"] {
+    display: grid;
+    gap: --spacing(1) --spacing(3);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @container (min-width: 32rem) {
+    [data-slot="demographics-field"] {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    }
+  }
+
+  [data-slot="demographics-field"] > p {
+    @apply text-sm text-muted-foreground;
+  }
+
+  [data-slot="demographics-field-value"] {
+    @apply min-w-0;
+  }
+
+  [data-slot="demographics-photo"] img,
+  [data-slot="demographics-photo-fallback"] {
+    @apply size-12 rounded-sm object-cover ring-1 ring-border;
+  }
+
+  [data-slot="demographics-photo-fallback"] {
+    @apply flex items-center justify-center bg-muted text-base text-muted-foreground;
+  }
+}

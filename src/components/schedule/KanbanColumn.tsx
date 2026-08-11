@@ -34,7 +34,10 @@ export function KanbanColumn({
 
   return (
     <div className="flex min-h-0 min-w-[200px] flex-1 flex-col overflow-hidden border-r border-gray-200 bg-gray-50 last:border-r-0">
-      <div className="shrink-0 border-b bg-background p-6">
+      <div
+        data-slot="schedule-column-header"
+        data-status={statusKey}
+      >
         <h5>{label}</h5>
         <p className="text-sm">{columnAppointments.length} appointments</p>
       </div>

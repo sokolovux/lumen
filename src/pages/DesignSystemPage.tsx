@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { CheckIcon, PlusIcon } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContent } from '@/components/layout/PageContent'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 import { AppointmentCard } from '@/components/schedule/AppointmentCard'
 import type { Appointment, LabStatus, NoteStatus, ScheduleStatus } from '@/state/types'
@@ -271,7 +272,8 @@ export function DesignSystemPage() {
       <PageHeader title="Design system" />
 
       <LightScrollbar className="min-h-0 flex-1">
-        <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-8">
+        <PageContent>
+          <div className="mx-auto flex max-w-5xl flex-col gap-12">
           <nav className="flex flex-wrap gap-2">
             {[
               ['foundations', 'Foundations'],
@@ -848,9 +850,9 @@ export function DesignSystemPage() {
                 <CardHeader>
                   <CardTitle>Visit panel — buttons</CardTitle>
                   <CardDescription>
-                    Panel action buttons stay clickable with click-time validation. Only
-                    Submit &amp; hand off uses the native disabled state after a successful
-                    submit (until the note is returned).
+                    Submit &amp; hand off validates vitals and the clinical note together on
+                    click. Submit &amp; hand off is hidden after a successful submit until the
+                    note is returned.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -868,12 +870,9 @@ export function DesignSystemPage() {
                       <p className="text-xs">
                         <strong>Visit panel — after submit</strong>
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        <Button disabled>Submit & hand off</Button>
-                        <Button variant="outline">Submit vitals</Button>
-                      </div>
                       <p className="text-xs text-muted-foreground">
-                        Submit vitals stays enabled; validation runs on click.
+                        Submit &amp; hand off is not shown once the note is awaiting physician
+                        review.
                       </p>
                     </div>
                   </div>
@@ -1151,7 +1150,8 @@ export function DesignSystemPage() {
               ))}
             </div>
           </Section>
-        </div>
+          </div>
+        </PageContent>
       </LightScrollbar>
     </div>
   )

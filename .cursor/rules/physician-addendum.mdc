@@ -1,0 +1,25 @@
+---
+description: Physician addendum is private until the visit is finished
+globs: src/components/patient/**,src/state/**
+alwaysApply: false
+---
+
+# Physician addendum — visible to assistant after finish
+
+The physician addendum is an **optional** draft in `physicianAddendum`. There is no submit button.
+
+The assistant must **not** see addendum content until the visit is finished and the addendum has content.
+
+## State
+
+- `physicianAddendum` — physician draft text
+- `physicianAddendumCommitted` — set `true` on `FINISH_VISIT` when addendum text is non-empty
+
+Editing the addendum clears `physicianAddendumCommitted` until the visit is finished again.
+
+## UI
+
+- **Physician:** optional labeled textarea; edits dispatch `UPDATE_PHYSICIAN_ADDENDUM`
+- **Assistant:** read-only addendum only when `physicianAddendumCommitted && physicianAddendum.trim()`
+
+See `VisitPanel.tsx`.

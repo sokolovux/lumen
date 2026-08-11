@@ -1,4 +1,24 @@
 @layer components {
+  [data-slot="schedule-column-header"] {
+    @apply shrink-0 border-b p-6;
+  }
+
+  [data-slot="schedule-column-header"][data-status="scheduled"] {
+    background-color: var(--color-gray-50);
+  }
+
+  [data-slot="schedule-column-header"][data-status="intake"] {
+    background-color: var(--color-purple-50);
+  }
+
+  [data-slot="schedule-column-header"][data-status="review"] {
+    background-color: var(--color-blue-50);
+  }
+
+  [data-slot="schedule-column-header"][data-status="finished"] {
+    background-color: var(--color-green-50);
+  }
+
   [data-schedule-column] [data-slot="light-scrollbar-viewport"] {
     @apply bg-background;
   }

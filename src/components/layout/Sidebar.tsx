@@ -88,7 +88,9 @@ export function Sidebar() {
       case 'cosign':
         return state.noteStatus === 'submitted' ? state.cosignUnread : 0
       case 'notesReview':
-        return state.noteStatus === 'returned' ? state.notesReviewUnread : 0
+        return state.noteStatus === 'returned' || state.noteStatus === 'cosigned'
+          ? state.notesReviewUnread
+          : 0
       case 'request':
         return state.labs.filter(
           (lab) => lab.status === 'requested' && !state.viewedRequests.includes(lab.id),
