@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -6,9 +7,11 @@ import { PatientDetailTabs, PAST_VISITS } from '@/components/patient/PatientDeta
 import { VisitPanel } from '@/components/patient/VisitPanel'
 import { TodayAppointmentBanner } from '@/components/patient/TodayAppointmentBanner'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
+import { canPhysicianOpenTodayVisit, shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 
 type PatientDetailLocationState = {
   from?: string
+  autoOpenTodayVisit?: boolean
 }
 
 export function PatientDetailPage() {
@@ -16,11 +19,11 @@ export function PatientDetailPage() {
   const [searchParams] = useSearchParams()
   const location = useLocation()
   const { state, dispatch } = useAppState()
-  const backTo =
-    (location.state as PatientDetailLocationState | null)?.from ?? '/patients'
+  const locationState = location.state as PatientDetailLocationState | null
+  const backTo = locationState?.from ?? '/patients'
 
   const tabParam = searchParams.get('tab')
-  const defaultTab = ['demographics', 'problems', 'labs', 'visits', 'audit'].includes(tabParam ?? '')
+  const defaultTab = ['demographics', 'problems', 'medications', 'labs', 'referrals', 'visits', 'audit'].includes(tabParam ?? '')
     ? tabParam!
     : 'demographics'
 
@@ -34,7 +37,35 @@ export function PatientDetailPage() {
     return <Navigate to="/patients" replace />
   }
 
+  const todayPanelOpen = state.selectedVisitId === 'today'
+  const showTodayVisitPanel = todayPanelOpen && !state.visitFinished
+  const showPastVisitPanel =
+    state.selectedVisitId !== null && state.selectedVisitId !== 'today'
+  const showVisitPanel = showTodayVisitPanel || showPastVisitPanel
+  const showBanner = !state.visitFinished
+
+  useEffect(() => {
+    if (!locationState?.autoOpenTodayVisit) {
+      return
+    }
+    if (!shouldAutoOpenTodayVisit(state.role, state)) {
+      return
+    }
+    dispatch({ type: 'OPEN_VISIT', visitId: 'today' })
+  }, [
+    dispatch,
+    locationState?.autoOpenTodayVisit,
+    state.role,
+    state.visitStarted,
+    state.visitFinished,
+    state.hasSubmittedOnce,
+    state.noteStatus,
+  ])
+
   const handleOpenTodayVisit = () => {
+    if (state.role === 'physician' && !canPhysicianOpenTodayVisit(state)) {
+      return
+    }
     dispatch({ type: 'OPEN_VISIT', visitId: 'today' })
   }
 
@@ -43,34 +74,50 @@ export function PatientDetailPage() {
   }
 
   const pastVisit = PAST_VISITS.find((v) => v.id === state.selectedVisitId)
-  const showVisitPanel = state.selectedVisitId !== null
 
   return (
     <div className="flex h-full overflow-hidden">
       <div className="flex flex-1 flex-col overflow-hidden">
-        <PageHeader title={patient.name} backTo={backTo} />
-        <TodayAppointmentBanner patientId={patient.id} />
+        <div data-slot="patient-detail-chrome" className="relative shrink-0">
+          <PageHeader title={patient.name} backTo={backTo} />
+          {showBanner && (
+            <div
+              data-slot="banner-slide-port"
+              data-panel-open={todayPanelOpen ? 'true' : 'false'}
+            >
+              <TodayAppointmentBanner
+                patientId={patient.id}
+                panelOpen={todayPanelOpen}
+              />
+            </div>
+          )}
+        </div>
         <LightScrollbar className="min-h-0 flex-1">
           <div className="p-6">
             <PatientDetailTabs
               defaultTab={defaultTab}
               onOpenTodayVisit={handleOpenTodayVisit}
               onOpenPastVisit={handleOpenPastVisit}
+              canOpenTodayVisit={
+                state.role === 'assistant'
+                  ? !state.visitFinished
+                  : canPhysicianOpenTodayVisit(state)
+              }
             />
           </div>
         </LightScrollbar>
       </div>
-      <VisitPanel
-        open={showVisitPanel}
-        visitLabel={
-          state.selectedVisitId === 'today'
-            ? "Today's visit"
-            : pastVisit?.label ?? 'Past visit'
-        }
-        isPastVisit={
-          state.selectedVisitId !== null && state.selectedVisitId !== 'today'
-        }
-      />
+      {showVisitPanel && (
+        <VisitPanel
+          open={showVisitPanel}
+          visitLabel={
+            state.selectedVisitId === 'today'
+              ? "Today's visit"
+              : pastVisit?.label ?? 'Past visit'
+          }
+          isPastVisit={showPastVisitPanel}
+        />
+      )}
     </div>
   )
 }

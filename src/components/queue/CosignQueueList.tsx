@@ -4,6 +4,7 @@ import { Card, CardAction, CardHeader } from '@/components/ui/card'
 import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
 import { JORDAN_REYES_ID } from '@/lib/scheduleData'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
+import { shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 
 export function CosignQueueList() {
   const { state, dispatch } = useAppState()
@@ -21,7 +22,10 @@ export function CosignQueueList() {
     }
     dispatch({ type: 'CLOSE_VISIT' })
     navigate(`/patients/${JORDAN_REYES_ID}`, {
-      state: { from: `${location.pathname}${location.search}` },
+      state: {
+        from: `${location.pathname}${location.search}`,
+        autoOpenTodayVisit: shouldAutoOpenTodayVisit(state.role, state),
+      },
     })
   }
 

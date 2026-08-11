@@ -14,6 +14,9 @@
 @import "./components/layout/sidebar.css";
 @import "./components/schedule/schedule-clock.css";
 @import "./components/schedule/schedule-column.css";
+@import "./components/patient/visit-toast.css";
+@import "./components/patient/visit-panel.css";
+@import "./components/patient/today-appointment-banner.css";
 @import "./components/schedule/appointment-card.css";
 
 @custom-variant dark (&:is(.dark *));

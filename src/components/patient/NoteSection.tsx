@@ -1,11 +1,15 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { useEffect, useState } from 'react'
 import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
-import { areVitalsComplete } from '@/lib/vitals'
+import { areVitalsComplete, formatMissingVitalsMessage } from '@/lib/vitals'
+import {
+  isClinicalNoteEditable,
+  isSubmitHandoffDisabled,
+} from '@/lib/visitLifecycle'
+import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
 import {
   Dialog,
   DialogContent,
@@ -16,56 +20,105 @@ import {
 
 interface NoteSectionProps {
   readOnly?: boolean
+  inVisitPanel?: boolean
 }
 
-export function NoteSection({ readOnly = false }: NoteSectionProps) {
+export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSectionProps) {
   const { state, dispatch } = useAppState()
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [returnFeedback, setReturnFeedback] = useState('')
   const [showNoteError, setShowNoteError] = useState(false)
 
-  const canEdit =
-    !readOnly &&
-    state.role === 'assistant' &&
-    (state.noteStatus === 'not_started' ||
-      state.noteStatus === 'draft' ||
-      state.noteStatus === 'returned')
+  const noteEditable = isClinicalNoteEditable(state, readOnly)
+  const submitHandoffDisabled = isSubmitHandoffDisabled(state)
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || !inVisitPanel) {
+      return
+    }
+    console.debug('[NoteSection] textarea gate', {
+      disabled: !noteEditable,
+      noteStatus: state.noteStatus,
+      role: state.role,
+      visitFinished: state.visitFinished,
+      readOnly,
+      vitalsSubmitted: state.vitalsSubmitted,
+    })
+  }, [
+    inVisitPanel,
+    noteEditable,
+    readOnly,
+    state.noteStatus,
+    state.role,
+    state.visitFinished,
+    state.vitalsSubmitted,
+  ])
 
   const handleSubmit = () => {
-    if (!canEdit) return
+    if (!noteEditable) {
+      visitErrorToast('Clinical note is not editable right now')
+      return
+    }
 
-    if (!areVitalsComplete(state.vitals) || !state.vitalsSubmitted) {
+    if (submitHandoffDisabled) {
+      visitErrorToast('Note has already been submitted')
+      return
+    }
+
+    if (!state.vitalsSubmitted) {
       dispatch({ type: 'SHOW_VITALS_ERRORS' })
-      toast.error('Complete and submit all vitals before handing off')
+      visitErrorToast('Submit vitals before handing off the note')
+      return
+    }
+
+    if (!areVitalsComplete(state.vitals)) {
+      dispatch({ type: 'SHOW_VITALS_ERRORS' })
+      visitErrorToast(formatMissingVitalsMessage(state.vitals))
       return
     }
 
     if (!state.noteDraft.trim()) {
       setShowNoteError(true)
-      toast.error('Enter a clinical note before submitting')
+      visitErrorToast('Please fill out: Clinical note.')
       return
     }
 
     setShowNoteError(false)
     dispatch({ type: 'SUBMIT_NOTE' })
-    toast.success(
+    visitStageToast(
       state.noteStatus === 'returned'
-        ? 'Note resubmitted for cosign'
-        : 'Note submitted for cosign',
+        ? 'Note resubmitted for review'
+        : 'Note submitted for review',
+      'review',
     )
   }
 
   const handleCosign = () => {
+    if (state.noteStatus !== 'submitted') {
+      visitErrorToast('No note is awaiting approval')
+      return
+    }
     dispatch({ type: 'COSIGN_NOTE' })
-    toast.success('Note cosigned')
+    visitStageToast('Note approved', 'review')
+  }
+
+  const handleReturnClick = () => {
+    if (state.noteStatus !== 'submitted') {
+      visitErrorToast('No note is awaiting return')
+      return
+    }
+    setReturnDialogOpen(true)
   }
 
   const handleReturn = () => {
-    if (!returnFeedback.trim()) return
+    if (!returnFeedback.trim()) {
+      visitErrorToast('Please fill out: Return feedback.')
+      return
+    }
     dispatch({ type: 'RETURN_NOTE', feedback: returnFeedback })
     setReturnDialogOpen(false)
     setReturnFeedback('')
-    toast.success('Note returned to assistant')
+    visitStageToast('Note returned to assistant', 'review')
   }
 
   const statusVariant = (() => {
@@ -81,6 +134,8 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
     }
   })()
 
+  const secondaryButtonVariant = inVisitPanel ? 'outline' : 'default'
+
   return (
     <section>
       <div className="mb-2">
@@ -91,7 +146,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Shared visit documentation — physician cosign required.
+          Shared visit documentation — physician review required.
         </p>
       </div>
 
@@ -102,46 +157,37 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
         </div>
       )}
 
-      {canEdit ? (
-        <Textarea
-          placeholder="Enter clinical note..."
-          value={state.noteDraft}
-          aria-invalid={showNoteError && !state.noteDraft.trim() ? true : undefined}
-          onChange={(e) => {
-            dispatch({ type: 'UPDATE_NOTE_DRAFT', content: e.target.value })
-            if (showNoteError && e.target.value.trim()) {
-              setShowNoteError(false)
-            }
-          }}
-        />
-      ) : (
-        <Textarea
-          readOnly
-          value={state.noteDraft}
-          placeholder="No note content"
-        />
-      )}
+      <Textarea
+        key={`clinical-note-${state.noteStatus}`}
+        placeholder="Enter clinical note..."
+        value={state.noteDraft}
+        disabled={!noteEditable}
+        aria-invalid={showNoteError && !state.noteDraft.trim() ? true : undefined}
+        onChange={(e) => {
+          dispatch({ type: 'UPDATE_NOTE_DRAFT', content: e.target.value })
+          if (showNoteError && e.target.value.trim()) {
+            setShowNoteError(false)
+          }
+        }}
+      />
 
       <div className="mt-2 flex flex-wrap gap-2">
         {!readOnly && state.role === 'assistant' && (
-          <Button onClick={handleSubmit}>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitHandoffDisabled}
+          >
             Submit & hand off
           </Button>
         )}
         {!readOnly && state.role === 'physician' && (
           <>
-            <Button
-              size="sm"
-              onClick={handleCosign}
-              disabled={state.noteStatus !== 'submitted'}
-            >
-              Cosign
+            <Button variant={secondaryButtonVariant} onClick={handleCosign}>
+              Approve
             </Button>
-            {state.noteStatus === 'submitted' && (
-              <Button size="sm" variant="outline" onClick={() => setReturnDialogOpen(true)}>
-                Return for revision
-              </Button>
-            )}
+            <Button variant={secondaryButtonVariant} onClick={handleReturnClick}>
+              Return for revision
+            </Button>
           </>
         )}
       </div>
@@ -160,7 +206,7 @@ export function NoteSection({ readOnly = false }: NoteSectionProps) {
             <Button variant="outline" onClick={() => setReturnDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleReturn} disabled={!returnFeedback.trim()}>
+            <Button onClick={handleReturn}>
               Return note
             </Button>
           </DialogFooter>

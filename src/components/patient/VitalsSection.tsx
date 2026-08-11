@@ -1,4 +1,3 @@
-import { toast } from 'sonner'
 import type { VisitVitals } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
@@ -10,13 +9,16 @@ import {
 } from '@/components/ui/input-group'
 import {
   areVitalsComplete,
+  formatMissingVitalsMessage,
   formatVitalValue,
   PAST_VISIT_VITALS,
   VITAL_UNITS,
 } from '@/lib/vitals'
+import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
 
 interface VitalsSectionProps {
   readOnly?: boolean
+  inVisitPanel?: boolean
 }
 
 type VitalFieldKey = keyof VisitVitals
@@ -50,62 +52,72 @@ function VitalUnitAddon({ unit }: { unit: string }) {
   )
 }
 
-export function VitalsSection({ readOnly = false }: VitalsSectionProps) {
+export function VitalsSection({ readOnly = false, inVisitPanel = false }: VitalsSectionProps) {
   const { state, dispatch } = useAppState()
 
   const editable =
     !readOnly &&
     state.role === 'assistant' &&
     state.visitStarted &&
-    !state.vitalsSubmitted
+    (!state.vitalsSubmitted || state.noteStatus === 'returned') &&
+    !state.visitFinished
+
+  const fieldsLocked =
+    readOnly ||
+    state.visitFinished ||
+    (state.role === 'assistant' &&
+      state.vitalsSubmitted &&
+      state.noteStatus !== 'returned') ||
+    state.role === 'physician'
+
+  const showSubmitButton =
+    !readOnly &&
+    state.role === 'assistant' &&
+    state.visitStarted &&
+    !state.visitFinished
 
   const displayVitals = readOnly ? PAST_VISIT_VITALS : state.vitals
 
   const updateField = (key: VitalFieldKey, value: string) => {
+    if (!editable) return
     dispatch({ type: 'UPDATE_VITALS', vitals: { [key]: value } })
   }
 
   const handleSubmit = () => {
+    if (state.vitalsSubmitted && state.noteStatus !== 'returned') {
+      visitErrorToast('Vitals have already been submitted')
+      return
+    }
+
     if (!areVitalsComplete(state.vitals)) {
       dispatch({ type: 'SHOW_VITALS_ERRORS' })
-      toast.error('Complete all vitals before submitting')
+      visitErrorToast(formatMissingVitalsMessage(state.vitals))
       return
     }
 
     dispatch({ type: 'SUBMIT_VITALS' })
-    toast.success('Vitals submitted')
+    visitStageToast('Vitals submitted', 'intake')
   }
 
-  const renderEditableField = (field: (typeof VITAL_FIELDS)[number]) => {
+  const renderField = (field: (typeof VITAL_FIELDS)[number]) => {
     const unit = VITAL_UNITS[field.key]
-    const hasError = state.vitalsShowErrors && !state.vitals[field.key].trim()
+    const hasError = editable && state.vitalsShowErrors && !state.vitals[field.key].trim()
+    const value = editable
+      ? state.vitals[field.key]
+      : formatVitalValue(field.key, displayVitals[field.key])
 
     return (
       <>
         <p className="text-sm text-muted-foreground">{field.label}</p>
         <InputGroup>
           <InputGroupInput
-            value={state.vitals[field.key]}
+            value={value}
             placeholder={field.placeholder}
             inputMode={field.inputMode}
             aria-invalid={hasError || undefined}
+            disabled={fieldsLocked || !editable}
             onChange={(event) => updateField(field.key, event.target.value)}
           />
-          {unit && <VitalUnitAddon unit={unit} />}
-        </InputGroup>
-      </>
-    )
-  }
-
-  const renderReadOnlyField = (field: (typeof VITAL_FIELDS)[number]) => {
-    const unit = VITAL_UNITS[field.key]
-    const value = formatVitalValue(field.key, displayVitals[field.key])
-
-    return (
-      <>
-        <p className="text-sm text-muted-foreground">{field.label}</p>
-        <InputGroup>
-          <InputGroupInput readOnly value={value} />
           {unit && <VitalUnitAddon unit={unit} />}
         </InputGroup>
       </>
@@ -119,13 +131,16 @@ export function VitalsSection({ readOnly = false }: VitalsSectionProps) {
         <div className="grid grid-cols-2 gap-x-2 gap-y-3">
           {VITAL_FIELDS.map((field) => (
             <div key={field.key} className="flex flex-col gap-1">
-              {editable ? renderEditableField(field) : renderReadOnlyField(field)}
+              {renderField(field)}
             </div>
           ))}
         </div>
-        {editable && (
-          <Button onClick={handleSubmit}>
-            Submit
+        {showSubmitButton && (
+          <Button
+            variant={inVisitPanel ? 'outline' : 'default'}
+            onClick={handleSubmit}
+          >
+            Submit vitals
           </Button>
         )}
       </div>

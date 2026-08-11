@@ -1,0 +1,17 @@
+@layer components {
+  [data-slot="visit-panel-header"] {
+    @apply flex h-16 shrink-0 items-center justify-between gap-3 border-b px-4;
+  }
+
+  [data-slot="visit-panel-header-start"] {
+    @apply flex min-w-0 flex-1 items-center gap-2;
+  }
+
+  [data-slot="visit-panel-header"][data-phase="intake"] {
+    @apply border-purple-200 bg-purple-50;
+  }
+
+  [data-slot="visit-panel-header"][data-phase="review"] {
+    @apply border-blue-200 bg-blue-50;
+  }
+}

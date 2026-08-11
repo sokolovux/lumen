@@ -4,6 +4,7 @@ import { LayoutGrid, List, Plus, SearchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Patient } from '@/state/types'
 import { PATIENTS, JORDAN_REYES_ID } from '@/lib/scheduleData'
+import { shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 import { FIXED_CLOCK } from '@/lib/fixedClock'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -151,7 +152,7 @@ function PatientsListView({ patients, onPatientClick }: PatientCollectionProps) 
 export function PatientsPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { dispatch } = useAppState()
+  const { dispatch, state } = useAppState()
   const [view, setView] = useState<PatientsView>('list')
   const [sort, setSort] = useState<PatientSort>('a-z')
 
@@ -160,8 +161,14 @@ export function PatientsPage() {
   const handlePatientClick = (patientId: string, isInteractive?: boolean) => {
     if (isInteractive || patientId === JORDAN_REYES_ID) {
       dispatch({ type: 'CLOSE_VISIT' })
+      const autoOpenTodayVisit =
+        patientId === JORDAN_REYES_ID
+        && shouldAutoOpenTodayVisit(state.role, state)
       navigate(`/patients/${patientId}`, {
-        state: { from: `${location.pathname}${location.search}` },
+        state: {
+          from: `${location.pathname}${location.search}`,
+          autoOpenTodayVisit,
+        },
       })
       return
     }

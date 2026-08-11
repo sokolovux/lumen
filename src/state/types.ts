@@ -116,6 +116,10 @@ export interface AppState {
   role: Role
   selectedVisitId: 'today' | string | null
   visitStarted: boolean
+  /** Wall-clock ms when START_VISIT fired; drives the shared encounter timer */
+  encounterStartedAt: number | null
+  /** Increments each time the physician returns the note for revision */
+  revisionCount: number
   vitalsSubmitted: boolean
   vitalsShowErrors: boolean
   vitals: VisitVitals
@@ -127,6 +131,10 @@ export interface AppState {
   noteHistory: NoteVersion[]
   confidentialNoteExists: boolean
   confidentialNoteContent: string
+  confidentialNoteCommitted: boolean
+  /** Physician addendum — shared with the assistant once saved */
+  physicianAddendum: string
+  physicianAddendumCommitted: boolean
   labs: LabResult[]
   auditLog: AuditEvent[]
   meds: Medication[]
@@ -160,6 +168,7 @@ export type AppAction =
   | { type: 'RETURN_NOTE'; feedback: string }
   | { type: 'FINISH_VISIT' }
   | { type: 'SAVE_CONFIDENTIAL_NOTE'; content: string }
+  | { type: 'SAVE_PHYSICIAN_ADDENDUM'; content: string }
   | { type: 'REQUEST_LAB_ACCESS'; labId: string }
   | { type: 'GRANT_LAB_ACCESS'; labId: string; duration: GrantDuration }
   | { type: 'CONFIRM_LAB_GRANT'; labId: string }

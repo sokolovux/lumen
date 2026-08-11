@@ -6,12 +6,10 @@ export function getRoleLabel(role: Role): string {
 
 export function jordanStatus(state: Pick<
   AppState,
-  'visitStarted' | 'visitFinished' | 'noteStatus'
+  'visitStarted' | 'visitFinished' | 'hasSubmittedOnce'
 >): ScheduleStatus {
   if (state.visitFinished) return 'finished'
-  if (state.noteStatus === 'submitted' || state.noteStatus === 'cosigned') {
-    return 'review'
-  }
+  if (state.hasSubmittedOnce) return 'review'
   if (state.visitStarted) return 'intake'
   return 'scheduled'
 }
@@ -179,8 +177,8 @@ export function getNoteStatusLabel(status: AppState['noteStatus']): string {
   switch (status) {
     case 'not_started': return 'Not started'
     case 'draft': return 'Draft'
-    case 'submitted': return 'Submitted — awaiting cosign'
+    case 'submitted': return 'Pending review'
     case 'returned': return 'Returned for revision'
-    case 'cosigned': return 'Cosigned'
+    case 'cosigned': return 'Approved'
   }
 }

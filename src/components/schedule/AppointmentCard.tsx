@@ -9,6 +9,7 @@ import {
   scheduleStatusTint,
 } from '@/lib/statusDerivation'
 import { useAppState } from '@/state/AppStateContext'
+import { shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 
 interface AppointmentCardProps {
   appointment: Appointment
@@ -23,13 +24,19 @@ export function AppointmentCard({
 }: AppointmentCardProps) {
   const navigate = useNavigate()
   const location = useLocation()
-  const { dispatch } = useAppState()
+  const { dispatch, state } = useAppState()
 
   const handleClick = () => {
     if (appointment.isInteractive || appointment.patientId === JORDAN_REYES_ID) {
       dispatch({ type: 'CLOSE_VISIT' })
+      const autoOpenTodayVisit =
+        appointment.patientId === JORDAN_REYES_ID
+        && shouldAutoOpenTodayVisit(state.role, state)
       navigate(`/patients/${appointment.patientId}`, {
-        state: { from: `${location.pathname}${location.search}` },
+        state: {
+          from: `${location.pathname}${location.search}`,
+          autoOpenTodayVisit,
+        },
       })
       return
     }

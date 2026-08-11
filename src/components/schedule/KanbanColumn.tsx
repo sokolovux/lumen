@@ -9,7 +9,7 @@ interface KanbanColumnProps {
   statusKey: ScheduleStatus
   label: string
   appointments: Appointment[]
-  visitState: Pick<AppState, 'visitStarted' | 'visitFinished' | 'noteStatus'>
+  visitState: Pick<AppState, 'visitStarted' | 'visitFinished' | 'hasSubmittedOnce'>
 }
 
 function columnStatus(

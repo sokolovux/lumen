@@ -6,6 +6,8 @@ export const JORDAN_REYES_ID = 'jordan-reyes'
 export const DEMO_ASSISTANT_NAME = 'Sam Whitfield'
 /** Display name for the demo physician in the product shell */
 export const DEMO_PHYSICIAN_NAME = 'Dr. Amara Osei'
+/** Short form for banner and handoff copy */
+export const DEMO_PHYSICIAN_SHORT_NAME = 'Dr. Osei'
 
 export function getDemoUserProfile(role: 'assistant' | 'physician') {
   return role === 'assistant'
@@ -240,6 +242,10 @@ export function getAppointmentForPatientOnDate(
   return SEEDED_APPOINTMENTS.find(
     (appointment) => appointment.patientId === patientId && appointment.date === date,
   )
+}
+
+export function getAnyAppointmentForPatient(patientId: string): Appointment | undefined {
+  return SEEDED_APPOINTMENTS.find((appointment) => appointment.patientId === patientId)
 }
 
 export function createInitialLabs(): LabResult[] {

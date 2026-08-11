@@ -1,0 +1,31 @@
+@layer components {
+  [data-sonner-toast].visit-toast-intake {
+    border-color: color-mix(in oklch, var(--color-purple-600) 35%, var(--border));
+    background-color: color-mix(in oklch, var(--color-purple-50) 90%, var(--popover));
+    color: var(--color-purple-600);
+  }
+
+  [data-sonner-toast].visit-toast-intake [data-description] {
+    color: color-mix(in oklch, var(--color-purple-600) 75%, var(--muted-foreground));
+  }
+
+  [data-sonner-toast].visit-toast-review {
+    border-color: color-mix(in oklch, var(--color-blue-600) 35%, var(--border));
+    background-color: color-mix(in oklch, var(--color-blue-50) 90%, var(--popover));
+    color: var(--color-blue-600);
+  }
+
+  [data-sonner-toast].visit-toast-review [data-description] {
+    color: color-mix(in oklch, var(--color-blue-600) 75%, var(--muted-foreground));
+  }
+
+  [data-sonner-toast].visit-toast-finished {
+    border-color: color-mix(in oklch, var(--color-green-600) 35%, var(--border));
+    background-color: color-mix(in oklch, var(--color-green-50) 90%, var(--popover));
+    color: var(--color-green-600);
+  }
+
+  [data-sonner-toast].visit-toast-finished [data-description] {
+    color: color-mix(in oklch, var(--color-green-600) 75%, var(--muted-foreground));
+  }
+}

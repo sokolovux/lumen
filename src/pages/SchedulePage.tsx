@@ -65,7 +65,7 @@ export function SchedulePage() {
   const visitState = {
     visitStarted: state.visitStarted,
     visitFinished: state.visitFinished,
-    noteStatus: state.noteStatus,
+    hasSubmittedOnce: state.hasSubmittedOnce,
   }
 
   return (

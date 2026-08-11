@@ -9,6 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Badge, countBadgeClassName, notificationBadgeClassName } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -273,6 +279,7 @@ export function DesignSystemPage() {
               ['badges', 'Badges'],
               ['buttons', 'Buttons'],
               ['forms', 'Forms'],
+              ['disabled-states', 'Disabled states'],
               ['feedback', 'Feedback'],
               ['surfaces', 'Surfaces'],
               ['result-cards', 'Result cards'],
@@ -758,6 +765,121 @@ export function DesignSystemPage() {
                 </div>
               </CardContent>
             </Card>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="disabled-states"
+            title="Disabled states"
+            description="Primitive disabled styling and the scoped Submit & hand off button. Field values use text-foreground globally."
+          >
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Fields</CardTitle>
+                  <CardDescription>
+                    Input, textarea, and input-group values use text-foreground. Disabled
+                    state mutes border and background only — not the entered text.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="ds-disabled-input">Input</Label>
+                      <Input
+                        id="ds-disabled-input"
+                        disabled
+                        defaultValue="120/80"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ds-enabled-input">Input (enabled)</Label>
+                      <Input
+                        id="ds-enabled-input"
+                        defaultValue="118/76"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Blood pressure (input group)</Label>
+                      <InputGroup>
+                        <InputGroupInput
+                          disabled
+                          defaultValue="118/76"
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupText>mmHg</InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Select</Label>
+                      <Select disabled defaultValue="10m">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10m">10 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="ds-disabled-textarea">Textarea</Label>
+                      <Textarea
+                        id="ds-disabled-textarea"
+                        disabled
+                        rows={3}
+                        defaultValue="Patient presents for follow-up. Vitals stable."
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox id="ds-disabled-check" disabled checked />
+                      <Label htmlFor="ds-disabled-check">Checkbox</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch id="ds-disabled-switch" disabled />
+                      <Label htmlFor="ds-disabled-switch">Switch</Label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Visit panel — buttons</CardTitle>
+                  <CardDescription>
+                    Panel action buttons stay clickable with click-time validation. Only
+                    Submit &amp; hand off uses the native disabled state after a successful
+                    submit (until the note is returned).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <p className="text-xs">
+                        <strong>Default disabled (general UI)</strong>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button disabled>Disabled</Button>
+                        <Button variant="outline" disabled>Disabled outline</Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs">
+                        <strong>Visit panel — after submit</strong>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button disabled>Submit & hand off</Button>
+                        <Button variant="outline">Submit vitals</Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Submit vitals stays enabled; validation runs on click.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </Section>
 
           <Separator />

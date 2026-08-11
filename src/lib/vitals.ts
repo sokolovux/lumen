@@ -40,6 +40,22 @@ export function getMissingVitalFields(vitals: VisitVitals): (keyof VisitVitals)[
   return (Object.keys(vitals) as (keyof VisitVitals)[]).filter((key) => !vitals[key].trim())
 }
 
+export const VITAL_FIELD_LABELS: Record<keyof VisitVitals, string> = {
+  bloodPressure: 'Blood Pressure',
+  heartRate: 'Heart Rate',
+  respiratoryRate: 'Respiratory Rate',
+  temperature: 'Temperature',
+  spO2: 'SpO2',
+  weight: 'Weight',
+  painScale: 'Pain Scale',
+  fingerstickGlucose: 'Fingerstick Glucose',
+}
+
+export function formatMissingVitalsMessage(vitals: VisitVitals): string {
+  const labels = getMissingVitalFields(vitals).map((key) => VITAL_FIELD_LABELS[key])
+  return `Please fill out: ${labels.join(', ')}.`
+}
+
 export const PAST_VISIT_VITALS: VisitVitals = {
   bloodPressure: '118/76',
   heartRate: '68',

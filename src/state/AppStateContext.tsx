@@ -50,6 +50,8 @@ export const initialState: AppState = {
   role: 'assistant',
   selectedVisitId: null,
   visitStarted: false,
+  encounterStartedAt: null,
+  revisionCount: 0,
   vitalsSubmitted: false,
   vitalsShowErrors: false,
   vitals: createEmptyVitals(),
@@ -61,6 +63,9 @@ export const initialState: AppState = {
   noteHistory: [],
   confidentialNoteExists: false,
   confidentialNoteContent: '',
+  confidentialNoteCommitted: false,
+  physicianAddendum: '',
+  physicianAddendumCommitted: false,
   labs: createInitialLabs(),
   auditLog: [],
   meds: createInitialMeds(),
@@ -126,6 +131,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         visitStarted: true,
+        encounterStartedAt: state.encounterStartedAt ?? Date.now(),
         auditLog: [
           ...state.auditLog,
           logAudit(state, state.role, 'Start visit', 'Visit started'),
@@ -215,6 +221,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         noteStatus: 'returned',
         returnFeedback: action.feedback,
+        vitalsSubmitted: false,
+        revisionCount: state.revisionCount + 1,
         cosignUnread: 0,
         notesReviewUnread: state.notesReviewUnread + 1,
         noteHistory: [
@@ -239,9 +247,25 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         visitFinished: true,
+        selectedVisitId: null,
         auditLog: [
           ...state.auditLog,
           logAudit(state, 'physician', 'Finish visit', 'Visit finished'),
+        ],
+      }
+
+    case 'SAVE_PHYSICIAN_ADDENDUM':
+      return {
+        ...state,
+        physicianAddendum: action.content,
+        auditLog: [
+          ...state.auditLog,
+          logAudit(
+            state,
+            'physician',
+            'Save physician addendum',
+            action.content.trim() ? 'Physician addendum saved' : 'Physician addendum cleared',
+          ),
         ],
       }
 
@@ -253,7 +277,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         confidentialNoteContent: action.content,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Save confidential note', exists ? 'Confidential note saved' : 'Confidential note cleared'),
+          logAudit(
+            state,
+            'physician',
+            'Save confidential note',
+            exists ? 'Confidential note saved' : 'Confidential note cleared',
+          ),
         ],
       }
     }
