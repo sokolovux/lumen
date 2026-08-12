@@ -4,10 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
-import { formatSubmitHandoffErrors } from '@/lib/vitals'
 import {
   isClinicalNoteEditable,
-  isSubmitHandoffDisabled,
 } from '@/lib/visitLifecycle'
 import { VisitFieldLabel } from '@/components/patient/VisitFieldLabel'
 import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
@@ -22,18 +20,24 @@ import {
 interface NoteSectionProps {
   readOnly?: boolean
   inVisitPanel?: boolean
+  showNoteError?: boolean
+  onShowNoteErrorChange?: (show: boolean) => void
 }
 
-export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSectionProps) {
+export function NoteSection({
+  readOnly = false,
+  inVisitPanel = false,
+  showNoteError: showNoteErrorProp,
+  onShowNoteErrorChange,
+}: NoteSectionProps) {
   const { state, dispatch } = useAppState()
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [returnFeedback, setReturnFeedback] = useState('')
-  const [showNoteError, setShowNoteError] = useState(false)
+  const [internalShowNoteError, setInternalShowNoteError] = useState(false)
 
   const noteEditable = isClinicalNoteEditable(state, readOnly)
-  const submitHandoffDisabled = isSubmitHandoffDisabled(state)
-  const submitLabel =
-    state.noteStatus === 'returned' ? 'Submit revision' : 'Submit & hand off'
+  const showNoteError = showNoteErrorProp ?? internalShowNoteError
+  const setShowNoteError = onShowNoteErrorChange ?? setInternalShowNoteError
 
   useEffect(() => {
     if (!import.meta.env.DEV || !inVisitPanel) {
@@ -54,37 +58,6 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
     state.role,
     state.visitFinished,
   ])
-
-  const handleSubmit = () => {
-    if (!noteEditable) {
-      visitErrorToast('Clinical note is not editable right now')
-      return
-    }
-
-    if (submitHandoffDisabled) {
-      visitErrorToast('Note has already been submitted')
-      return
-    }
-
-    const validationError = formatSubmitHandoffErrors(state.vitals, state.noteDraft)
-    if (validationError) {
-      dispatch({ type: 'SHOW_VITALS_ERRORS' })
-      if (!state.noteDraft.trim()) {
-        setShowNoteError(true)
-      }
-      visitErrorToast(validationError)
-      return
-    }
-
-    setShowNoteError(false)
-    dispatch({ type: 'SUBMIT_NOTE' })
-    visitStageToast(
-      state.noteStatus === 'returned'
-        ? 'Note resubmitted for review'
-        : 'Note submitted for review',
-      'review',
-    )
-  }
 
   const handleCosign = () => {
     if (state.noteStatus !== 'submitted') {
@@ -163,24 +136,14 @@ export function NoteSection({ readOnly = false, inVisitPanel = false }: NoteSect
         }}
       />
 
-      {((!readOnly && state.role === 'assistant' && !submitHandoffDisabled) ||
-        (!readOnly && state.role === 'physician' && state.noteStatus === 'submitted')) && (
+      {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {!readOnly && state.role === 'assistant' && !submitHandoffDisabled && (
-            <Button onClick={handleSubmit}>
-              {submitLabel}
-            </Button>
-          )}
-          {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (
-            <>
-              <Button variant="success" onClick={handleCosign}>
-                Approve
-              </Button>
-              <Button variant="destructive" onClick={handleReturnClick}>
-                Return for revision
-              </Button>
-            </>
-          )}
+          <Button variant="success" onClick={handleCosign}>
+            Approve
+          </Button>
+          <Button variant="destructive" onClick={handleReturnClick}>
+            Return for revision
+          </Button>
         </div>
       )}
 

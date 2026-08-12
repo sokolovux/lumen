@@ -23,7 +23,7 @@ export function VisitFieldLabel({
     >
       {children}
       {required && <span className="text-destructive"> *</span>}
-      {optional && <span className="text-xs text-muted-foreground"> (optional)</span>}
+      {optional && <span className="text-sm text-muted-foreground"> (optional)</span>}
     </Tag>
   )
 }

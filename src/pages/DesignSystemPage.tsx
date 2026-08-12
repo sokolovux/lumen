@@ -257,7 +257,7 @@ function Swatch({
         border ? 'ring-1 ring-border' : ''
       }`}
     >
-      <span className="text-xs"><strong>{name}</strong></span>
+      <span className="text-sm"><strong>{name}</strong></span>
     </div>
   )
 }
@@ -291,7 +291,7 @@ export function DesignSystemPage() {
               <a
                 key={href}
                 href={`#${href}`}
-                className="rounded-md border bg-card px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="rounded-md border bg-card px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {label}
               </a>
@@ -374,7 +374,7 @@ export function DesignSystemPage() {
                   ].map(([cls, label]) => (
                     <div key={label} className="flex flex-col items-center gap-1">
                       <div className={`size-14 bg-primary ${cls}`} />
-                      <span className="text-xs text-muted-foreground">{label}</span>
+                      <span className="text-sm text-muted-foreground">{label}</span>
                     </div>
                   ))}
                 </div>
@@ -401,7 +401,7 @@ export function DesignSystemPage() {
                 <CardContent>
                   <div className="space-y-2">
                     <p className="text-emerald-700">✓ Grant temporary access</p>
-                    <p className="text-emerald-700">✓ Access requests</p>
+                    <p className="text-emerald-700">✓ Access Requests</p>
                     <p className="text-destructive">✗ Grant Temporary Access</p>
                     <p className="text-muted-foreground">
                       Keep: Lisinopril, HbA1c, Chest X-Ray, Jordan Reyes
@@ -577,7 +577,7 @@ export function DesignSystemPage() {
 
               <BadgeRow label="Unread / new indicators">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Sidebar count</span>
+                  <span className="text-sm text-muted-foreground">Sidebar count</span>
                   <Badge
                     variant="outline"
                     className={cn(countBadgeClassName, notificationBadgeClassName)}
@@ -586,7 +586,7 @@ export function DesignSystemPage() {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Queue / requests</span>
+                  <span className="text-sm text-muted-foreground">Queue / requests</span>
                   <Badge variant="outline" className={notificationBadgeClassName}>
                     New
                   </Badge>
@@ -640,7 +640,7 @@ export function DesignSystemPage() {
                 </Badge>
               </BadgeRow>
 
-              <BadgeRow label="Cosign queue note status">
+              <BadgeRow label="Notes Review note status">
                 <Badge
                   variant="outline"
                   className="border-blue-200 bg-blue-50 text-blue-600"
@@ -689,7 +689,7 @@ export function DesignSystemPage() {
                     </Button>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xs">
+                    <p className="text-sm">
                       <strong>Left-aligned group — primary first</strong>
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -699,7 +699,7 @@ export function DesignSystemPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xs">
+                    <p className="text-sm">
                       <strong>Right-aligned group — primary on the right</strong>
                     </p>
                     <div className="flex flex-wrap justify-end gap-2">
@@ -858,7 +858,7 @@ export function DesignSystemPage() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <p className="text-xs">
+                      <p className="text-sm">
                         <strong>Default disabled (general UI)</strong>
                       </p>
                       <div className="flex flex-wrap gap-2">
@@ -867,10 +867,10 @@ export function DesignSystemPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-xs">
+                      <p className="text-sm">
                         <strong>Visit panel — after submit</strong>
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Submit &amp; hand off is not shown once the note is awaiting physician
                         review.
                       </p>
@@ -1115,7 +1115,7 @@ export function DesignSystemPage() {
                     </div>
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/70 px-4 text-center">
                       <p className="text-sm"><strong>Access has expired</strong></p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Your temporary access window closed.
                       </p>
                     </div>
@@ -1130,7 +1130,7 @@ export function DesignSystemPage() {
           <Section
             id="result-cards"
             title="Result cards"
-            description="Every Labs & Results and Access / My Requests card state for Assistant and Physician. Presentational fixtures — switch tabs to review edge cases."
+            description="Every Labs & Results and Access Requests card state for Assistant and Physician. Presentational fixtures — switch tabs to review edge cases."
           >
             <LabResultCardsGallery />
           </Section>

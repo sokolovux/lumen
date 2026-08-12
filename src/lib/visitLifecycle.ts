@@ -1,6 +1,9 @@
-import type { Appointment, AppState, NoteStatus, Role } from '@/state/types'
+import type { Dispatch } from 'react'
+import type { Appointment, AppAction, AppState, NoteStatus, Role } from '@/state/types'
 import { FIXED_CLOCK } from '@/lib/fixedClock'
 import { DEMO_TODAY, parseAppointmentTime } from '@/lib/scheduleData'
+import { formatSubmitHandoffErrors } from '@/lib/vitals'
+import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
 
 export type NoteReviewStatus = 'pending' | 'returned' | 'approved'
 
@@ -47,7 +50,7 @@ export function getVisitBannerPhase(
   appointment: Appointment | undefined,
   now: Date = FIXED_CLOCK,
 ): VisitBannerPhase {
-  if (state.visitFinished && state.noteStatus !== 'returned') {
+  if (state.visitFinished) {
     return 'finished'
   }
   if (!appointment) {
@@ -200,4 +203,46 @@ export function isSubmitHandoffDisabled(
   state: Pick<AppState, 'noteStatus'>,
 ): boolean {
   return state.noteStatus === 'submitted' || state.noteStatus === 'cosigned'
+}
+
+export function getSubmitHandoffLabel(noteStatus: NoteStatus): string {
+  return noteStatus === 'returned' ? 'Submit revision' : 'Submit & hand off'
+}
+
+export function submitClinicalNoteHandoff(
+  state: AppState,
+  dispatch: Dispatch<AppAction>,
+  readOnly: boolean,
+  options?: { setShowNoteError?: (show: boolean) => void },
+): void {
+  const noteEditable = isClinicalNoteEditable(state, readOnly)
+
+  if (!noteEditable) {
+    visitErrorToast('Clinical note is not editable right now')
+    return
+  }
+
+  if (isSubmitHandoffDisabled(state)) {
+    visitErrorToast('Note has already been submitted')
+    return
+  }
+
+  const validationError = formatSubmitHandoffErrors(state.vitals, state.noteDraft)
+  if (validationError) {
+    dispatch({ type: 'SHOW_VITALS_ERRORS' })
+    if (!state.noteDraft.trim()) {
+      options?.setShowNoteError?.(true)
+    }
+    visitErrorToast(validationError)
+    return
+  }
+
+  options?.setShowNoteError?.(false)
+  dispatch({ type: 'SUBMIT_NOTE' })
+  visitStageToast(
+    state.noteStatus === 'returned'
+      ? 'Note resubmitted for review'
+      : 'Note submitted for review',
+    'review',
+  )
 }

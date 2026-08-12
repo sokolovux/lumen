@@ -1,19 +1,29 @@
 @layer components {
   [data-slot="visit-panel-port"] {
-    @apply h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)];
+    @apply relative z-10 h-full shrink-0 overflow-hidden;
     width: 0;
+    transition: width var(--visit-chrome-duration) var(--visit-chrome-ease);
+    will-change: width;
   }
 
   [data-slot="visit-panel-port"][data-open="true"] {
     width: 480px;
   }
 
+  [data-slot="visit-panel-port"][data-open="true"][data-stagger="open"] {
+    transition-delay: var(--visit-chrome-duration);
+  }
+
+  [data-slot="visit-panel-port"][data-open="false"] {
+    transition-delay: 0ms;
+  }
+
+  [data-slot="visit-panel-port"][data-instant="true"] {
+    transition: none;
+  }
+
   [data-slot="visit-panel"] {
     @apply flex h-full w-[480px] flex-col border-l bg-white;
-    transform: translateX(100%);
-    transition:
-      transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
-      background-color 300ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   [data-slot="visit-panel"] [data-slot="light-scrollbar-viewport"] {
@@ -24,15 +34,11 @@
     @apply bg-white p-6;
   }
 
-  [data-slot="visit-panel-port"][data-open="true"] [data-slot="visit-panel"] {
-    transform: translateX(0);
-  }
-
   [data-slot="visit-panel-header"] {
     @apply flex h-16 shrink-0 items-center justify-between gap-4 border-b px-6;
     transition:
-      background-color 300ms cubic-bezier(0.32, 0.72, 0, 1),
-      border-color 300ms cubic-bezier(0.32, 0.72, 0, 1);
+      background-color var(--visit-chrome-duration) var(--visit-chrome-ease),
+      border-color var(--visit-chrome-duration) var(--visit-chrome-ease);
   }
 
   [data-slot="visit-panel-header-start"] {

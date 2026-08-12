@@ -12,6 +12,6 @@
   }
 
   [data-slot="sidebar-section-title"] {
-    @apply px-3 pb-0.5 text-xs uppercase;
+    @apply px-3 pb-0.5 text-sm uppercase;
   }
 }

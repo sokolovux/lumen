@@ -1,6 +1,6 @@
 @layer components {
-  [data-slot="vitals-section"] [data-slot="input-group"] {
-    @apply !bg-white has-disabled:!bg-white dark:!bg-white dark:has-disabled:!bg-white;
+  [data-slot="vitals-section"] [data-slot="input-group"]:not(:has([data-slot="input-group-control"]:disabled)) {
+    @apply !bg-white;
   }
 
   [data-slot="vitals-section"] [data-slot="input-group-addon"] {

@@ -195,6 +195,18 @@ export function DemographicsTab() {
           <DemographicsField label="Pronouns">
             <DemographicsValue>{identity.pronouns}</DemographicsValue>
           </DemographicsField>
+          <DemographicsField label="Race">
+            <div className="flex flex-wrap gap-2">
+              {raceEthnicity.race.map((value) => (
+                <Badge key={value} variant="outline">
+                  {value}
+                </Badge>
+              ))}
+            </div>
+          </DemographicsField>
+          <DemographicsField label="Ethnicity">
+            <DemographicsValue>{raceEthnicity.ethnicity}</DemographicsValue>
+          </DemographicsField>
           <DemographicsField label="Marital status">
             <DemographicsValue>{identity.maritalStatus}</DemographicsValue>
           </DemographicsField>
@@ -227,21 +239,6 @@ export function DemographicsTab() {
           </DemographicsField>
           <DemographicsField label="Preferred contact method">
             <DemographicsValue>{contact.preferredContactMethod}</DemographicsValue>
-          </DemographicsField>
-        </DemographicsEditCard>
-
-        <DemographicsEditCard title="Race & ethnicity" section="race-ethnicity">
-          <DemographicsField label="Race">
-            <div className="flex flex-wrap gap-2">
-              {raceEthnicity.race.map((value) => (
-                <Badge key={value} variant="outline">
-                  {value}
-                </Badge>
-              ))}
-            </div>
-          </DemographicsField>
-          <DemographicsField label="Ethnicity">
-            <DemographicsValue>{raceEthnicity.ethnicity}</DemographicsValue>
           </DemographicsField>
         </DemographicsEditCard>
 

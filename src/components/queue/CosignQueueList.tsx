@@ -37,13 +37,9 @@ export function CosignQueueList() {
 
   if (!hasNoteInReview) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-16 text-center">
-        <p className="text-sm">
-          <strong>
-            {isPhysician ? 'No notes awaiting cosign' : 'No notes in review'}
-          </strong>
-        </p>
-        <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+      <div data-slot="queue-empty-state">
+        <h5>No pending notes</h5>
+        <p className="max-w-sm">
           {isPhysician
             ? 'Submitted notes will appear here for physician review.'
             : 'After you submit a note, its review status will appear here.'}
@@ -67,8 +63,8 @@ export function CosignQueueList() {
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">Today&apos;s visit · Aug 10, 2026</p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">Today&apos;s visit · Aug 10, 2026</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             {isPhysician
               ? 'Click to open visit panel and cosign or return'
               : state.noteStatus === 'cosigned'

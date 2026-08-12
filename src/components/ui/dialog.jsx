@@ -5,6 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useAppChromeContainer } from "@/components/layout/AppChromeContext"
 import { XIcon } from "lucide-react"
 
 function Dialog({
@@ -50,15 +51,29 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  scoped = false,
   ...props
 }) {
+  const appChrome = useAppChromeContainer()
+  const portalContainer = scoped ? appChrome : undefined
+
+  if (scoped && !portalContainer) {
+    return null
+  }
+
   return (
-    <DialogPortal>
-      <DialogOverlay />
+    <DialogPortal container={portalContainer}>
+      <DialogOverlay
+        className={cn(scoped && "absolute inset-0")}
+      />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-scoped={scoped ? "true" : undefined}
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-md bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "z-50 grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-md bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          scoped
+            ? "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            : "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
           className
         )}
         {...props}>

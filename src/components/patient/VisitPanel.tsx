@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { Button } from '@/components/ui/button'
@@ -12,8 +12,9 @@ import { VisitFieldLabel } from '@/components/patient/VisitFieldLabel'
 import { AccessTimer } from '@/components/patient/AccessTimer'
 import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
 import { getScheduleStatusLabel, scheduleStatusTint } from '@/lib/statusDerivation'
-import { isAssistantNoteRevision, isAssistantVisitViewOnly, hasPhysicianReviewedNote } from '@/lib/visitLifecycle'
+import { isAssistantNoteRevision, isAssistantVisitViewOnly, hasPhysicianReviewedNote, getSubmitHandoffLabel, isSubmitHandoffDisabled, submitClinicalNoteHandoff } from '@/lib/visitLifecycle'
 import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
+import type { VisitChromeStagger } from '@/components/patient/visit-chrome-sequence'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,37 +30,49 @@ interface VisitPanelProps {
   open: boolean
   visitLabel: string
   isPastVisit?: boolean
+  chromeStagger?: VisitChromeStagger
+  instantOpen?: boolean
+  onWidthOpenTransitionEnd?: () => void
+  onWidthCloseTransitionEnd?: () => void
 }
 
 export function VisitPanel({
   open,
   visitLabel,
   isPastVisit = false,
+  chromeStagger = 'idle',
+  instantOpen = false,
+  onWidthOpenTransitionEnd,
+  onWidthCloseTransitionEnd,
 }: VisitPanelProps) {
   const { state, dispatch } = useAppState()
   const isPhysician = state.role === 'physician'
   const [mounted, setMounted] = useState(open)
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(open && instantOpen)
   const visitLabelRef = useRef(visitLabel)
   const isPastVisitRef = useRef(isPastVisit)
   const [now, setNow] = useState(() => Date.now())
   const [finishDialogOpen, setFinishDialogOpen] = useState(false)
+  const [showNoteError, setShowNoteError] = useState(false)
 
   if (open) {
     visitLabelRef.current = visitLabel
     isPastVisitRef.current = isPastVisit
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (open) {
       setMounted(true)
-      const id = requestAnimationFrame(() => {
-        requestAnimationFrame(() => setVisible(true))
-      })
+      if (instantOpen) {
+        setVisible(true)
+        return
+      }
+      setVisible(false)
+      const id = requestAnimationFrame(() => setVisible(true))
       return () => cancelAnimationFrame(id)
     }
     setVisible(false)
-  }, [open])
+  }, [open, instantOpen])
 
   const panelVisitLabel = visitLabelRef.current
   const panelIsPastVisit = isPastVisitRef.current
@@ -111,6 +124,12 @@ export function VisitPanel({
     visitStageToast('Visit finished', 'finished')
   }
 
+  const handleSubmitHandoff = () => {
+    submitClinicalNoteHandoff(state, dispatch, todayVisitReadOnly, {
+      setShowNoteError,
+    })
+  }
+
   if (!mounted) return null
 
   const showClinicalSections =
@@ -119,6 +138,14 @@ export function VisitPanel({
     isToday && isPhysician && state.visitStarted && !state.hasSubmittedOnce && !state.visitFinished
   const inReview =
     isToday && state.hasSubmittedOnce && (!state.visitFinished || revisionActive)
+  const submitHandoffDisabled = isSubmitHandoffDisabled(state)
+  const showSubmitHandoff =
+    isToday &&
+    !isPhysician &&
+    !todayVisitReadOnly &&
+    !submitHandoffDisabled &&
+    showClinicalSections &&
+    !physicianIntakeBlock
   const showPhysicianOptionalFields =
     isPhysician && showClinicalSections && !physicianIntakeBlock && !panelIsPastVisit
   const showSubmittedAddendumToAssistant =
@@ -133,10 +160,17 @@ export function VisitPanel({
       <div
         data-slot="visit-panel-port"
         data-open={visible ? 'true' : 'false'}
+        data-stagger={chromeStagger}
+        data-instant={instantOpen ? 'true' : undefined}
         onTransitionEnd={(event) => {
           if (event.target !== event.currentTarget) return
           if (event.propertyName !== 'width') return
-          if (!visible) setMounted(false)
+          if (visible) {
+            onWidthOpenTransitionEnd?.()
+            return
+          }
+          setMounted(false)
+          onWidthCloseTransitionEnd?.()
         }}
       >
         <div
@@ -185,7 +219,12 @@ export function VisitPanel({
                 <>
                   <VitalsSection readOnly={todayVisitReadOnly} />
                   <Separator />
-                  <NoteSection readOnly={todayVisitReadOnly} inVisitPanel />
+                  <NoteSection
+                    readOnly={todayVisitReadOnly}
+                    inVisitPanel
+                    showNoteError={showNoteError}
+                    onShowNoteErrorChange={setShowNoteError}
+                  />
                 </>
               )}
 
@@ -245,6 +284,15 @@ export function VisitPanel({
                       }}
                     />
                   </section>
+                </>
+              )}
+
+              {showSubmitHandoff && (
+                <>
+                  <Separator />
+                  <Button onClick={handleSubmitHandoff}>
+                    {getSubmitHandoffLabel(state.noteStatus)}
+                  </Button>
                 </>
               )}
 

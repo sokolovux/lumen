@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { visitStageToast } from '@/lib/visitToasts'
 import { AccessTimer } from '@/components/patient/AccessTimer'
@@ -112,6 +113,17 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
   const handleOpenPanel = () => {
     dispatch({ type: 'OPEN_VISIT', visitId: 'today' })
   }
+
+  const renderVisitPanelButton = (
+    label: string,
+    onClick: () => void,
+    variant?: 'default' | 'outline',
+  ) => (
+    <Button variant={variant} onClick={onClick}>
+      {label}
+      <ArrowRight data-icon="inline-end" />
+    </Button>
+  )
 
   const renderPrimaryCopy = () => {
     switch (phase) {
@@ -234,41 +246,25 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
         if (!isAssistant) {
           return null
         }
-        return (
-          <Button onClick={handleStartVisit}>Start visit</Button>
-        )
+        return renderVisitPanelButton('Start visit', handleStartVisit)
       case 'intake':
         if (!isAssistant) {
           return null
         }
-        return (
-          <Button onClick={handleOpenPanel}>Continue</Button>
-        )
+        return renderVisitPanelButton('Continue', handleOpenPanel)
       case 'review':
         if (isAssistant && noteReview === 'returned') {
-          return (
-            <Button onClick={handleOpenPanel}>Revise</Button>
-          )
+          return renderVisitPanelButton('Revise', handleOpenPanel)
         }
         if (isAssistant) {
-          return (
-            <Button variant="outline" onClick={handleOpenPanel}>
-              View visit
-            </Button>
-          )
+          return renderVisitPanelButton('View visit', handleOpenPanel, 'outline')
         }
         if (!isAssistant) {
-          return (
-            <Button onClick={handleOpenPanel}>Review visit</Button>
-          )
+          return renderVisitPanelButton('Review visit', handleOpenPanel)
         }
         return null
       case 'finished':
-        return (
-          <Button variant="outline" onClick={handleOpenPanel}>
-            View visit
-          </Button>
-        )
+        return renderVisitPanelButton('View visit', handleOpenPanel, 'outline')
       default:
         return null
     }

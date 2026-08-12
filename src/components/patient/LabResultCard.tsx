@@ -285,7 +285,7 @@ function PaActions({
               <X className="size-3.5" />
             </button>
             <p className="text-sm"><strong>Request was denied.</strong></p>
-            <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
+            <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
             <p className="mt-0.5 text-sm">{lab.denialReason}</p>
           </div>
         </div>

@@ -247,7 +247,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         visitFinished: true,
-        selectedVisitId: null,
         physicianAddendumCommitted:
           state.physicianAddendum.trim().length > 0 || state.physicianAddendumCommitted,
         auditLog: [

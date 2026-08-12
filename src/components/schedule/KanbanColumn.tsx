@@ -44,7 +44,7 @@ export function KanbanColumn({
       <LightScrollbar className="min-h-0 flex-1" data-schedule-column="">
         <div data-schedule-column-content="">
           {columnAppointments.length === 0 ? (
-            <p className="p-6 text-center text-xs text-muted-foreground">No appointments</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">No appointments</p>
           ) : (
             <div className="flex w-full flex-col gap-2 p-6">
               {columnAppointments.map((apt) => (

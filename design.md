@@ -114,7 +114,7 @@ Body text, copy inside content components, and common text applications inherit 
 
 Unstyled `<p>` also defaults to **`text-muted-foreground`** via `@apply` in `@layer base`. Add `text-foreground` (or a semantic color) only when the paragraph should be primary emphasis.
 
-Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Add a size utility only when you intentionally want denser or larger type (e.g. `text-xs` meta lines). Control chrome may define its own size: **Button / TabsTrigger → `text-base`** (same as a regular `<p>`), **Badge → `text-sm`** (regular weight by inheritance; no weight utilities).
+Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Add a size utility only when you intentionally want denser or larger type (e.g. `text-sm` meta lines). Control chrome may define its own size: **Button / TabsTrigger → `text-base`** (same as a regular `<p>`), **Badge → `text-sm`** (regular weight by inheritance; no weight utilities).
 
 Examples:
 

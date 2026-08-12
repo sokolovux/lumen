@@ -80,7 +80,7 @@ export function PatientDetailTabs({
             <div className="flex items-center justify-between">
               <div>
                 <p><strong>Today&apos;s visit</strong></p>
-                <p className="text-xs text-muted-foreground">Aug 10, 2026 · 10:30 AM</p>
+                <p className="text-sm text-muted-foreground">Aug 10, 2026 · 10:30 AM</p>
               </div>
               <Button
                 size="sm"
@@ -102,7 +102,7 @@ export function PatientDetailTabs({
             </div>
           </div>
         )}
-        <p className="text-xs"><strong>Past visits</strong></p>
+        <p className="text-sm"><strong>Past visits</strong></p>
         {PAST_VISITS.map((visit) => (
           <div key={visit.id} data-slot="patient-tab-card" className="p-4">
             <div className="flex items-center justify-between">
@@ -159,7 +159,7 @@ export function PatientDetailTabs({
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm"><strong>{med.name}</strong></p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {med.dose} · {med.frequency}
                   </p>
                 </div>
@@ -185,7 +185,7 @@ export function PatientDetailTabs({
               {med.history.length > 0 && (
                 <ul className="mt-2 space-y-0.5">
                   {med.history.map((event) => (
-                    <li key={event.id} className="text-xs text-muted-foreground">
+                    <li key={event.id} className="text-sm text-muted-foreground">
                       {event.timestamp} — {event.action} by{' '}
                       {getRoleLabel(event.actor)}
                       {event.detail && ` (${event.detail})`}
@@ -210,8 +210,8 @@ export function PatientDetailTabs({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm"><strong>{referral.specialty}</strong></p>
-                <p className="text-xs text-muted-foreground">{referral.provider}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">{referral.provider}</p>
+                <p className="text-sm text-muted-foreground">
                   Ordered {referral.orderedDate}
                   {referral.appointmentDate && ` · Appointment ${referral.appointmentDate}`}
                 </p>
@@ -239,7 +239,7 @@ export function PatientDetailTabs({
             <LightScrollbar className="h-[400px]">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
+                  <tr className="border-b text-left text-sm text-muted-foreground">
                     <th className="pb-2 pr-4"><strong>Timestamp</strong></th>
                     <th className="pb-2 pr-4"><strong>Actor</strong></th>
                     <th className="pb-2 pr-4"><strong>Action</strong></th>
@@ -249,7 +249,7 @@ export function PatientDetailTabs({
                 <tbody>
                   {[...state.auditLog].reverse().map((event) => (
                     <tr key={event.id} className="border-b">
-                      <td className="py-2 pr-4 text-xs text-muted-foreground">{event.timestamp}</td>
+                      <td className="py-2 pr-4 text-sm text-muted-foreground">{event.timestamp}</td>
                       <td className="py-2 pr-4">
                         {getRoleLabel(event.actor)}
                       </td>

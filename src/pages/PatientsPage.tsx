@@ -161,7 +161,6 @@ export function PatientsPage() {
 
   const handlePatientClick = (patientId: string, isInteractive?: boolean) => {
     if (isInteractive || patientId === JORDAN_REYES_ID) {
-      dispatch({ type: 'CLOSE_VISIT' })
       const autoOpenTodayVisit =
         patientId === JORDAN_REYES_ID
         && shouldAutoOpenTodayVisit(state.role, state)

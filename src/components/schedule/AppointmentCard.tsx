@@ -28,7 +28,6 @@ export function AppointmentCard({
 
   const handleClick = () => {
     if (appointment.isInteractive || appointment.patientId === JORDAN_REYES_ID) {
-      dispatch({ type: 'CLOSE_VISIT' })
       const autoOpenTodayVisit =
         appointment.patientId === JORDAN_REYES_ID
         && shouldAutoOpenTodayVisit(state.role, state)

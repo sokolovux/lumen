@@ -52,7 +52,7 @@ export function DayColumn({ date, label, appointments, visitState }: DayColumnPr
       <LightScrollbar className="min-h-0 flex-1" data-schedule-column="">
         <div data-schedule-column-content="">
           {sections.length === 0 ? (
-            <p className="p-6 text-center text-xs text-muted-foreground">No appointments</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">No appointments</p>
           ) : (
             sections.map((section, index) => (
               <Fragment key={section.status}>

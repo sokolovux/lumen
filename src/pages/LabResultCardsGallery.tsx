@@ -158,7 +158,7 @@ function LabsAssistantGallery() {
                 <X className="size-3.5" />
               </button>
               <p className="text-sm"><strong>Request was denied.</strong></p>
-              <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
+              <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
               <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
             </div>
           </div>
@@ -452,7 +452,7 @@ function QueueAssistantGallery() {
         <ResultCardShell status="denied" role="assistant" surface="requests">
           <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
             <p className="text-sm"><strong>Request was denied.</strong></p>
-            <p className="mt-1 text-xs opacity-90">Comment from the physician:</p>
+            <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
             <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
           </div>
         </ResultCardShell>

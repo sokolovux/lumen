@@ -92,7 +92,7 @@ function PhysicianAccessRequestsList() {
       <Tabs defaultValue="unresolved">
         <TabsList>
           <TabsTrigger value="unresolved">
-            Unresolved
+            Pending
             {unreadCount > 0 && (
               <Badge
                 variant="outline"
@@ -115,7 +115,7 @@ function PhysicianAccessRequestsList() {
         <TabsContent value="unresolved" className="mt-4">
           {unresolvedLabs.length === 0 ? (
             <EmptyState
-              title="No unresolved requests"
+              title="No pending requests"
               description="Lab and imaging access requests from assistants will appear here."
             />
           ) : (
@@ -200,7 +200,7 @@ function PaMyRequestsList() {
     <Tabs defaultValue="resolved">
       <TabsList>
         <TabsTrigger value="resolved">
-          Resolved
+          History
           {state.assistantUnseenResolution.length > 0 && (
             <Badge
               variant="outline"
@@ -211,7 +211,7 @@ function PaMyRequestsList() {
           )}
         </TabsTrigger>
         <TabsTrigger value="awaiting">
-          Awaiting response
+          Pending
           {awaitingLabs.length > 0 && (
             <Badge variant="outline" className={cn('ml-1.5', countBadgeClassName)}>
               {awaitingLabs.length}
@@ -223,7 +223,7 @@ function PaMyRequestsList() {
       <TabsContent value="resolved" className="mt-4">
         {resolvedLabs.length === 0 ? (
           <EmptyState
-            title="No resolved requests"
+            title="No requests in history"
             description="Granted, denied, released, and expired requests will appear here."
           />
         ) : (
@@ -242,7 +242,7 @@ function PaMyRequestsList() {
       <TabsContent value="awaiting" className="mt-4">
         {awaitingLabs.length === 0 ? (
           <EmptyState
-            title="No awaiting requests"
+            title="No pending requests"
             description="Labs you've requested that are still waiting on a physician response will appear here."
           />
         ) : (
@@ -310,9 +310,9 @@ function PaResolvedRow({
 
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-16 text-center">
-      <p className="text-sm"><strong>{title}</strong></p>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+    <div data-slot="queue-empty-state">
+      <h5>{title}</h5>
+      <p className="max-w-sm">{description}</p>
     </div>
   )
 }

@@ -40,14 +40,14 @@ type SidebarNavItem =
 const queueItem = {
   to: '/queue',
   icon: ClipboardList,
-  labelForRole: { physician: 'Cosign queue', assistant: 'Notes review' } as const,
+  label: 'Notes Review',
   badgeForRole: { physician: 'cosign' as const, assistant: 'notesReview' as const },
 } satisfies SidebarNavItem
 
 const requestsItem = {
   to: '/requests',
   icon: Inbox,
-  labelForRole: { physician: 'Access requests', assistant: 'My requests' } as const,
+  label: 'Access Requests',
   badgeForRole: { physician: 'request' as const, assistant: 'assistantApproval' as const },
 } satisfies SidebarNavItem
 
@@ -126,6 +126,7 @@ export function Sidebar() {
       <NavLink
         key={item.to}
         to={item.to}
+        end={item.to === '/patients'}
         className={({ isActive }) =>
           cn(
             'flex items-center gap-2 rounded-md px-3 py-2 text-base transition-colors',
@@ -176,7 +177,7 @@ export function Sidebar() {
           </Avatar>
           <div className="grid min-w-0 flex-1 text-left leading-tight">
             <span className="truncate">{demoUser.name}</span>
-            <span className="truncate text-xs">{getRoleLabel(state.role)}</span>
+            <span className="truncate text-sm">{getRoleLabel(state.role)}</span>
           </div>
         </button>
       </div>

@@ -27,7 +27,7 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg sm:max-w-xl">
+      <DialogContent scoped className="max-w-lg sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{lab.name}</DialogTitle>
           <DialogDescription>
@@ -51,7 +51,7 @@ export function LabDocumentView({ labId, open, onOpenChange }: LabDocumentViewPr
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-4 w-3/4" />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua.
             </p>

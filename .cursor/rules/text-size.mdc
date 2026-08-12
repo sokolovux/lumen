@@ -9,12 +9,12 @@ Body copy, text inside content components, and common UI text **inherit the app 
 
 Unstyled `<p>` defaults to **`text-muted-foreground`** (`@apply` in `@layer base`). Use `text-foreground` only when the paragraph should read as primary emphasis. Do not re-add `text-muted-foreground` on `<p>` by default.
 
-Do **not** set `text-sm` / `text-xs` / etc. on layout shells or content wrappers (Card, Dialog content, Sheet content, TabsContent, page sections) just to “match the UI.”
+Do **not** set `text-sm` / etc. on layout shells or content wrappers (Card, Dialog content, Sheet content, TabsContent, page sections) just to “match the UI.”
 
 Only add a size utility when deliberately denser or larger:
 
 - ✅ `<p>Supporting copy</p>` — muted + base by default
-- ✅ `<p className="text-xs">Ordered Aug 5</p>` — intentional denser meta (still muted)
+- ✅ `<p className="text-sm">Ordered Aug 5</p>` — intentional denser meta (still muted)
 - ✅ `<p className="text-foreground">Pending request from Alex Chen</p>` — intentional primary
 - ✅ Button and TabsTrigger use `text-base` (same as a regular `<p>`); Badge uses `text-sm` (on the primitives; regular weight by inheritance)
 - ✅ Input and other control chrome may define their own size tokens
