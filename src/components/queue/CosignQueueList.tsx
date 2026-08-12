@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppState } from '@/state/AppStateContext'
 import { Card, CardAction, CardHeader } from '@/components/ui/card'
 import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
-import { JORDAN_REYES_ID } from '@/lib/scheduleData'
+import { DEMO_TODAY, formatScheduleDateLabel, JORDAN_REYES_ID } from '@/lib/scheduleData'
 import { getNoteStatusLabel } from '@/lib/statusDerivation'
 import { shouldAutoOpenTodayVisit } from '@/lib/visitLifecycle'
 
@@ -63,7 +63,9 @@ export function CosignQueueList() {
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">Today&apos;s visit · Aug 10, 2026</p>
+          <p className="text-sm text-muted-foreground">
+            Today&apos;s visit · {formatScheduleDateLabel(DEMO_TODAY)}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {isPhysician
               ? 'Click to open visit panel and cosign or return'

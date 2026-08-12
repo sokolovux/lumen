@@ -1,0 +1,21 @@
+@layer components {
+  [data-slot="lab-denial-block"] {
+    @apply rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-red-600;
+  }
+
+  [data-slot="lab-denial-block"][data-dismissible="true"] {
+    @apply relative pr-9;
+  }
+
+  [data-slot="lab-denial-block"] p {
+    @apply text-red-600;
+  }
+
+  [data-slot="lab-denial-block"] strong {
+    @apply text-red-600;
+  }
+
+  [data-slot="lab-denial-dismiss"] {
+    @apply absolute top-2 right-2 rounded-md p-0.5 text-red-600/70 hover:bg-red-100 hover:text-red-600;
+  }
+}

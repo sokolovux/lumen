@@ -98,8 +98,8 @@ export const JORDAN_REYES_DEMOGRAPHICS: JordanReyesDemographics = {
     legalSuffix: null,
     preferredName: 'Jordan',
     previousName: null,
-    dateOfBirth: '03/14/1988',
-    dateOfBirthDisplay: 'March 14, 1988 (38)',
+    dateOfBirth: '03/14/1980',
+    dateOfBirthDisplay: 'March 14, 1980 (46)',
     sexAssignedAtBirth: 'Female',
     genderIdentity: 'Woman',
     pronouns: 'she/her',
@@ -160,7 +160,7 @@ export const JORDAN_REYES_DEMOGRAPHICS: JordanReyesDemographics = {
     guarantor: null,
   },
   careTeamPharmacy: {
-    primaryCareProvider: 'Dr. Elena Vasquez · Park Slope Family Medicine',
+    primaryCareProvider: 'Dr. Amara Osei · Sam Whitfield, PA-C',
     referringProvider: null,
     pharmacy: {
       name: 'CVS Pharmacy #5821',

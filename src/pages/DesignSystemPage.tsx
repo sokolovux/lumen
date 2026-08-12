@@ -172,7 +172,7 @@ const APPOINTMENT_CARD_FIXTURES: {
       patientId: 'sarah-patel',
       patientName: 'Sarah Patel',
       time: '11:30AM',
-      date: '2026-08-10',
+      date: '2026-08-12',
       kind: 'Follow-up',
       status: 'scheduled',
     },
@@ -184,7 +184,7 @@ const APPOINTMENT_CARD_FIXTURES: {
       patientId: 'david-kim',
       patientName: 'David Kim',
       time: '9:30AM',
-      date: '2026-08-10',
+      date: '2026-08-12',
       kind: 'Sick visit',
       status: 'intake',
     },
@@ -208,7 +208,7 @@ const APPOINTMENT_CARD_FIXTURES: {
       patientId: 'maria-chen',
       patientName: 'Maria Chen',
       time: '9:00AM',
-      date: '2026-08-10',
+      date: '2026-08-12',
       kind: 'Annual physical',
       status: 'finished',
     },
@@ -342,7 +342,7 @@ export function DesignSystemPage() {
                       <Separator />
                       <div className="space-y-2">
                         <p>
-                          Unstyled paragraph — muted + text-base by default.
+                          Unstyled paragraph: muted + text-base by default.
                         </p>
                         <p className="text-sm">
                           <strong>Primary emphasis (text-sm + strong)</strong>
@@ -351,7 +351,7 @@ export function DesignSystemPage() {
                           Body copy uses IBM Plex Sans. Prefer sentence case for all UI labels.
                         </p>
                         <p className="text-sm text-foreground">
-                          text-foreground — primary paragraph copy
+                          text-foreground: primary paragraph copy
                         </p>
                         <p className="text-sm">
                           Inline code uses{' '}
@@ -418,10 +418,10 @@ export function DesignSystemPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p><strong>Scheduled</strong> — not started</p>
-                    <p><strong>Intake</strong> — vitals + first note</p>
-                    <p><strong>Review</strong> — transferred</p>
-                    <p><strong>Finished</strong> — finish visit clicked</p>
+                    <p><strong>Scheduled</strong>: not started</p>
+                    <p><strong>Intake</strong>: vitals + first note</p>
+                    <p><strong>Review</strong>: transferred</p>
+                    <p><strong>Finished</strong>: finish visit clicked</p>
                   </div>
                 </CardContent>
               </Card>
@@ -562,7 +562,7 @@ export function DesignSystemPage() {
             description="Outline only. Use className tints for status and notification color."
           >
             <div className="space-y-6">
-              <BadgeRow label="Product rule — outline only">
+              <BadgeRow label="Product rule: outline only">
                 <Badge variant="outline">Outline</Badge>
                 <Badge variant="outline" className={notificationBadgeClassName}>
                   Notification tint
@@ -645,7 +645,7 @@ export function DesignSystemPage() {
                   variant="outline"
                   className="border-blue-200 bg-blue-50 text-blue-600"
                 >
-                  Submitted — awaiting cosign
+                  Submitted, awaiting cosign
                 </Badge>
               </BadgeRow>
             </div>
@@ -656,7 +656,7 @@ export function DesignSystemPage() {
           <Section
             id="buttons"
             title="Buttons"
-            description="Variants, sizes, and group order by action emphasis (primary → secondary left to right; reverse when right-aligned). No secondary button variant — use outline."
+            description="Variants, sizes, and group order by action emphasis (primary → secondary left to right; reverse when right-aligned). No secondary button variant; use outline."
           >
             <Card>
               <CardContent>
@@ -690,7 +690,7 @@ export function DesignSystemPage() {
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm">
-                      <strong>Left-aligned group — primary first</strong>
+                      <strong>Left-aligned group: primary first</strong>
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Button size="sm" variant="success">Grant</Button>
@@ -700,7 +700,7 @@ export function DesignSystemPage() {
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm">
-                      <strong>Right-aligned group — primary on the right</strong>
+                      <strong>Right-aligned group: primary on the right</strong>
                     </p>
                     <div className="flex flex-wrap justify-end gap-2">
                       <Button size="sm" variant="outline">Cancel</Button>
@@ -782,7 +782,7 @@ export function DesignSystemPage() {
                   <CardTitle>Fields</CardTitle>
                   <CardDescription>
                     Input, textarea, and input-group values use text-foreground. Disabled
-                    state mutes border and background only — not the entered text.
+                    state mutes border and background only, not the entered text.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -848,7 +848,7 @@ export function DesignSystemPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Visit panel — buttons</CardTitle>
+                  <CardTitle>Visit panel: buttons</CardTitle>
                   <CardDescription>
                     Submit &amp; hand off validates vitals and the clinical note together on
                     click. Submit &amp; hand off is hidden after a successful submit until the
@@ -868,7 +868,7 @@ export function DesignSystemPage() {
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm">
-                        <strong>Visit panel — after submit</strong>
+                        <strong>Visit panel: after submit</strong>
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Submit &amp; hand off is not shown once the note is awaiting physician
@@ -889,7 +889,7 @@ export function DesignSystemPage() {
                 <CheckIcon />
                 <AlertTitle>Access granted</AlertTitle>
                 <AlertDescription>
-                  Temporary access is ready — awaiting assistant confirmation.
+                  Temporary access is ready. Awaiting assistant confirmation.
                 </AlertDescription>
               </Alert>
               <div className="grid gap-4 md:grid-cols-2">
@@ -927,7 +927,7 @@ export function DesignSystemPage() {
                 <CardHeader>
                   <CardTitle>Card title</CardTitle>
                   <CardDescription>
-                    Naked by default — equal padding, no call-site utilities on Card slots.
+                    Naked by default: equal padding, no call-site utilities on Card slots.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -952,7 +952,7 @@ export function DesignSystemPage() {
               <div className="space-y-2">
                 <h6>Appointment card</h6>
                 <p>
-                  Schedule board card — size=&quot;sm&quot;, interactive, outline status badge.
+                  Schedule board card: size=&quot;sm&quot;, interactive, outline status badge.
                   Scheduled has no badge.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -995,29 +995,31 @@ export function DesignSystemPage() {
                 </Avatar>
               </div>
 
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Actor</TableHead>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Detail</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Assistant</TableCell>
-                      <TableCell>Start visit</TableCell>
-                      <TableCell className="text-muted-foreground">Visit started</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Physician</TableCell>
-                      <TableCell>Cosign note</TableCell>
-                      <TableCell className="text-muted-foreground">Note cosigned (v1)</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
+              <Card data-chart-table="">
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Actor</TableHead>
+                        <TableHead>Action</TableHead>
+                        <TableHead data-wrap="true">Detail</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Assistant</TableCell>
+                        <TableCell>Start visit</TableCell>
+                        <TableCell data-wrap="true" className="text-muted-foreground">Visit started</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Physician</TableCell>
+                        <TableCell>Cosign note</TableCell>
+                        <TableCell data-wrap="true" className="text-muted-foreground">Note cosigned (v1)</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </div>
           </Section>
 
@@ -1130,7 +1132,7 @@ export function DesignSystemPage() {
           <Section
             id="result-cards"
             title="Result cards"
-            description="Every Labs & Results and Access Requests card state for Assistant and Physician. Presentational fixtures — switch tabs to review edge cases."
+            description="Every Labs & Results and Access Requests card state for Assistant and Physician. Presentational fixtures. Switch tabs to review edge cases."
           >
             <LabResultCardsGallery />
           </Section>

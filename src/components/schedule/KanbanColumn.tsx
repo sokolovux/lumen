@@ -2,7 +2,7 @@ import type { Appointment, ScheduleStatus } from '@/state/types'
 import { AppointmentCard } from '@/components/schedule/AppointmentCard'
 import { jordanStatus } from '@/lib/statusDerivation'
 import type { AppState } from '@/state/types'
-import { JORDAN_REYES_ID } from '@/lib/scheduleData'
+import { JORDAN_REYES_ID, parseAppointmentTime } from '@/lib/scheduleData'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 
 interface KanbanColumnProps {
@@ -28,9 +28,9 @@ export function KanbanColumn({
   appointments,
   visitState,
 }: KanbanColumnProps) {
-  const columnAppointments = appointments.filter(
-    (apt) => columnStatus(apt, visitState) === statusKey,
-  )
+  const columnAppointments = appointments
+    .filter((apt) => columnStatus(apt, visitState) === statusKey)
+    .sort((a, b) => parseAppointmentTime(a.time) - parseAppointmentTime(b.time))
 
   return (
     <div className="flex min-h-0 min-w-[200px] flex-1 flex-col overflow-hidden border-r border-gray-200 bg-gray-50 last:border-r-0">

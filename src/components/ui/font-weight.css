@@ -1,4 +1,4 @@
-/* Font weight for UI primitives — @apply only; never call-site weight utilities. */
+/* Font weight for UI primitives: @apply only; never call-site weight utilities. */
 @layer components {
   [data-slot="accordion-trigger"],
   [data-slot="alert-title"],

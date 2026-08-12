@@ -59,6 +59,10 @@ export function PatientDetailPage() {
     return <Navigate to="/patients" replace />
   }
 
+  if (state.role !== 'physician' && defaultTab === 'audit') {
+    return <Navigate to={`/patients/${JORDAN_REYES_ID}?tab=demographics`} replace />
+  }
+
   const handleOpenTodayVisit = () => {
     if (state.role === 'physician' && !canPhysicianOpenTodayVisit(state)) {
       return
@@ -67,6 +71,10 @@ export function PatientDetailPage() {
   }
 
   const handleOpenPastVisit = (visitId: string) => {
+    if (state.selectedVisitId === visitId) {
+      dispatch({ type: 'CLOSE_VISIT' })
+      return
+    }
     dispatch({ type: 'OPEN_VISIT', visitId })
   }
 

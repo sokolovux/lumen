@@ -5,7 +5,7 @@ import { useAppState } from '@/state/AppStateContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
+import { DEMO_ASSISTANT_NAME, formatLabDenialComment, getLabDenialCommentTitle } from '@/lib/scheduleData'
 import {
   getLabStatusLabel,
   getLabStatusTint,
@@ -39,13 +39,9 @@ export function RequestQueueCard({
 }: RequestQueueCardProps) {
   const { state } = useAppState()
   const now = Date.now()
-  const isPhysician = state.role === 'physician'
 
   const statusBadgeLabel = (() => {
     if (mode === 'assistant-awaiting') return 'Access pending'
-    if (lab.status === 'granted_unstarted' && isPhysician) {
-      return 'Granted — not yet started'
-    }
     return getLabStatusLabel(lab.status, state.role, 'requests')
   })()
 
@@ -77,12 +73,13 @@ export function RequestQueueCard({
           lab.status === 'granted_unstarted'
           || lab.status === 'active'
           || lab.status === 'released'
+          || lab.status === 'denied'
         )
       )
     )
 
   const viewInChartButton = showViewInChart ? (
-    <Button size="sm" variant="outline" onClick={onViewInChart}>
+    <Button variant="outline" onClick={onViewInChart}>
       View in chart
       <ArrowRight className="size-3.5" />
     </Button>
@@ -90,10 +87,9 @@ export function RequestQueueCard({
 
   const denialBlock =
     mode === 'assistant-resolved' && lab.status === 'denied' && lab.denialReason ? (
-      <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
-        <p className="text-sm"><strong>Request was denied.</strong></p>
-        <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
-        <p className="mt-0.5 text-sm">{lab.denialReason}</p>
+      <div data-slot="lab-denial-block">
+        <p className="text-sm"><strong>{getLabDenialCommentTitle()}</strong></p>
+        <p className="mt-0.5 text-sm">{formatLabDenialComment(lab.denialReason)}</p>
       </div>
     ) : null
 

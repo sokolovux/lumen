@@ -10,9 +10,9 @@ Do **not** invent a new component by default. If you believe a new component is 
 
 ### Existing components (naked by default)
 
-Once a component exists (shared UI under `src/components/ui/`, or any product component), call sites must use it **naked** — no Tailwind utilities on that component unless you **ask and get permission**.
+Once a component exists (shared UI under `src/components/ui/`, or any product component), call sites must use it **naked**: no Tailwind utilities on that component unless you **ask and get permission**.
 
-Documented exceptions (props, helpers, or semantic tints already in this file) do not require re-asking — e.g. Badge `notificationBadgeClassName` / status tints, Card `interactive` / `size`, Button `variant` / `size`.
+Documented exceptions (props, helpers, or semantic tints already in this file) do not require re-asking: e.g. Badge `notificationBadgeClassName` / status tints, Card `interactive` / `size`, Button `variant` / `size`.
 
 ### Repeated styles → `@apply` in the component
 
@@ -25,7 +25,7 @@ If the same utilities keep appearing on a component (or would, by judgment), do 
   <Button variant="outline">Release permanently</Button>
 </div>
 
-// ✅ Inner layout wrappers are fine — they are not the component
+// ✅ Inner layout wrappers are fine: they are not the component
 <Card>
   <CardContent>
     <div className="flex flex-wrap gap-2">…</div>
@@ -56,7 +56,7 @@ Use **line** tabs only (`TabsList` defaults to `variant="line"`). Do not use the
 
 ### Cards
 
-Card styles live in `src/components/ui/card.css` (`@apply` on `data-slot`). Use **naked** `Card` / `CardHeader` / `CardTitle` / `CardDescription` / `CardAction` / `CardContent` / `CardFooter` — no Tailwind utilities on those slots by default.
+Card styles live in `src/components/ui/card.css` (`@apply` on `data-slot`). Use **naked** `Card` / `CardHeader` / `CardTitle` / `CardDescription` / `CardAction` / `CardContent` / `CardFooter`: no Tailwind utilities on those slots by default.
 
 - Equal padding on all sides (`p-(--card-spacing)`); do not override with `p-*` / `px-*` / `py-*` / section `gap-*`
 - Put stacks, grids, and button rows on **inner** elements
@@ -88,14 +88,14 @@ Do **not** use font-weight Tailwind utilities (`font-normal`, `font-medium`, `fo
 
 Adjust weight only with:
 
-- **Naked headings** (`h1`–`h6`) — medium from `@layer base`
-- **`<strong>`** — `@apply font-medium text-foreground` in `@layer base`
+- **Naked headings** (`h1`–`h6`): medium from `@layer base`
+- **`<strong>`**: `@apply font-medium text-foreground` in `@layer base`
 
 Default body and most UI stay regular by inheritance (Button and Badge included). Primitive chrome may set weight only via `@apply` inside the component (see `src/components/ui/font-weight.css` and `card.css`), not via call-site utilities. Applied emphasis weight is **medium**.
 
 ### Headings
 
-`h1`–`h6` styles are defined with `@apply` in `@layer base` (`src/index.css`). Use **naked** heading tags — no `text-*`, `font-*`, or `tracking-*` utilities on them unless explicitly requested as an exception.
+`h1`–`h6` styles are defined with `@apply` in `@layer base` (`src/index.css`). Use **naked** heading tags: no `text-*`, `font-*`, or `tracking-*` utilities on them unless explicitly requested as an exception.
 
 | Element | Style |
 | --- | --- |
@@ -110,7 +110,7 @@ Pick the level that matches the intended scale instead of overriding a larger le
 
 ### Default size
 
-Body text, copy inside content components, and common text applications inherit the **base** size — the same as an unstyled `<p>` (`text-base` on `body` in `src/index.css`).
+Body text, copy inside content components, and common text applications inherit the **base** size: the same as an unstyled `<p>` (`text-base` on `body` in `src/index.css`).
 
 Unstyled `<p>` also defaults to **`text-muted-foreground`** via `@apply` in `@layer base`. Add `text-foreground` (or a semantic color) only when the paragraph should be primary emphasis.
 
@@ -118,8 +118,8 @@ Do not force `text-sm` (or other sizes) on layout shells or content wrappers. Ad
 
 Examples:
 
-- ✅ `<p>Ordered Aug 5</p>` — muted by default
-- ✅ `<p className="text-foreground">Pending request from Alex Chen</p>` — intentional primary copy
+- ✅ `<p>Ordered Aug 5</p>`: muted by default
+- ✅ `<p className="text-foreground">Pending request from Alex Chen</p>`: intentional primary copy
 - ✅ `<h4>Schedule</h4>` (naked; level matches scale)
 - ❌ `Card` / `DialogContent` / `SheetContent` with root `text-sm` so children shrink by default
 - ❌ `<h1 className="text-xl font-medium">Schedule</h1>`
@@ -147,11 +147,32 @@ Examples:
 
 Keep medication names, test names, lab result names, and patient names in their conventional capitalization (e.g. Lisinopril, HbA1c, Chest X-Ray, Jordan Reyes).
 
+### No em dashes
+
+Do not use em dashes (`—`) anywhere in product UI: labels, body copy, toasts, badges, placeholders, dialogs, or seeded chart content. Do not paste them from specs or notes; rewrite with an alternative.
+
+Preferred replacements:
+
+- Middle dot (` · `) for inline metadata separators (date · visit type, lab · ordered date)
+- Colon (`: `) for short label–detail pairs (e.g. summary lines, status explanations)
+- Comma, period, or parentheses for clause breaks
+- Hyphen-minus (`-`) for empty or missing values in tables and vitals
+
+Examples:
+
+- ✅ Aug 3, 2026 · Follow-up
+- ✅ Access granted. Awaiting assistant confirmation.
+- ✅ Severe (anaphylaxis)
+- ✅ Hemoglobin A1c: rising trend
+- ❌ Aug 3, 2026 — Follow-up
+- ❌ Access granted — awaiting assistant confirmation.
+- ❌ Severe — anaphylaxis
+
 ### Buttons
 
 Do **not** use `Button` `variant="secondary"`. Use `variant="outline"` for that role. Do not reintroduce secondary on the Button primitive.
 
-Do not use ellipses (`…` or `...`) in button labels. The dialog or next step makes the incomplete action clear — the button should be a complete verb phrase.
+Do not use ellipses (`…` or `...`) in button labels. The dialog or next step makes the incomplete action clear: the button should be a complete verb phrase.
 
 Examples:
 
@@ -184,9 +205,9 @@ Segmented toggles (role switch, schedule view) are mutually exclusive options, n
 
 Use **outline badges only** (`variant="outline"`). Do not use filled badge variants (`default`, `secondary`, `destructive`, `ghost`, `link`, or solid notification pills).
 
-Badge text is **regular weight** (inherited) and `text-sm` — set on the Badge primitive; do not add font-weight utilities.
+Badge text is **regular weight** (inherited) and `text-sm`: set on the Badge primitive; do not add font-weight utilities.
 
-Color meaning comes from documented tint helpers on the Badge module (`notificationBadgeClassName`, status tints). Compact counts use `countBadgeClassName` — do not re-declare `h-5` / `px-*` at call sites.
+Color meaning comes from documented tint helpers on the Badge module (`notificationBadgeClassName`, status tints). Compact counts use `countBadgeClassName`: do not re-declare `h-5` / `px-*` at call sites.
 
 Examples:
 
@@ -197,12 +218,12 @@ Examples:
 
 ### Lab / result card tags
 
-- Green — Just released
-- Green — Temporary access (`granted_unstarted` and `active` on Labs; live countdown uses neutral `AccessTimer` top-right in `CardContent`)
-- Blue — Access requested
-- Amber — Access pending
-- Neutral/muted — Access expired (not red; expiry is not a rejection)
-- Red — Deny control and denial-reason block only
+- Green: Just released
+- Green: Temporary access (`granted_unstarted` and `active` on Labs; live countdown uses neutral `AccessTimer` top-right in `CardContent`)
+- Blue: Access requested
+- Amber: Access pending
+- Neutral/muted: Access expired (not red; expiry is not a rejection)
+- Red: Deny control and denial-reason block only
 
 ## Border radius
 
@@ -211,7 +232,7 @@ Maximum corner radius is **`md`** (`rounded-md`). Do not use `rounded-lg`, `roun
 - Cards and most chrome use `rounded-md` (Card in `src/components/ui/card.css`)
 - Smaller radii (`rounded-xs`, `rounded-sm`, `rounded-none`) are fine where denser
 - `rounded-xs` is half of `rounded-sm` (`--radius-xs: calc(var(--radius-sm) * 0.5)`); Badges use it
-- `rounded-full` is reserved for circular controls only (avatar, radio, switch) — not for cards, menus, or panels
+- `rounded-full` is reserved for circular controls only (avatar, radio, switch): not for cards, menus, or panels
 
 ## Theme
 
@@ -251,7 +272,7 @@ Do not use PA, physician assistant, doctor, or other synonyms in UI copy or new 
 
 All interactive elements must show a pointer cursor on hover.
 
-Enforce this globally in `src/index.css` (`@layer base`) — do not sprinkle `cursor-pointer` on individual components unless an element is interactive but not covered by the global selectors (e.g. a clickable `div`). For clickable cards, use `<Card interactive>` instead of a `cursor-pointer` utility.
+Enforce this globally in `src/index.css` (`@layer base`): do not sprinkle `cursor-pointer` on individual components unless an element is interactive but not covered by the global selectors (e.g. a clickable `div`). For clickable cards, use `<Card interactive>` instead of a `cursor-pointer` utility.
 
 ## Design system documentation
 

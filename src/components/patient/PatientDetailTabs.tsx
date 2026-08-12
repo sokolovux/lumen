@@ -1,39 +1,100 @@
+import type { ReactNode } from 'react'
 import { toast } from 'sonner'
 import type { Medication } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Skeleton } from '@/components/ui/skeleton'
 import { DemographicsTab } from '@/components/patient/DemographicsTab'
-import { LightScrollbar } from '@/components/ui/light-scrollbar'
+import { AuditTrailTab } from '@/components/patient/AuditTrailTab'
 import { LabResultCard } from '@/components/patient/LabResultCard'
 import { AddMedicationDialog } from '@/components/patient/AddMedicationDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getRoleLabel } from '@/lib/statusDerivation'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { getVisibleChartLabs } from '@/lib/statusDerivation'
+import {
+  DEMO_TODAY,
+  formatAppointmentTimeDisplay,
+  formatScheduleDateLabel,
+  getAppointmentForPatientOnDate,
+  JORDAN_REYES_ID,
+} from '@/lib/scheduleData'
+import {
+  JORDAN_REYES_ALLERGIES,
+  JORDAN_REYES_PAST_VISITS,
+  JORDAN_REYES_PROBLEMS,
+  JORDAN_REYES_REFERRALS,
+  JORDAN_REYES_VITALS_HISTORY,
+} from '@/lib/jordanReyesChartData'
 
-const PAST_VISITS = [
-  { id: 'visit-2026-08-03', label: 'Aug 3, 2026 — Follow-up' },
-  { id: 'visit-2026-07-20', label: 'Jul 20, 2026 — Annual physical' },
-]
+const REFERRAL_STATUS_CLASS: Record<
+  (typeof JORDAN_REYES_REFERRALS)[number]['statusTone'],
+  string
+> = {
+  amber: 'border-amber-200 bg-amber-50 text-amber-600',
+  green: 'border-green-200 bg-green-50 text-green-600',
+  destructive: 'border-red-200 bg-red-50 text-red-600',
+  blue: 'border-blue-200 bg-blue-50 text-blue-600',
+}
 
-const REFERRALS = [
-  {
-    id: 'referral-1',
-    specialty: 'Cardiology',
-    provider: 'Dr. Anita Patel',
-    status: 'Scheduled',
-    orderedDate: 'Jul 28, 2026',
-    appointmentDate: 'Aug 18, 2026',
-  },
-  {
-    id: 'referral-2',
-    specialty: 'Endocrinology',
-    provider: 'Dr. Marcus Chen',
-    status: 'Pending',
-    orderedDate: 'Aug 5, 2026',
-    appointmentDate: null,
-  },
-]
+const ALLERGY_SEVERITY_CLASS = {
+  severe: 'border-destructive/40 bg-destructive/10 text-destructive',
+  moderate: 'border-amber-200 bg-amber-50 text-amber-700',
+  mild: 'border-gray-200 bg-gray-50 text-gray-600',
+} as const
+
+function ChartTabCard({
+  badges,
+  title,
+  meta,
+  actions,
+}: {
+  badges?: ReactNode
+  title: ReactNode
+  meta?: ReactNode
+  actions?: ReactNode
+}) {
+  return (
+    <div>
+      <Card>
+        <CardContent>
+          <div className="flex flex-col items-start gap-(--card-spacing)">
+            <div className="flex w-full flex-col gap-1">
+              {badges ? (
+                <div className="flex flex-wrap items-center gap-1.5">{badges}</div>
+              ) : null}
+              <div className="min-w-0">
+                {title}
+                {meta}
+              </div>
+            </div>
+            {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function isRecentlyAddedMed(med: Medication): boolean {
+  const latest = med.history[med.history.length - 1]
+  return latest?.action === 'added' && latest.detail?.toLowerCase().includes('recently added')
+}
+
+function isRecentlyCompletedMed(med: Medication): boolean {
+  if (med.status !== 'discontinued') {
+    return false
+  }
+  const latest = med.history[med.history.length - 1]
+  return latest?.action === 'discontinued' && Boolean(latest.detail?.toLowerCase().includes('completed'))
+}
 
 interface PatientDetailTabsProps {
   onOpenTodayVisit: () => void
@@ -49,6 +110,11 @@ export function PatientDetailTabs({
   defaultTab = 'demographics',
 }: PatientDetailTabsProps) {
   const { state, dispatch } = useAppState()
+  const visibleLabs = getVisibleChartLabs(state.labs, state.role)
+  const todayAppointment = getAppointmentForPatientOnDate(JORDAN_REYES_ID, DEMO_TODAY)
+  const todayVisitMeta = todayAppointment
+    ? `${formatScheduleDateLabel(todayAppointment.date)} · ${formatAppointmentTimeDisplay(todayAppointment.time)}`
+    : formatScheduleDateLabel(DEMO_TODAY)
 
   const handleContinueMed = (med: Medication) => {
     dispatch({ type: 'CONTINUE_MED', medId: med.id })
@@ -60,8 +126,20 @@ export function PatientDetailTabs({
     toast.success(`${med.name} discontinued`)
   }
 
+  const todayVisitButtonLabel =
+    state.selectedVisitId === 'today'
+      ? 'Visit open'
+      : state.noteStatus === 'returned'
+        ? 'Revise visit'
+        : state.visitFinished ||
+            (state.role === 'assistant' &&
+              state.hasSubmittedOnce &&
+              state.noteStatus !== 'returned')
+          ? 'View visit'
+          : 'Open visit'
+
   return (
-    <Tabs defaultValue={defaultTab} key={defaultTab} className="flex-1">
+    <Tabs defaultValue={defaultTab} key={defaultTab} className="min-w-0 flex-1">
       <TabsList>
         <TabsTrigger value="demographics">Demographics</TabsTrigger>
         <TabsTrigger value="problems">Problems & allergies</TabsTrigger>
@@ -74,49 +152,78 @@ export function PatientDetailTabs({
         )}
       </TabsList>
 
-      <TabsContent value="visits" className="mt-4 space-y-3">
+      <TabsContent value="visits" className="mt-4 min-w-0 space-y-4">
         {(state.visitStarted || state.visitFinished) && (
-          <div data-slot="patient-tab-card" className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p><strong>Today&apos;s visit</strong></p>
-                <p className="text-sm text-muted-foreground">Aug 10, 2026 · 10:30 AM</p>
-              </div>
+          <ChartTabCard
+            title={<h6>Today&apos;s visit</h6>}
+            meta={(
+              <>
+                <p className="text-sm text-muted-foreground">{todayVisitMeta}</p>
+                <p className="text-sm text-muted-foreground">
+                  Current encounter. Vitals and note captured in the visit panel.
+                </p>
+              </>
+            )}
+            actions={(
               <Button
-                size="sm"
                 variant={state.selectedVisitId === 'today' ? 'outline' : 'default'}
                 onClick={onOpenTodayVisit}
                 disabled={!canOpenTodayVisit}
               >
-                {state.selectedVisitId === 'today'
-                  ? 'Visit open'
-                  : state.noteStatus === 'returned'
-                    ? 'Revise visit'
-                    : state.visitFinished ||
-                        (state.role === 'assistant' &&
-                          state.hasSubmittedOnce &&
-                          state.noteStatus !== 'returned')
-                      ? 'View visit'
-                      : 'Open visit'}
+                {todayVisitButtonLabel}
               </Button>
-            </div>
-          </div>
+            )}
+          />
         )}
-        <p className="text-sm"><strong>Past visits</strong></p>
-        {PAST_VISITS.map((visit) => (
-          <div key={visit.id} data-slot="patient-tab-card" className="p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm">{visit.label}</p>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onOpenPastVisit(visit.id)}
-              >
-                {state.selectedVisitId === visit.id ? 'Open' : 'View'}
-              </Button>
-            </div>
+        <div>
+          <h6 className="mb-2">Past visits</h6>
+          <div className="space-y-3">
+            {JORDAN_REYES_PAST_VISITS.map((visit) => (
+              <ChartTabCard
+                key={visit.id}
+                title={<h6>{visit.label}</h6>}
+                meta={<p className="text-sm text-muted-foreground">{visit.summary}</p>}
+                actions={(
+                  <Button
+                    variant="outline"
+                    onClick={() => onOpenPastVisit(visit.id)}
+                  >
+                    {state.selectedVisitId === visit.id ? 'Close' : 'View'}
+                  </Button>
+                )}
+              />
+            ))}
           </div>
-        ))}
+        </div>
+        <div>
+          <h6 className="mb-2">Vitals history</h6>
+          <Card data-chart-table="">
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead data-column="date">Date</TableHead>
+                    <TableHead>BP</TableHead>
+                    <TableHead>HR</TableHead>
+                    <TableHead>Weight</TableHead>
+                    <TableHead>BMI</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {JORDAN_REYES_VITALS_HISTORY.map((entry) => (
+                    <TableRow key={entry.date}>
+                      <TableCell data-column="date" className="text-muted-foreground">{entry.date}</TableCell>
+                      <TableCell>{entry.bloodPressure}</TableCell>
+                      <TableCell>{entry.heartRate}</TableCell>
+                      <TableCell>{entry.weight} lbs</TableCell>
+                      <TableCell>{entry.bmi}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </TabsContent>
 
       <TabsContent value="demographics" className="mt-4">
@@ -126,23 +233,45 @@ export function PatientDetailTabs({
       <TabsContent value="problems" className="mt-4 space-y-4">
         <div>
           <h6 className="mb-2">Problem list</h6>
-          <div className="space-y-2">
-            {['Hypertension', 'Type 2 Diabetes'].map((problem) => (
-              <div key={problem} data-slot="patient-tab-card" className="p-2">
-                <p className="text-sm">{problem}</p>
-                <Skeleton className="mt-1 h-3 w-24" />
-              </div>
+          <div className="space-y-3">
+            {JORDAN_REYES_PROBLEMS.map((problem) => (
+              <ChartTabCard
+                key={problem.id}
+                badges={(
+                  <Badge
+                    variant="outline"
+                    className="border-green-200 bg-green-50 text-green-600"
+                  >
+                    Active
+                  </Badge>
+                )}
+                title={<h6>{problem.name}</h6>}
+                meta={
+                  problem.onset ? (
+                    <p className="text-sm text-muted-foreground">Onset {problem.onset}</p>
+                  ) : undefined
+                }
+              />
             ))}
           </div>
         </div>
         <div>
           <h6 className="mb-2">Allergies</h6>
-          <div className="space-y-2">
-            {['Penicillin', 'Sulfa drugs'].map((allergy) => (
-              <div key={allergy} data-slot="patient-tab-card" className="p-2">
-                <p className="text-sm">{allergy}</p>
-                <Skeleton className="mt-1 h-3 w-24" />
-              </div>
+          <div className="space-y-3">
+            {JORDAN_REYES_ALLERGIES.map((allergy) => (
+              <ChartTabCard
+                key={allergy.id}
+                badges={(
+                  <Badge
+                    variant="outline"
+                    className={ALLERGY_SEVERITY_CLASS[allergy.severity]}
+                  >
+                    {allergy.severity === 'severe' ? 'Severe (anaphylaxis)' : 'Moderate'}
+                  </Badge>
+                )}
+                title={<h6>{allergy.substance}</h6>}
+                meta={<p className="text-sm text-muted-foreground">{allergy.reaction}</p>}
+              />
             ))}
           </div>
         </div>
@@ -153,118 +282,100 @@ export function PatientDetailTabs({
           <h6>Medications</h6>
           <AddMedicationDialog />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {state.meds.map((med) => (
-            <div key={med.id} data-slot="patient-tab-card" className="p-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm"><strong>{med.name}</strong></p>
-                  <p className="text-sm text-muted-foreground">
-                    {med.dose} · {med.frequency}
-                  </p>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={
-                    med.status === 'active'
-                      ? 'border-green-200 bg-green-50 text-green-600'
-                      : 'border-red-200 bg-red-50 text-red-600'
-                  }
-                >
-                  {med.status === 'active' ? 'Active' : 'Discontinued'}
-                </Badge>
-              </div>
-              <div className="mt-2 flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleContinueMed(med)}>
-                  Continue
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleDiscontinueMed(med)}>
-                  Discontinue
-                </Button>
-              </div>
-              {med.history.length > 0 && (
-                <ul className="mt-2 space-y-0.5">
-                  {med.history.map((event) => (
-                    <li key={event.id} className="text-sm text-muted-foreground">
-                      {event.timestamp} — {event.action} by{' '}
-                      {getRoleLabel(event.actor)}
-                      {event.detail && ` (${event.detail})`}
-                    </li>
-                  ))}
-                </ul>
+            <ChartTabCard
+              key={med.id}
+              badges={(
+                <>
+                  <Badge
+                    variant="outline"
+                    className={
+                      med.status === 'active'
+                        ? 'border-green-200 bg-green-50 text-green-600'
+                        : 'border-red-200 bg-red-50 text-red-600'
+                    }
+                  >
+                    {med.status === 'active' ? 'Active' : 'Discontinued'}
+                  </Badge>
+                  {isRecentlyAddedMed(med) && (
+                    <Badge
+                      variant="outline"
+                      className="border-blue-200 bg-blue-50 text-blue-600"
+                    >
+                      Recently added
+                    </Badge>
+                  )}
+                  {isRecentlyCompletedMed(med) && (
+                    <Badge
+                      variant="outline"
+                      className="border-amber-200 bg-amber-50 text-amber-600"
+                    >
+                      Recent course completed
+                    </Badge>
+                  )}
+                </>
               )}
-            </div>
+              title={<h6>{med.name}</h6>}
+              meta={(
+                <p className="text-sm text-muted-foreground">
+                  {med.dose} · {med.frequency}
+                </p>
+              )}
+              actions={(
+                <>
+                  <Button variant="outline" onClick={() => handleContinueMed(med)}>
+                    Continue
+                  </Button>
+                  <Button variant="outline" onClick={() => handleDiscontinueMed(med)}>
+                    Discontinue
+                  </Button>
+                </>
+              )}
+            />
           ))}
         </div>
       </TabsContent>
 
       <TabsContent value="labs" className="mt-4 space-y-3">
-        {state.labs.map((lab) => (
+        {visibleLabs.map((lab) => (
           <LabResultCard key={lab.id} lab={lab} />
         ))}
       </TabsContent>
 
       <TabsContent value="referrals" className="mt-4 space-y-3">
-        {REFERRALS.map((referral) => (
-          <div key={referral.id} data-slot="patient-tab-card" className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm"><strong>{referral.specialty}</strong></p>
+        {JORDAN_REYES_REFERRALS.map((referral) => (
+          <ChartTabCard
+            key={referral.id}
+            badges={(
+              <Badge
+                variant="outline"
+                className={REFERRAL_STATUS_CLASS[referral.statusTone]}
+              >
+                {referral.status}
+              </Badge>
+            )}
+            title={<h6>{referral.specialty}</h6>}
+            meta={(
+              <>
                 <p className="text-sm text-muted-foreground">{referral.provider}</p>
                 <p className="text-sm text-muted-foreground">
                   Ordered {referral.orderedDate}
                   {referral.appointmentDate && ` · Appointment ${referral.appointmentDate}`}
                 </p>
-              </div>
-              <Badge
-                variant="outline"
-                className={
-                  referral.status === 'Scheduled'
-                    ? 'border-green-200 bg-green-50 text-green-600'
-                    : 'border-amber-200 bg-amber-50 text-amber-600'
-                }
-              >
-                {referral.status}
-              </Badge>
-            </div>
-          </div>
+              </>
+            )}
+          />
         ))}
       </TabsContent>
 
       {state.role === 'physician' && (
-        <TabsContent value="audit" className="mt-4">
-          {state.auditLog.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No audit events recorded yet.</p>
-          ) : (
-            <LightScrollbar className="h-[400px]">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left text-sm text-muted-foreground">
-                    <th className="pb-2 pr-4"><strong>Timestamp</strong></th>
-                    <th className="pb-2 pr-4"><strong>Actor</strong></th>
-                    <th className="pb-2 pr-4"><strong>Action</strong></th>
-                    <th className="pb-2"><strong>Detail</strong></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...state.auditLog].reverse().map((event) => (
-                    <tr key={event.id} className="border-b">
-                      <td className="py-2 pr-4 text-sm text-muted-foreground">{event.timestamp}</td>
-                      <td className="py-2 pr-4">
-                        {getRoleLabel(event.actor)}
-                      </td>
-                      <td className="py-2 pr-4">{event.action}</td>
-                      <td className="py-2 text-muted-foreground">{event.detail}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </LightScrollbar>
-          )}
+        <TabsContent value="audit" className="mt-4 min-w-0">
+          <AuditTrailTab />
         </TabsContent>
       )}
     </Tabs>
   )
 }
 
-export { PAST_VISITS }
+export { JORDAN_REYES_PAST_VISITS as PAST_VISITS }

@@ -14,6 +14,7 @@ import {
   type DemographicsInsurance,
   type DemographicsPhone,
 } from '@/lib/jordanReyesDemographics'
+import { JORDAN_REYES_IMMUNIZATIONS } from '@/lib/jordanReyesChartData'
 
 function handleEdit(section: string) {
   console.log(`Edit demographics: ${section}`)
@@ -360,6 +361,25 @@ export function DemographicsTab() {
               <DemographicsValue>{consentCommunication.releaseOfInformation}</DemographicsValue>
             </DemographicsField>
           )}
+        </DemographicsEditCard>
+
+        <DemographicsEditCard title="Immunizations" section="immunizations">
+          <div className="space-y-3">
+            {JORDAN_REYES_IMMUNIZATIONS.map((immunization) => (
+              <div
+                key={immunization.id}
+                className="flex items-start justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0"
+              >
+                <div>
+                  <DemographicsValue>{immunization.name}</DemographicsValue>
+                  <p className="text-sm text-muted-foreground">{immunization.date}</p>
+                </div>
+                <Badge variant="outline" className="border-green-200 bg-green-50 text-green-600">
+                  Up to date
+                </Badge>
+              </div>
+            ))}
+          </div>
         </DemographicsEditCard>
 
         <DemographicsEditCard title="Record metadata" section="record-metadata">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -21,20 +21,22 @@ const PAGE_FADE_MS = 100
 
 function AppLayout() {
   const location = useLocation()
-  const [renderedLocation, setRenderedLocation] = useState(location)
   const [visible, setVisible] = useState(true)
+  const isFirstNavigation = useRef(true)
 
-  useEffect(() => {
-    if (location.pathname === renderedLocation.pathname) return
+  useLayoutEffect(() => {
+    if (isFirstNavigation.current) {
+      isFirstNavigation.current = false
+      return
+    }
 
     setVisible(false)
     const id = window.setTimeout(() => {
-      setRenderedLocation(location)
       setVisible(true)
     }, PAGE_FADE_MS)
 
     return () => window.clearTimeout(id)
-  }, [location, renderedLocation.pathname])
+  }, [location.pathname])
 
   return (
     <div className="flex h-screen flex-col">
@@ -49,7 +51,7 @@ function AppLayout() {
                 visible ? 'opacity-100' : 'opacity-0',
               )}
             >
-              <Routes location={renderedLocation}>
+              <Routes location={location}>
                 <Route path="/" element={<Navigate to="/schedule" replace />} />
                 <Route path="/schedule" element={<SchedulePage />} />
                 <Route path="/patients" element={<PatientsPage />} />

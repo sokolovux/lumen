@@ -68,15 +68,20 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
       : null
 
   const renderFinishedTiming = () => {
-    if (startedAtLabel == null) {
-      return null
-    }
-
     const parts: string[] = []
     if (scheduledTime) {
       parts.push(`Scheduled ${scheduledTime}`)
     }
-    parts.push(`Started ${startedAtLabel}`)
+    if (startedAtLabel != null) {
+      parts.push(`Started ${startedAtLabel}`)
+    }
+    if (state.visitFinishedAt != null) {
+      parts.push(`Finished ${formatEncounterStartTime(state.visitFinishedAt)}`)
+    }
+
+    if (parts.length === 0) {
+      return null
+    }
 
     return (
       <p className="text-sm text-muted-foreground">
@@ -147,7 +152,7 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
         return (
           <h6>
             {todayAppointment
-              ? `${todayAppointment.kind} appointment was today at ${todayAppointment.time} — running late`
+              ? `${todayAppointment.kind} appointment was today at ${todayAppointment.time}, running late`
               : 'Appointment is running late'}
           </h6>
         )
@@ -177,7 +182,7 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
             )}
             {isAssistant && noteReview === 'returned' && (
               <p className="text-sm text-muted-foreground">
-                {DEMO_PHYSICIAN_SHORT_NAME} returned your note — revise and resubmit.
+                {DEMO_PHYSICIAN_SHORT_NAME} returned your note. Revise and resubmit.
               </p>
             )}
             {isAssistant && noteReview === 'approved' && (
@@ -195,7 +200,7 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
             )}
             {!isAssistant && noteReview === 'approved' && (
               <p className="text-sm text-muted-foreground">
-                You approved the note — finish the visit when ready.
+                You approved the note. Finish the visit when ready.
               </p>
             )}
           </div>
@@ -215,8 +220,8 @@ export function TodayAppointmentBanner({ patientId, panelOpen }: TodayAppointmen
             {noteReview === 'pending' && (
               <p className="text-sm text-muted-foreground">
                 {isAssistant
-                  ? 'Note submitted — visit closed before physician review completed.'
-                  : 'Visit closed — note still awaiting your review.'}
+                  ? 'Note submitted. Visit closed before physician review completed.'
+                  : 'Visit closed. Note still awaiting your review.'}
               </p>
             )}
             {!noteReview && (

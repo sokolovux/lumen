@@ -1,5 +1,0 @@
-@layer components {
-  [data-slot="patient-tab-card"] {
-    @apply rounded-md border bg-card;
-  }
-}

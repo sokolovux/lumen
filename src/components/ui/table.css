@@ -1,0 +1,9 @@
+@layer components {
+  [data-slot="table-head"] {
+    @apply whitespace-normal;
+  }
+
+  [data-slot="table-cell"] {
+    @apply whitespace-normal;
+  }
+}

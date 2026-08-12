@@ -14,7 +14,7 @@ export function AccessTimer({ expiresAt, startedAt, now = Date.now() }: AccessTi
     startedAt != null
       ? formatEncounterElapsed(startedAt, now)
       : expiresAt != null
-        ? formatCountdownHms(expiresAt, now)
+        ? `Expires in ${formatCountdownHms(expiresAt, now)}`
         : '0:00'
 
   return (

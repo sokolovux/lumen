@@ -12,7 +12,7 @@ import { VisitFieldLabel } from '@/components/patient/VisitFieldLabel'
 import { AccessTimer } from '@/components/patient/AccessTimer'
 import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
 import { getScheduleStatusLabel, scheduleStatusTint } from '@/lib/statusDerivation'
-import { isAssistantNoteRevision, isAssistantVisitViewOnly, hasPhysicianReviewedNote, getSubmitHandoffLabel, isSubmitHandoffDisabled, submitClinicalNoteHandoff } from '@/lib/visitLifecycle'
+import { isAssistantNoteRevision, isAssistantVisitViewOnly, hasPhysicianReviewedNote, getSubmitHandoffLabel, isSubmitHandoffDisabled, submitClinicalNoteHandoff, formatEncounterStartTime, getTodayVisitPanelTitle } from '@/lib/visitLifecycle'
 import { visitErrorToast, visitStageToast } from '@/lib/visitToasts'
 import type { VisitChromeStagger } from '@/components/patient/visit-chrome-sequence'
 import {
@@ -30,6 +30,7 @@ interface VisitPanelProps {
   open: boolean
   visitLabel: string
   isPastVisit?: boolean
+  pastVisitId?: string | null
   chromeStagger?: VisitChromeStagger
   instantOpen?: boolean
   onWidthOpenTransitionEnd?: () => void
@@ -40,6 +41,7 @@ export function VisitPanel({
   open,
   visitLabel,
   isPastVisit = false,
+  pastVisitId = null,
   chromeStagger = 'idle',
   instantOpen = false,
   onWidthOpenTransitionEnd,
@@ -76,6 +78,9 @@ export function VisitPanel({
 
   const panelVisitLabel = visitLabelRef.current
   const panelIsPastVisit = isPastVisitRef.current
+  const panelTitle = panelIsPastVisit
+    ? panelVisitLabel
+    : getTodayVisitPanelTitle(state)
   const isToday = !panelIsPastVisit
   const revisionActive = isAssistantNoteRevision(state)
   const assistantViewOnly = isAssistantVisitViewOnly(state)
@@ -97,6 +102,8 @@ export function VisitPanel({
       ? 'review'
       : 'intake'
   const fieldsLocked = todayVisitReadOnly
+  const showFinishedSummary =
+    isToday && state.visitFinished && !revisionActive && state.visitFinishedAt != null
 
   useEffect(() => {
     if (!showEncounterMeta) {
@@ -182,7 +189,7 @@ export function VisitPanel({
             data-phase={showVisitStatusMeta ? visitPhase : undefined}
           >
             <div data-slot="visit-panel-header-start">
-              <h4>{panelVisitLabel}</h4>
+              <h4>{panelTitle}</h4>
               {showVisitStatusMeta && (
                 <Badge variant="outline" className={scheduleStatusTint[visitPhase]}>
                   {getScheduleStatusLabel(visitPhase)}
@@ -215,9 +222,15 @@ export function VisitPanel({
                 </p>
               )}
 
+              {showFinishedSummary && (
+                <p className="text-sm text-muted-foreground">
+                  Finished {formatEncounterStartTime(state.visitFinishedAt!)}
+                </p>
+              )}
+
               {showClinicalSections && !physicianIntakeBlock && (
                 <>
-                  <VitalsSection readOnly={todayVisitReadOnly} />
+                  <VitalsSection readOnly={todayVisitReadOnly} pastVisitId={pastVisitId} />
                   <Separator />
                   <NoteSection
                     readOnly={todayVisitReadOnly}
@@ -245,6 +258,7 @@ export function VisitPanel({
                           content: e.target.value,
                         })
                       }}
+                      onBlur={() => dispatch({ type: 'LOG_PHYSICIAN_ADDENDUM_EDIT' })}
                     />
                   </section>
                 </>
@@ -270,7 +284,7 @@ export function VisitPanel({
                       Confidential note
                     </VisitFieldLabel>
                     <p className="mb-2 text-sm text-muted-foreground">
-                      Physician-only. Hidden from Assistant — no request path.
+                      Physician-only. Hidden from Assistant; no request path.
                     </p>
                     <Textarea
                       placeholder="Confidential physician note..."
@@ -282,6 +296,7 @@ export function VisitPanel({
                           content: e.target.value,
                         })
                       }}
+                      onBlur={() => dispatch({ type: 'LOG_CONFIDENTIAL_NOTE_EDIT' })}
                     />
                   </section>
                 </>

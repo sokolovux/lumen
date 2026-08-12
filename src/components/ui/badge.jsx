@@ -4,7 +4,7 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-/** Shared outline tint for unread counts and "New" indicators — always blue. */
+/** Shared outline tint for unread counts and "New" indicators: always blue. */
 export const notificationBadgeClassName =
   "border-blue-200 bg-blue-50 text-blue-600"
 

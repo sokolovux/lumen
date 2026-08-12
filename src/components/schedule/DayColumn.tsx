@@ -2,7 +2,13 @@ import type { Appointment, AppState, ScheduleStatus } from '@/state/types'
 import { Fragment } from 'react'
 import { AppointmentCard } from '@/components/schedule/AppointmentCard'
 import { Separator } from '@/components/ui/separator'
-import { parseAppointmentTime, JORDAN_REYES_ID, TODAY_KANBAN_COLUMNS } from '@/lib/scheduleData'
+import {
+  DEMO_TODAY,
+  FULL_WEEK_PAST_DAY_COLUMNS,
+  parseAppointmentTime,
+  JORDAN_REYES_ID,
+  TODAY_KANBAN_COLUMNS,
+} from '@/lib/scheduleData'
 import { jordanStatus } from '@/lib/statusDerivation'
 import { LightScrollbar } from '@/components/ui/light-scrollbar'
 
@@ -12,6 +18,8 @@ interface DayColumnProps {
   appointments: Appointment[]
   visitState: Pick<AppState, 'visitStarted' | 'visitFinished' | 'hasSubmittedOnce'>
 }
+
+const PAST_DAY_VISIBLE_STATUSES = new Set<ScheduleStatus>(['finished', 'no_show'])
 
 function columnStatus(
   apt: Appointment,
@@ -34,9 +42,18 @@ function appointmentsForStatus(
 }
 
 export function DayColumn({ date, label, appointments, visitState }: DayColumnProps) {
-  const dayAppointments = appointments.filter((apt) => apt.date === date)
+  const isPastDay = date < DEMO_TODAY
 
-  const sections = TODAY_KANBAN_COLUMNS
+  const dayAppointments = appointments
+    .filter((apt) => apt.date === date)
+    .filter((apt) => {
+      if (!isPastDay) return true
+      return PAST_DAY_VISIBLE_STATUSES.has(columnStatus(apt, visitState))
+    })
+
+  const statusColumns = isPastDay ? FULL_WEEK_PAST_DAY_COLUMNS : TODAY_KANBAN_COLUMNS
+
+  const sections = statusColumns
     .map(({ key }) => ({
       status: key,
       appointments: appointmentsForStatus(dayAppointments, key, visitState),

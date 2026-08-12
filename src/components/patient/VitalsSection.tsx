@@ -7,11 +7,13 @@ import {
   InputGroupText,
 } from '@/components/ui/input-group'
 import { VisitFieldLabel } from '@/components/patient/VisitFieldLabel'
-import { formatVitalValue, PAST_VISIT_VITALS, VITAL_UNITS } from '@/lib/vitals'
+import { formatVitalValue, VITAL_UNITS } from '@/lib/vitals'
+import { getJordanReyesPastVisitVitals } from '@/lib/jordanReyesChartData'
 import { isAssistantNoteRevision } from '@/lib/visitLifecycle'
 
 interface VitalsSectionProps {
   readOnly?: boolean
+  pastVisitId?: string | null
 }
 
 type VitalFieldKey = keyof VisitVitals
@@ -45,7 +47,7 @@ function VitalUnitAddon({ unit }: { unit: string }) {
   )
 }
 
-export function VitalsSection({ readOnly = false }: VitalsSectionProps) {
+export function VitalsSection({ readOnly = false, pastVisitId = null }: VitalsSectionProps) {
   const { state, dispatch } = useAppState()
   const revisionActive = isAssistantNoteRevision(state)
 
@@ -66,7 +68,9 @@ export function VitalsSection({ readOnly = false }: VitalsSectionProps) {
     (!state.visitFinished || revisionActive) &&
     !fieldsLocked
 
-  const displayVitals = readOnly ? PAST_VISIT_VITALS : state.vitals
+  const displayVitals = pastVisitId
+    ? getJordanReyesPastVisitVitals(pastVisitId)
+    : state.vitals
 
   const updateField = (key: VitalFieldKey, value: string) => {
     if (!editable) return

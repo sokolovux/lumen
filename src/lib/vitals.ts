@@ -26,7 +26,7 @@ export const VITAL_UNITS: Record<keyof VisitVitals, string | null> = {
 
 export function formatVitalValue(key: keyof VisitVitals, value: string): string {
   if (!value.trim()) {
-    return '—'
+    return '-'
   }
 
   return value
@@ -83,8 +83,8 @@ export function formatVitalDisplay(
   value: string,
 ): string {
   const formattedValue = formatVitalValue(key, value)
-  if (formattedValue === '—') {
-    return '—'
+  if (formattedValue === '-') {
+    return '-'
   }
 
   const unit = VITAL_UNITS[key]

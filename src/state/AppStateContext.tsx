@@ -7,13 +7,14 @@ import {
   type Dispatch,
 } from 'react'
 import type { AppAction, AppState, AuditEvent } from '@/state/types'
-import { createInitialLabs, createInitialMeds } from '@/lib/scheduleData'
+import { createInitialLabs, createInitialMeds, JORDAN_REYES_INITIAL_CONFIDENTIAL_NOTE } from '@/lib/scheduleData'
+import { JORDAN_REYES_AUDIT_SEED } from '@/lib/jordanReyesAuditSeed'
 import { createEmptyVitals, areVitalsComplete } from '@/lib/vitals'
 import { formatTimestamp } from '@/lib/fixedClock'
-import { durationToMs } from '@/lib/statusDerivation'
+import { durationToMs, formatGrantDurationPhrase } from '@/lib/statusDerivation'
 
-let auditCounter = 0
-let noteVersionCounter = 0
+let auditCounter = JORDAN_REYES_AUDIT_SEED.maxAuditSeedId
+let noteVersionCounter = JORDAN_REYES_AUDIT_SEED.maxNoteVersion
 let medEventCounter = 0
 
 function nextAuditId(): string {
@@ -57,16 +58,17 @@ export const initialState: AppState = {
   noteStatus: 'not_started',
   hasSubmittedOnce: false,
   visitFinished: false,
+  visitFinishedAt: null,
   returnFeedback: null,
   noteDraft: '',
-  noteHistory: [],
-  confidentialNoteExists: false,
-  confidentialNoteContent: '',
+  noteHistory: [...JORDAN_REYES_AUDIT_SEED.noteHistory],
+  confidentialNoteExists: true,
+  confidentialNoteContent: JORDAN_REYES_INITIAL_CONFIDENTIAL_NOTE,
   confidentialNoteCommitted: false,
   physicianAddendum: '',
   physicianAddendumCommitted: false,
   labs: createInitialLabs(),
-  auditLog: [],
+  auditLog: [...JORDAN_REYES_AUDIT_SEED.auditLog],
   meds: createInitialMeds(),
   cosignUnread: 0,
   notesReviewUnread: 0,
@@ -84,8 +86,8 @@ function createFreshInitialState(): AppState {
     labs: createInitialLabs(),
     meds: createInitialMeds(),
     vitals: createEmptyVitals(),
-    noteHistory: [],
-    auditLog: [],
+    noteHistory: [...JORDAN_REYES_AUDIT_SEED.noteHistory],
+    auditLog: [...JORDAN_REYES_AUDIT_SEED.auditLog],
     viewedRequests: [],
     assistantUnseenResolution: [],
   }
@@ -106,8 +108,8 @@ function withViewedRequest(state: AppState, labId: string): string[] {
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'RESET_DEMO':
-      auditCounter = 0
-      noteVersionCounter = 0
+      auditCounter = JORDAN_REYES_AUDIT_SEED.maxAuditSeedId
+      noteVersionCounter = JORDAN_REYES_AUDIT_SEED.maxNoteVersion
       medEventCounter = 0
       return createFreshInitialState()
 
@@ -167,6 +169,23 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SUBMIT_NOTE': {
       const version = nextNoteVersion()
+      const resubmit = state.noteHistory.some((entry) => entry.status === 'returned')
+      const auditEntries = [...state.auditLog]
+      if (areVitalsComplete(state.vitals)) {
+        auditEntries.push(
+          logAudit(state, state.role, 'Submit vitals', 'Vitals submitted for today\'s visit'),
+        )
+      }
+      auditEntries.push(
+        logAudit(
+          state,
+          state.role,
+          'Submit note',
+          resubmit
+            ? `Note resubmitted (v${version})`
+            : `Note submitted (v${version})`,
+        ),
+      )
       return {
         ...state,
         noteStatus: 'submitted',
@@ -185,10 +204,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
         notesReviewUnread: 0,
         cosignUnread: state.cosignUnread + 1,
-        auditLog: [
-          ...state.auditLog,
-          logAudit(state, state.role, 'Submit note', `Note submitted (v${version})`),
-        ],
+        auditLog: auditEntries,
       }
     }
 
@@ -211,7 +227,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Cosign note', `Note cosigned (v${version})`),
+          logAudit(state, 'physician', 'Approve note', `Note approved (v${version})`),
         ],
       }
     }
@@ -238,7 +254,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ],
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Return note', `Note returned: ${action.feedback}`),
+          logAudit(
+            state,
+            'physician',
+            'Return note',
+            `Note returned (v${version}). Comment: ${action.feedback}`,
+          ),
         ],
       }
     }
@@ -247,11 +268,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         visitFinished: true,
+        visitFinishedAt: Date.now(),
         physicianAddendumCommitted:
           state.physicianAddendum.trim().length > 0 || state.physicianAddendumCommitted,
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'physician', 'Finish visit', 'Visit finished'),
+          logAudit(state, 'physician', 'Finish visit', 'Visit finished by physician'),
         ],
       }
 
@@ -262,70 +284,89 @@ function appReducer(state: AppState, action: AppAction): AppState {
         physicianAddendumCommitted: false,
       }
 
+    case 'LOG_PHYSICIAN_ADDENDUM_EDIT':
+      return {
+        ...state,
+        auditLog: [
+          ...state.auditLog,
+          logAudit(state, 'physician', 'Save physician addendum', 'Physician addendum edited'),
+        ],
+      }
+
+    case 'LOG_CONFIDENTIAL_NOTE_EDIT':
+      return {
+        ...state,
+        auditLog: [
+          ...state.auditLog,
+          logAudit(state, 'physician', 'Save confidential note', 'Confidential note edited'),
+        ],
+      }
+
     case 'SAVE_CONFIDENTIAL_NOTE': {
       const exists = action.content.trim().length > 0
       return {
         ...state,
         confidentialNoteExists: exists,
         confidentialNoteContent: action.content,
-        auditLog: [
-          ...state.auditLog,
-          logAudit(
-            state,
-            'physician',
-            'Save confidential note',
-            exists ? 'Confidential note saved' : 'Confidential note cleared',
-          ),
-        ],
       }
     }
 
     case 'REQUEST_LAB_ACCESS': {
       const requestId = `req-${action.labId}`
+      const lab = state.labs.find((item) => item.id === action.labId)
+      const labName = lab?.name ?? action.labId
       return {
         ...state,
-        labs: state.labs.map((lab) =>
-          lab.id === action.labId
+        viewedRequests: state.viewedRequests.filter((id) => id !== action.labId),
+        labs: state.labs.map((item) =>
+          item.id === action.labId
             ? {
-                ...lab,
+                ...item,
                 status: 'requested' as const,
                 everRequested: true,
                 requestId,
                 denialReason: undefined,
                 denialDismissed: undefined,
               }
-            : lab,
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'assistant', 'Request lab access', `Requested access to ${action.labId}`),
+          logAudit(
+            state,
+            'assistant',
+            'Request lab access',
+            `Requested access to ${labName}`,
+          ),
         ],
       }
     }
 
     case 'GRANT_LAB_ACCESS': {
+      const lab = state.labs.find((item) => item.id === action.labId)
+      const labName = lab?.name ?? action.labId
       return {
         ...state,
         pendingGrantLabId: action.labId,
         pendingGrantDuration: action.duration,
         viewedRequests: withViewedRequest(state, action.labId),
         assistantUnseenResolution: withAssistantUnseenResolution(state, action.labId),
-        labs: state.labs.map((lab) =>
-          lab.id === action.labId
+        labs: state.labs.map((item) =>
+          item.id === action.labId
             ? {
-                ...lab,
+                ...item,
                 status: 'granted_unstarted' as const,
                 grantDuration: action.duration,
               }
-            : lab,
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
           logAudit(
             state,
             'physician',
-            'Granted access',
-            `Granted ${action.duration} access`,
+            'Grant lab access',
+            `Granted ${formatGrantDurationPhrase(action.duration)} temporary access to ${labName}`,
           ),
         ],
       }
@@ -333,6 +374,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'CONFIRM_LAB_GRANT': {
       const lab = state.labs.find((l) => l.id === action.labId)
+      const labName = lab?.name ?? action.labId
       const duration = lab?.grantDuration ?? '10m'
       const now = Date.now()
       return {
@@ -351,34 +393,41 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, 'assistant', 'Confirm lab grant', `Temporary access confirmed for ${action.labId}`),
+          logAudit(
+            state,
+            'assistant',
+            'Confirm lab grant',
+            `Started temporary access window for ${labName}`,
+          ),
         ],
       }
     }
 
     case 'DENY_LAB_ACCESS': {
+      const lab = state.labs.find((item) => item.id === action.labId)
+      const labName = lab?.name ?? action.labId
       return {
         ...state,
         viewedRequests: withViewedRequest(state, action.labId),
         assistantUnseenResolution: withAssistantUnseenResolution(state, action.labId),
-        labs: state.labs.map((lab) =>
-          lab.id === action.labId
+        labs: state.labs.map((item) =>
+          item.id === action.labId
             ? {
-                ...lab,
+                ...item,
                 status: 'denied' as const,
                 everDenied: true,
                 denialReason: action.feedback,
                 denialDismissed: false,
               }
-            : lab,
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
           logAudit(
             state,
             'physician',
-            'Denied access request',
-            action.feedback,
+            'Deny lab access',
+            `Denied access to ${labName}. Reason: ${action.feedback}`,
           ),
         ],
       }
@@ -386,6 +435,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'RELEASE_LAB': {
       const lab = state.labs.find((l) => l.id === action.labId)
+      const labName = lab?.name ?? action.labId
       const isResponseToRequest = lab?.status === 'requested'
       const wasActiveGrant =
         lab?.status === 'active' || lab?.status === 'granted_unstarted'
@@ -401,7 +451,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
           item.id === action.labId
             ? {
                 ...item,
-                // Mid-countdown release converts temporary → permanent (never expired)
                 status: 'released' as const,
                 grantExpiresAt: undefined,
                 grantConfirmedAt: undefined,
@@ -414,12 +463,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
           logAudit(
             state,
             'physician',
-            'Released result',
+            'Release lab result',
             isResponseToRequest
-              ? 'Released result in response to request'
+              ? `Permanently released ${labName} in response to access request`
               : wasActiveGrant
-                ? 'Released result (converted active temporary grant to permanent)'
-                : 'Released result (direct release)',
+                ? `Permanently released ${labName} (converted active temporary grant)`
+                : `Permanently released ${labName}`,
           ),
         ],
       }
@@ -436,20 +485,28 @@ function appReducer(state: AppState, action: AppAction): AppState {
       }
     }
 
-    case 'EXPIRE_LAB':
+    case 'EXPIRE_LAB': {
+      const lab = state.labs.find((item) => item.id === action.labId)
+      const labName = lab?.name ?? action.labId
       return {
         ...state,
         expiryModalLabId: action.labId,
-        labs: state.labs.map((lab) =>
-          lab.id === action.labId
-            ? { ...lab, status: 'expired' as const, grantExpiresAt: undefined }
-            : lab,
+        labs: state.labs.map((item) =>
+          item.id === action.labId
+            ? { ...item, status: 'expired' as const, grantExpiresAt: undefined }
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Lab access expired', `Temporary access expired for ${action.labId}`),
+          logAudit(
+            state,
+            state.role,
+            'Lab access expired',
+            `Temporary access expired for ${labName}`,
+          ),
         ],
       }
+    }
 
     case 'DISMISS_EXPIRY_MODAL':
       return { ...state, expiryModalLabId: null }
@@ -469,13 +526,20 @@ function appReducer(state: AppState, action: AppAction): AppState {
         return lab
       })
       if (expiredLabId) {
+        const expiredLab = state.labs.find((lab) => lab.id === expiredLabId)
+        const labName = expiredLab?.name ?? expiredLabId
         return {
           ...state,
           labs,
           expiryModalLabId: null,
           auditLog: [
             ...state.auditLog,
-            logAudit(state, state.role, 'Lab access expired', `Temporary access expired for ${expiredLabId}`),
+            logAudit(
+              state,
+              state.role,
+              'Lab access expired',
+              `Temporary access expired for ${labName}`,
+            ),
           ],
         }
       }
@@ -486,16 +550,18 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return state
     }
 
-    case 'CONTINUE_MED':
+    case 'CONTINUE_MED': {
+      const med = state.meds.find((item) => item.id === action.medId)
+      const medName = med?.name ?? action.medId
       return {
         ...state,
-        meds: state.meds.map((med) =>
-          med.id === action.medId
+        meds: state.meds.map((item) =>
+          item.id === action.medId
             ? {
-                ...med,
+                ...item,
                 status: 'active',
                 history: [
-                  ...med.history,
+                  ...item.history,
                   {
                     id: nextMedEventId(),
                     timestamp: formatTimestamp(),
@@ -504,24 +570,27 @@ function appReducer(state: AppState, action: AppAction): AppState {
                   },
                 ],
               }
-            : med,
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Continue medication', `Continued ${action.medId}`),
+          logAudit(state, state.role, 'Continue medication', `Continued ${medName}`),
         ],
       }
+    }
 
-    case 'DISCONTINUE_MED':
+    case 'DISCONTINUE_MED': {
+      const med = state.meds.find((item) => item.id === action.medId)
+      const medName = med?.name ?? action.medId
       return {
         ...state,
-        meds: state.meds.map((med) =>
-          med.id === action.medId
+        meds: state.meds.map((item) =>
+          item.id === action.medId
             ? {
-                ...med,
+                ...item,
                 status: 'discontinued',
                 history: [
-                  ...med.history,
+                  ...item.history,
                   {
                     id: nextMedEventId(),
                     timestamp: formatTimestamp(),
@@ -530,13 +599,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
                   },
                 ],
               }
-            : med,
+            : item,
         ),
         auditLog: [
           ...state.auditLog,
-          logAudit(state, state.role, 'Discontinue medication', `Discontinued ${action.medId}`),
+          logAudit(state, state.role, 'Discontinue medication', `Discontinued ${medName}`),
         ],
       }
+    }
 
     case 'ADD_MEDICATION': {
       const id = `med-${Date.now()}`

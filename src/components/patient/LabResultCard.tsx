@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { Check, Lock, Unlock, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import type { GrantDuration, LabResult } from '@/state/types'
 import { useAppState } from '@/state/AppStateContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, notificationBadgeClassName } from '@/components/ui/badge'
 import {
   formatGrantDurationLabel,
   formatGrantDurationPhrase,
@@ -14,7 +13,7 @@ import {
   getLabStatusTint,
 } from '@/lib/statusDerivation'
 import { AccessTimer } from '@/components/patient/AccessTimer'
-import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
+import { DEMO_ASSISTANT_NAME, formatLabDenialComment, getLabDenialCommentTitle, shouldShowNewLabBadge } from '@/lib/scheduleData'
 import { GrantAccessDialog } from '@/components/patient/GrantAccessDialog'
 import { DenyAccessDialog } from '@/components/patient/DenyAccessDialog'
 import { ReleasePermanentlyDialog } from '@/components/patient/ReleasePermanentlyDialog'
@@ -75,7 +74,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
   const handleGrant = (duration: GrantDuration) => {
     dispatch({ type: 'GRANT_LAB_ACCESS', labId: lab.id, duration })
     setGrantOpen(false)
-    toast.success('Access granted — awaiting assistant confirmation')
+    toast.success('Access granted. Awaiting assistant confirmation')
   }
 
   const handleDeny = (feedback: string) => {
@@ -90,7 +89,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
     setReleaseOpen(false)
     toast.success(
       asResponse
-        ? 'Result permanently released — assistant notified'
+        ? 'Result permanently released. Assistant notified'
         : 'Result permanently released',
     )
   }
@@ -101,6 +100,7 @@ export function LabResultCard({ lab }: LabResultCardProps) {
     isAssistant && lab.status === 'denied' && lab.denialDismissed
       ? 'pending'
       : lab.status
+  const showNewBadge = shouldShowNewLabBadge(lab)
 
   return (
     <>
@@ -117,6 +117,11 @@ export function LabResultCard({ lab }: LabResultCardProps) {
                     >
                       {getLabStatusLabel(badgeStatus, state.role)}
                     </Badge>
+                    {showNewBadge && (
+                      <Badge variant="outline" className={notificationBadgeClassName}>
+                        New
+                      </Badge>
+                    )}
                   </div>
                   {showTimer && lab.grantExpiresAt && (
                     <AccessTimer expiresAt={lab.grantExpiresAt} now={now} />
@@ -262,7 +267,7 @@ function PaActions({
         return (
           <Button variant="outline" onClick={onRequest}>
             <Lock className="size-3.5" />
-            {requestLabel}
+            Request access
           </Button>
         )
       }
@@ -272,21 +277,17 @@ function PaActions({
             <Lock className="size-3.5" />
             {requestLabel}
           </Button>
-          <div className="relative rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
+          <div data-slot="lab-denial-block" data-dismissible="true">
             <button
               type="button"
               onClick={onDismissDenial}
-              className={cn(
-                'absolute top-2 right-2 rounded-md p-0.5 text-destructive/70',
-                'hover:bg-destructive/10 hover:text-destructive',
-              )}
+              data-slot="lab-denial-dismiss"
               aria-label="Dismiss denial"
             >
               <X className="size-3.5" />
             </button>
-            <p className="text-sm"><strong>Request was denied.</strong></p>
-            <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
-            <p className="mt-0.5 text-sm">{lab.denialReason}</p>
+            <p className="text-sm"><strong>{getLabDenialCommentTitle()}</strong></p>
+            <p className="mt-0.5 text-sm">{formatLabDenialComment(lab.denialReason ?? '')}</p>
           </div>
         </div>
       )

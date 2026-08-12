@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DEMO_ASSISTANT_NAME } from '@/lib/scheduleData'
+import { DEMO_ASSISTANT_NAME, formatLabDenialComment, getLabDenialCommentTitle } from '@/lib/scheduleData'
 import {
   formatGrantDurationLabel,
   getLabStatusLabel,
@@ -149,17 +149,16 @@ function LabsAssistantGallery() {
               <Lock className="size-3.5" />
               Request access again
             </Button>
-            <div className="relative rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 pr-9 text-destructive">
+            <div data-slot="lab-denial-block" data-dismissible="true">
               <button
                 type="button"
-                className="absolute top-2 right-2 rounded-md p-0.5 text-destructive/70"
+                data-slot="lab-denial-dismiss"
                 aria-label="Dismiss denial"
               >
                 <X className="size-3.5" />
               </button>
-              <p className="text-sm"><strong>Request was denied.</strong></p>
-              <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
-              <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
+              <p className="text-sm"><strong>{getLabDenialCommentTitle()}</strong></p>
+              <p className="mt-0.5 text-sm">{formatLabDenialComment('Need more clinical context before release.')}</p>
             </div>
           </div>
         </ResultCardShell>
@@ -167,12 +166,12 @@ function LabsAssistantGallery() {
 
       <Case
         title="denied · dismissed"
-        description="Badge back to Locked; denial block gone. everDenied → Request access again."
+        description="Badge back to Locked; denial block gone. Button copy matches default locked state."
       >
         <ResultCardShell status="pending" role="assistant">
           <Button variant="outline">
             <Lock className="size-3.5" />
-            Request access again
+            Request access
           </Button>
         </ResultCardShell>
       </Case>
@@ -356,9 +355,8 @@ function QueuePhysicianGallery() {
           status="granted_unstarted"
           role="physician"
           surface="requests"
-          badgeLabel="Granted — not yet started"
         >
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -367,7 +365,7 @@ function QueuePhysicianGallery() {
 
       <Case title="History · active" description="Temporary access + mono timer.">
         <ResultCardShell status="active" role="physician" surface="requests" showTimer>
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -376,7 +374,7 @@ function QueuePhysicianGallery() {
 
       <Case title="History · expired" description="View in chart.">
         <ResultCardShell status="expired" role="physician" surface="requests">
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -385,7 +383,7 @@ function QueuePhysicianGallery() {
 
       <Case title="History · denied" description="View in chart.">
         <ResultCardShell status="denied" role="physician" surface="requests">
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -394,7 +392,7 @@ function QueuePhysicianGallery() {
 
       <Case title="History · released" description="View in chart.">
         <ResultCardShell status="released" role="physician" surface="requests">
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -425,7 +423,7 @@ function QueueAssistantGallery() {
         description="View in chart only (navigate, no start)."
       >
         <ResultCardShell status="granted_unstarted" role="assistant" surface="requests">
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -434,7 +432,7 @@ function QueueAssistantGallery() {
 
       <Case title="Resolved · active" description="Temporary access badge + View in chart.">
         <ResultCardShell status="active" role="assistant" surface="requests">
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>
@@ -447,20 +445,25 @@ function QueueAssistantGallery() {
 
       <Case
         title="Resolved · denied"
-        description="Denial block, no dismiss X, no buttons."
+        description="Denial block + View in chart."
       >
         <ResultCardShell status="denied" role="assistant" surface="requests">
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-destructive">
-            <p className="text-sm"><strong>Request was denied.</strong></p>
-            <p className="mt-1 text-sm opacity-90">Comment from the physician:</p>
-            <p className="mt-0.5 text-sm">Need more clinical context before release.</p>
+          <div className="space-y-3">
+            <div data-slot="lab-denial-block">
+              <p className="text-sm"><strong>{getLabDenialCommentTitle()}</strong></p>
+              <p className="mt-0.5 text-sm">{formatLabDenialComment('Need more clinical context before release.')}</p>
+            </div>
+            <Button variant="outline">
+              View in chart
+              <ArrowRight className="size-3.5" />
+            </Button>
           </div>
         </ResultCardShell>
       </Case>
 
       <Case title="Resolved · released" description="View in chart.">
         <ResultCardShell status="released" role="assistant" surface="requests">
-          <Button size="sm" variant="outline">
+          <Button variant="outline">
             View in chart
             <ArrowRight className="size-3.5" />
           </Button>

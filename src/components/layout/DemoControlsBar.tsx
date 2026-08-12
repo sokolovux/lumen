@@ -15,8 +15,8 @@ export function DemoControlsBar() {
 
   const handleRoleChange = (role: 'assistant' | 'physician') => {
     if (state.role === role) return
-    dispatch({ type: 'SET_ROLE', role })
     navigate('/schedule', { replace: true })
+    dispatch({ type: 'SET_ROLE', role })
   }
 
   return (

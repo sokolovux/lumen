@@ -23,6 +23,7 @@ export type ScheduleStatus =
   | 'intake'
   | 'review'
   | 'finished'
+  | 'no_show'
 
 export type ScheduleView = 'today' | 'fullWeek'
 
@@ -53,6 +54,8 @@ export interface LabResult {
   denialReason?: string
   /** Assistant display-only: denial block dismissed on Labs tab; audit / My Requests unchanged */
   denialDismissed?: boolean
+  /** When true, hidden from assistant chart views entirely (e.g. pending-release results) */
+  physicianOnly?: boolean
 }
 
 export interface AuditEvent {
@@ -125,13 +128,15 @@ export interface AppState {
   noteStatus: NoteStatus
   hasSubmittedOnce: boolean
   visitFinished: boolean
+  /** Wall-clock ms when FINISH_VISIT fired */
+  visitFinishedAt: number | null
   returnFeedback: string | null
   noteDraft: string
   noteHistory: NoteVersion[]
   confidentialNoteExists: boolean
   confidentialNoteContent: string
   confidentialNoteCommitted: boolean
-  /** Physician addendum — last submitted text; assistant sees only after submit */
+  /** Physician addendum: last submitted text; assistant sees only after submit */
   physicianAddendum: string
   physicianAddendumCommitted: boolean
   labs: LabResult[]
@@ -167,6 +172,8 @@ export type AppAction =
   | { type: 'FINISH_VISIT' }
   | { type: 'SAVE_CONFIDENTIAL_NOTE'; content: string }
   | { type: 'UPDATE_PHYSICIAN_ADDENDUM'; content: string }
+  | { type: 'LOG_PHYSICIAN_ADDENDUM_EDIT' }
+  | { type: 'LOG_CONFIDENTIAL_NOTE_EDIT' }
   | { type: 'REQUEST_LAB_ACCESS'; labId: string }
   | { type: 'GRANT_LAB_ACCESS'; labId: string; duration: GrantDuration }
   | { type: 'CONFIRM_LAB_GRANT'; labId: string }

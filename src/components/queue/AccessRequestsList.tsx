@@ -63,7 +63,7 @@ function PhysicianAccessRequestsList() {
     if (!grantLabId) return
     dispatch({ type: 'GRANT_LAB_ACCESS', labId: grantLabId, duration })
     setGrantLabId(null)
-    toast.success('Access granted — awaiting assistant confirmation')
+    toast.success('Access granted. Awaiting assistant confirmation')
   }
 
   const handleDeny = (feedback: string) => {
@@ -77,7 +77,7 @@ function PhysicianAccessRequestsList() {
     if (!releaseLabId) return
     dispatch({ type: 'RELEASE_LAB', labId: releaseLabId })
     setReleaseLabId(null)
-    toast.success('Result permanently released — assistant notified')
+    toast.success('Result permanently released. Assistant notified')
   }
 
   const handleViewInChart = () => {
@@ -200,7 +200,7 @@ function PaMyRequestsList() {
     <Tabs defaultValue="resolved">
       <TabsList>
         <TabsTrigger value="resolved">
-          History
+          Resolved
           {state.assistantUnseenResolution.length > 0 && (
             <Badge
               variant="outline"

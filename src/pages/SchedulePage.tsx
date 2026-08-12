@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Plus, SearchIcon } from 'lucide-react'
 import { useAppState } from '@/state/AppStateContext'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -11,43 +11,24 @@ import {
 import { KanbanColumn } from '@/components/schedule/KanbanColumn'
 import { DayColumn } from '@/components/schedule/DayColumn'
 import {
+  DEMO_TODAY,
   SEEDED_APPOINTMENTS,
   TODAY_KANBAN_COLUMNS,
   WEEK_DATES,
 } from '@/lib/scheduleData'
+import {
+  formatFixedScheduleClockDate,
+  formatFixedScheduleClockTime,
+} from '@/lib/fixedClock'
 
 const DAY_LABELS = ['Mon Aug 10', 'Tue Aug 11', 'Wed Aug 12', 'Thu Aug 13', 'Fri Aug 14']
-const EST_TIME_ZONE = 'America/New_York'
 
 function EstClock() {
-  const [now, setNow] = useState(() => new Date())
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
-
-  const dateLabel = now.toLocaleDateString('en-US', {
-    timeZone: EST_TIME_ZONE,
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
-
-  const timeLabel = now
-    .toLocaleTimeString('en-US', {
-      timeZone: EST_TIME_ZONE,
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    })
-    .replace(/\s+(AM|PM)/i, '$1')
-
   return (
     <div className="flex items-center gap-6">
-      <p>{dateLabel}</p>
+      <p>{formatFixedScheduleClockDate()}</p>
       <div data-slot="schedule-clock-time">
-        <p>{timeLabel}</p>
+        <p>{formatFixedScheduleClockTime()}</p>
         <span data-slot="schedule-clock-dot" aria-hidden />
       </div>
     </div>
@@ -58,7 +39,7 @@ export function SchedulePage() {
   const { state, dispatch } = useAppState()
 
   const todayAppointments = useMemo(
-    () => SEEDED_APPOINTMENTS.filter((apt) => apt.date === '2026-08-10'),
+    () => SEEDED_APPOINTMENTS.filter((apt) => apt.date === DEMO_TODAY),
     [],
   )
 

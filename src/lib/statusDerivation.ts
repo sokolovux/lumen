@@ -26,9 +26,7 @@ export function getLabStatusLabel(
     case 'pending': return physicianChartLocked ? 'Unreleased' : 'Locked'
     case 'requested': return 'Access requested'
     case 'granted_unstarted':
-      return surface === 'labs'
-        ? 'Temporary access'
-        : 'Grant pending confirmation'
+      return 'Temporary access granted'
     case 'active': return 'Temporary access'
     case 'expired': return 'Access expired'
     case 'denied': return physicianChartLocked ? 'Unreleased' : 'Access denied'
@@ -58,7 +56,7 @@ export function getLabStatusTint(
     case 'pending':
     case 'expired':
     default:
-      // Neutral outline — Locked / Access expired / Unreleased
+      // Neutral outline: Locked / Access expired / Unreleased
       return ''
   }
 }
@@ -69,6 +67,7 @@ export function getScheduleStatusLabel(status: ScheduleStatus): string {
     case 'intake': return 'Intake'
     case 'review': return 'Review'
     case 'finished': return 'Finished'
+    case 'no_show': return 'No Show'
   }
 }
 
@@ -78,6 +77,7 @@ export const scheduleStatusColumnBackground: Record<ScheduleStatus, string> = {
   intake: 'bg-purple-50',
   review: 'bg-blue-50',
   finished: 'bg-green-50',
+  no_show: 'bg-gray-50',
 }
 
 /** Text color for schedule status labels. */
@@ -86,6 +86,7 @@ export const scheduleStatusTextColor: Record<ScheduleStatus, string> = {
   intake: 'text-purple-600',
   review: 'text-blue-600',
   finished: 'text-green-600',
+  no_show: 'text-gray-600',
 }
 
 /** Outline Badge tints for schedule statuses. */
@@ -94,10 +95,19 @@ export const scheduleStatusTint: Record<ScheduleStatus, string> = {
   intake: 'border-purple-200 bg-purple-50 text-purple-600',
   review: 'border-blue-200 bg-blue-50 text-blue-600',
   finished: 'border-green-200 bg-green-50 text-green-600',
+  no_show: 'border-amber-200 bg-amber-50 text-amber-700',
 }
 
 export function canAssistantViewLab(lab: LabResult): boolean {
   return lab.status === 'active' || lab.status === 'released'
+}
+
+/** Chart labs tab: physician-only pending-release results are hidden from the assistant entirely. */
+export function getVisibleChartLabs(labs: LabResult[], role: Role): LabResult[] {
+  if (role === 'physician') {
+    return labs
+  }
+  return labs.filter((lab) => !lab.physicianOnly)
 }
 
 export function isAssistantApprovedLabStatus(status: LabStatus): boolean {

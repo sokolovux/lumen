@@ -120,7 +120,11 @@ export function shouldAutoOpenTodayVisit(
     'visitStarted' | 'visitFinished' | 'hasSubmittedOnce' | 'noteStatus'
   >,
 ): boolean {
-  if (state.visitFinished && state.noteStatus !== 'returned') {
+  if (
+    state.visitFinished &&
+    state.noteStatus !== 'returned' &&
+    state.noteStatus !== 'submitted'
+  ) {
     return false
   }
   if (state.hasSubmittedOnce && role === 'physician') {
@@ -179,6 +183,35 @@ export function isAssistantNoteRevision(
 
 export function hasPhysicianReviewedNote(noteStatus: NoteStatus): boolean {
   return noteStatus === 'cosigned' || noteStatus === 'returned'
+}
+
+/** Visit panel header title for today's encounter. */
+export function getTodayVisitPanelTitle(
+  state: Pick<
+    AppState,
+    'role' | 'visitStarted' | 'visitFinished' | 'hasSubmittedOnce' | 'noteStatus'
+  >,
+): string {
+  if (state.visitFinished && state.noteStatus !== 'returned') {
+    return "Today's visit"
+  }
+
+  if (state.noteStatus === 'returned') {
+    return state.role === 'assistant' ? 'Revise visit' : "Today's visit"
+  }
+
+  if (state.hasSubmittedOnce) {
+    if (state.role === 'physician' && state.noteStatus === 'submitted') {
+      return 'Review visit'
+    }
+    return "Today's visit"
+  }
+
+  if (state.visitStarted) {
+    return 'Visit in progress'
+  }
+
+  return "Today's visit"
 }
 
 /** Single source of truth for clinical note textarea editability. */

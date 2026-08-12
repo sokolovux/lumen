@@ -112,7 +112,7 @@ export function NoteSection({
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Shared visit documentation — physician review required.
+          Shared visit documentation. Physician review required.
         </p>
       </div>
 
@@ -136,7 +136,7 @@ export function NoteSection({
         }}
       />
 
-      {!readOnly && state.role === 'physician' && state.noteStatus === 'submitted' && (
+      {state.role === 'physician' && state.noteStatus === 'submitted' && (
         <div className="mt-2 flex flex-wrap gap-2">
           <Button variant="success" onClick={handleCosign}>
             Approve

@@ -1,0 +1,17 @@
+---
+description: No em dashes in product UI copy
+alwaysApply: true
+---
+
+# No em dashes
+
+Do not use em dashes (`—`) anywhere in product UI: labels, body copy, toasts, badges, placeholders, dialogs, or seeded chart content.
+
+Preferred replacements:
+
+- Middle dot (` · `) for inline metadata separators
+- Colon (`: `) for short label–detail pairs
+- Comma, period, or parentheses for clause breaks
+- Hyphen-minus (`-`) for empty or missing values
+
+See `design.md` → UI copy → No em dashes.
