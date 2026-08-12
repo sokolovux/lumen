@@ -8,6 +8,7 @@
 @import "./components/ui/light-scrollbar.css";
 @import "./components/ui/font-weight.css";
 @import "./components/patient/chart-table-card.css";
+@import "./components/patient/lab-denial-block.css";
 @import "./components/patient/access-timer.css";
 @import "./components/patient/vitals-section.css";
 @import "./components/patient/patient-card.css";
